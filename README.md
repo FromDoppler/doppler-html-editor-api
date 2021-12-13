@@ -103,9 +103,5 @@ Response:
 	  "body": {},
 	  "name": "",
 	  "schemaVersion": 6
-}{
-	"counters": {},
-	"body": {},
-	"schemaVersion": 6
 }
 ```
