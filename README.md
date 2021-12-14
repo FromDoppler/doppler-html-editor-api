@@ -10,9 +10,9 @@ Response:
 
 ```json
 {
-	"counters": {},
-	"body": {},
-	"schemaVersion": 6
+  "counters": {},
+  "body": {},
+  "schemaVersion": 6
 }
 ```
 
@@ -32,11 +32,11 @@ PNG/JPG file or redirect to image URI
 PUT /accounts/{accountName}/campaigns/{campaignId}/content/
 
 {
-	"counters": {...},
-	"body": {...},
-	"schemaVersion": 6,
-	"HTML": "",	// HTML
-	"thumbnailUrl": "" // URI Image
+  "counters": {...},
+  "body": {...},
+  "schemaVersion": 6,
+  "HTML": "",	// HTML
+  "thumbnailUrl": "" // URI Image
 }
 ```
 
@@ -52,10 +52,10 @@ Response:
 
 ```json
 {
-	  "counters": {},
-	  "body": {},
-	  "name": "",
-	  "schemaVersion": 6
+  "counters": {},
+  "body": {},
+  "name": "",
+  "schemaVersion": 6
 }
 ```
 
@@ -65,12 +65,12 @@ Response:
 PUT /accounts/{accountName}/templates/{templateId}
 
 {
-	"name": "",
-	"counters": {...},
-	"body": {...},
-	"schemaVersion": 6,
-	"HTML": "",	// HTML
-	"thumbnailUrl": "" // URI Image
+  "name": "",
+  "counters": {...},
+  "body": {...},
+  "schemaVersion": 6,
+  "HTML": "",	// HTML
+  "thumbnailUrl": "" // URI Image
 }
 ```
 
@@ -80,12 +80,12 @@ PUT /accounts/{accountName}/templates/{templateId}
 POST /accounts/{accountName}/templates
 
 {
-	"name": "",
-	"counters": {},
-	"body": {...},
-	"schemaVersion": 6,
-	"HTML": "",	// HTML
-	"thumbnailUrl": "" // URI Image
+  "name": "",
+  "counters": {},
+  "body": {...},
+  "schemaVersion": 6,
+  "HTML": "",	// HTML
+  "thumbnailUrl": "" // URI Image
 }
 ```
 
@@ -99,9 +99,9 @@ Response:
 
 ```json
 {
-	  "counters": {},
-	  "body": {},
-	  "name": "",
-	  "schemaVersion": 6
+  "counters": {},
+  "body": {},
+  "name": "",
+  "schemaVersion": 6
 }
 ```
