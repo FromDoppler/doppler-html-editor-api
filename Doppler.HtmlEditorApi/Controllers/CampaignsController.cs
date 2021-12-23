@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DopplerSecurity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
 using Doppler.HtmlEditorApi.Model;
+using Doppler.HtmlEditorApi.Infrastructure;
 
 namespace Doppler.HtmlEditorApi.Controllers
 {
@@ -14,67 +14,24 @@ namespace Doppler.HtmlEditorApi.Controllers
     [ApiController]
     public class CampaignsController
     {
+        private readonly IRepository _repository;
+
+        public CampaignsController(IRepository Repository)
+        {
+            _repository = Repository;
+        }
+
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content/design")]
-        public ActionResult<ContentModel> GetCampaign(string accountName, int campaignId)
+        public async Task<ActionResult<ContentModel>> GetCampaign(string accountName, int campaignId)
         {
-            ContentModel campaign = new()
-            {
-                counters = new()
-                {
-                    u_row = 1,
-                    u_column = 2,
-                    u_content_text = 1,
-                    u_content_heading = 1,
-                    u_content_menu = 1
-                },
-                body = new()
-                {
-                    rows = Array.Empty<string>(),
-                    values = new()
-                    {
-                        textColor = "#000000",
-                        backgroundColor = "#e7e7e7",
-                        backgroundImage = new()
-                        {
-                            url = "",
-                            fullWidth = true,
-                            repeat = false,
-                            center = true,
-                            cover = false
-                        },
-                        contentWidth = "500px",
-                        contentAlign = "center",
-                        fontFamily = new()
-                        {
-                            label = "Arial",
-                            value = "arial,helvetica,sans-serif"
-                        },
-                        preheaderText = "",
-                        linkStyle = new()
-                        {
-                            body = true,
-                            linkColor = "#0000ee",
-                            linkHoverColor = "#0000ee",
-                            linkUnderline = true,
-                            linkHoverUnderline = true
-                        },
-                        _meta = new()
-                        {
-                            htmlID = "u_body",
-                            htmlClassNames = "u_body"
-                        }
-                    }
-                },
-                schemaVersion = 6
-            };
-
+            var campaign = await _repository.GetCampaignModel(accountName, campaignId);
             return campaign;
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content/thumbnail")]
-        public ActionResult GetCampaignThumbnail(string accountName, int campaignId)
+        public async Task<ActionResult> GetCampaignThumbnail(string accountName, int campaignId)
         {
             var uriCampaignThumbnail = "https://via.placeholder.com/200x200";
             return new RedirectResult(uriCampaignThumbnail);
@@ -82,8 +39,9 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content/")]
-        public IActionResult SaveCampaign(string accountName, int campaignId, ContentModel campaignModel)
+        public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, ContentModel campaignModel)
         {
+            await _repository.SaveCampaignContent(accountName, campaignId, campaignModel);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
     }
