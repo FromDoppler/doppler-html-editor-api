@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Hellang.Middleware.ProblemDetails;
+using Doppler.HtmlEditorApi.Infrastructure;
 
 namespace Doppler.HtmlEditorApi
 {
@@ -62,6 +63,7 @@ namespace Doppler.HtmlEditorApi
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
                 };
             });
+            services.AddScoped<IRepository, DummyRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
