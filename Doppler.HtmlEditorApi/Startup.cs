@@ -63,7 +63,9 @@ namespace Doppler.HtmlEditorApi
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
                 };
             });
-            services.AddScoped<IRepository, DummyRepository>();
+            services.AddScoped<IRepository, Repository>();
+            services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
+            services.Configure<DopplerDatabaseSettings>(Configuration.GetSection(nameof(DopplerDatabaseSettings)));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
