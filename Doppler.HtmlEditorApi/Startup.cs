@@ -63,7 +63,7 @@ namespace Doppler.HtmlEditorApi
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
                 };
             });
-            services.AddScoped<IRepository, DummyRepository>();
+            services.AddScoped<IRepository, Repository>();
             services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
             services.Configure<DopplerDatabaseSettings>(Configuration.GetSection(nameof(DopplerDatabaseSettings)));
         }

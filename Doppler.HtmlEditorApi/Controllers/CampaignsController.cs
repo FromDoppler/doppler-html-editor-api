@@ -23,10 +23,14 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content/design")]
-        public async Task<ActionResult<ContentModel>> GetCampaign(string accountName, int campaignId)
+        public async Task<IActionResult> GetCampaign(string accountName, int campaignId)
         {
+            // TODO: Considere refactoring accountName validation
+            // TODO: Check own resource
+            // TODO: Request for superUsers
             var campaign = await _repository.GetCampaignModel(accountName, campaignId);
-            return campaign;
+            // TODO: Return 404 if campaign is NULL
+            return new ContentResult() { Content= campaign, ContentType= "application/json", StatusCode=200};
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
