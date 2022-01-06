@@ -30,7 +30,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             // TODO: Request for superUsers
             var campaign = await _repository.GetCampaignModel(accountName, campaignId);
             // TODO: Return 404 if campaign is NULL
-            return new ContentResult() { Content= campaign, ContentType= "application/json", StatusCode=200};
+            return new ContentResult() { Content = campaign, ContentType = "application/json", StatusCode = 200};
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
