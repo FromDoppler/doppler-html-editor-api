@@ -21,6 +21,12 @@ JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
 JOIN [User] u ON u.IdUser = ca.IdUser
 WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType = 5";
                 var result = await connection.QueryFirstOrDefaultAsync<ContentRow>(dummyDatabaseQuery, new { campaignId, accountName });
+
+                if (result == null)
+                {
+                    return null;
+                }
+
                 return result.Content;
             }
         }
