@@ -33,7 +33,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return new NotFoundObjectResult("Campaign not found");
             }
 
-            return new ContentResult() { Content = campaign, ContentType = "application/json", StatusCode = 200};
+            return new ContentResult() { Content = campaign, ContentType = "application/json", StatusCode = 200 };
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]

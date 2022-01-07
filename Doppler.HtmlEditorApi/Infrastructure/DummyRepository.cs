@@ -60,7 +60,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
                 schemaVersion = 6
             };
 
-            return JsonSerializer.Serialize(campaign);;
+            return JsonSerializer.Serialize(campaign); ;
         }
 
         public async Task<TemplateModel> GetTemplateModel(string accountName, int templateId)
