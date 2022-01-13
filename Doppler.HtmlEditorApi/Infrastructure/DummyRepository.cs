@@ -176,9 +176,9 @@ namespace Doppler.HtmlEditorApi.Infrastructure
             return sharedTemplate;
         }
 
-        public Task SaveCampaignContent(string accountName, int campaignId, ContentModel campaignModel)
+        public Task<bool> SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest campaignModel)
         {
-            return Task.CompletedTask;
+            return null;
         }
 
         public Task SaveTemplateContent(string accountName, int templateId, TemplateModel templateModel)

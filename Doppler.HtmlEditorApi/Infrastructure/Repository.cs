@@ -2,6 +2,8 @@ using System;
 using Doppler.HtmlEditorApi.Model;
 using System.Threading.Tasks;
 using Dapper;
+using System.Text.Json;
+using System.Collections.Generic;
 
 namespace Doppler.HtmlEditorApi.Infrastructure
 {
@@ -37,9 +39,26 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
             return null;
         }
 
-        public Task SaveCampaignContent(string accountName, int campaignId, ContentModel campaignModel)
+        public async Task<bool> SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest request)
         {
-            return Task.CompletedTask;
+            using (var connection = await _connectionFactory.GetConnection())
+            {
+                var databaseQuery = @"SELECT co.IdCampaign FROM Content co
+JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
+JOIN [User] u ON u.IdUser = ca.IdUser
+WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType = 5";
+                var checkIfExistAndUserIsOwner = await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { campaignId, accountName });
+                // TODO: maybe need check if exist as other owner
+                var databaseExec = @"INSERT INTO Content (IdCampaign, Content, Meta, EditorType) VALUES (@campaignId, @htmlContent, @metaModel, 5)";
+                if (checkIfExistAndUserIsOwner != null)
+                {
+                    databaseExec = @"UPDATE Content SET Content = @htmlContent, Meta = @metaModel WHERE IdCampaign = @campaignId";
+                }
+
+                var modelSerialize = JsonSerializer.Serialize(request.Meta);
+                var result = await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = request.Content, metaModel = modelSerialize });
+                return result > 0;
+            }
         }
 
         public Task SaveTemplateContent(string accountName, int templateId, TemplateModel templateModel)

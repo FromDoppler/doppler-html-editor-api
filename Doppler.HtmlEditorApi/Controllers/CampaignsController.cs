@@ -23,17 +23,11 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content/design")]
-        public async Task<IActionResult> GetCampaign(string accountName, int campaignId)
+        public async Task<ActionResult<ContentModel>> GetCampaign(string accountName, int campaignId)
         {
             // TODO: Considere refactoring accountName validation
-            var campaign = await _repository.GetCampaignModel(accountName, campaignId);
-
-            if (campaign == null)
-            {
-                return new NotFoundObjectResult("Campaign not found");
-            }
-
-            return new ContentResult() { Content = campaign, ContentType = "application/json", StatusCode = 200 };
+            var campaignModel = await _repository.GetCampaignModel(accountName, campaignId);
+            return campaignModel != null ? campaignModel : new NotFoundObjectResult("Campaign not found");
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
@@ -46,9 +40,9 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content/")]
-        public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, ContentModel campaignModel)
+        public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContentRequest data)
         {
-            await _repository.SaveCampaignContent(accountName, campaignId, campaignModel);
+            await _repository.SaveCampaignContent(accountName, campaignId, data);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
     }
