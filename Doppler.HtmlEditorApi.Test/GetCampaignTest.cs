@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Infrastructure;
+using Doppler.HtmlEditorApi.Model;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -91,9 +93,10 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             // TODO: consider to mock Dapper in place of IRepository
+            ContentModel emptyContentModel = null;
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-                .ReturnsAsync((string)null);
+                .ReturnsAsync(emptyContentModel);
 
             var client = _factory
                 .WithWebHostBuilder(c =>
@@ -121,12 +124,15 @@ namespace Doppler.HtmlEditorApi
         public async Task GET_campaign_should_accept_right_tokens_and_return_content_as_it_is_in_DB(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
-            var dbContent = "{ \"hi\": \"this is an Unlayer's design!\" }";
+            ContentModel contentModel = new ContentModel()
+            {
+                schemaVersion = 9999
+            };
 
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-                .ReturnsAsync(dbContent);
+                .ReturnsAsync(contentModel);
 
             var client = _factory
                 .WithWebHostBuilder(c =>
@@ -143,10 +149,12 @@ namespace Doppler.HtmlEditorApi
             var response = await client.GetAsync(url);
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
+            var contentModelResponse = JsonSerializer.Deserialize<ContentModel>
+                (responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal(dbContent, responseContent);
+            Assert.Equal(contentModel.schemaVersion, contentModelResponse.schemaVersion);
 
             // TODO: fix it, why does it not work?
             // Assert.Equal("application/json", response.Headers.GetValues("Content-Type").First());
