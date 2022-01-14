@@ -2,14 +2,15 @@ using System;
 using Doppler.HtmlEditorApi.Model;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Collections.Generic;
 
 namespace Doppler.HtmlEditorApi.Infrastructure
 {
     public class DummyRepository : IRepository
     {
-        public async Task<string> GetCampaignModel(string accountName, int campaignId)
+        public async Task<ContentModel> GetCampaignModel(string accountName, int campaignId)
         {
-            ContentModel campaign = new()
+            return new()
             {
                 counters = new()
                 {
@@ -21,7 +22,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
                 },
                 body = new()
                 {
-                    rows = Array.Empty<string>(),
+                    rows = new List<Row>(),
                     values = new()
                     {
                         textColor = "#000000",
@@ -59,8 +60,6 @@ namespace Doppler.HtmlEditorApi.Infrastructure
                 },
                 schemaVersion = 6
             };
-
-            return JsonSerializer.Serialize(campaign); ;
         }
 
         public async Task<TemplateModel> GetTemplateModel(string accountName, int templateId)
@@ -78,7 +77,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
                 },
                 body = new()
                 {
-                    rows = Array.Empty<string>(),
+                    rows = new List<Row>(),
                     values = new()
                     {
                         textColor = "#000000",
@@ -135,7 +134,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
                 },
                 body = new()
                 {
-                    rows = Array.Empty<string>(),
+                    rows = new List<Row>(),
                     values = new()
                     {
                         textColor = "#000000",
@@ -177,9 +176,9 @@ namespace Doppler.HtmlEditorApi.Infrastructure
             return sharedTemplate;
         }
 
-        public Task SaveCampaignContent(string accountName, int campaignId, ContentModel campaignModel)
+        public Task<bool> SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest campaignModel)
         {
-            return Task.CompletedTask;
+            return null;
         }
 
         public Task SaveTemplateContent(string accountName, int templateId, TemplateModel templateModel)

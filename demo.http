@@ -11,6 +11,339 @@ GET {{base}}/accounts/amoschini@makingsense.com/campaigns/33882793/content/desig
 Authorization: Bearer {{Token}}
 
 ###
+PUT {{base}}/accounts/amoschini@makingsense.com/campaigns/33882793/content
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+    "Meta":
+    {
+        "counters": {
+            "u_row": 5,
+            "u_column": 6,
+            "u_content_text": 1,
+            "u_content_button": 6
+        },
+        "body": {
+            "rows": [{
+                "cells": [1],
+                "columns": [{
+                    "contents": [{
+                        "type": "button",
+                        "values": {
+                            "containerPadding": "10px",
+                            "href": {
+                                "name": "web",
+                                "values": {
+                                    "href": "",
+                                    "target": "_blank"
+                                }
+                            },
+                            "buttonColors": {
+                                "color": "#FFFFFF",
+                                "backgroundColor": "#3AAEE0",
+                                "hoverColor": "#FFFFFF",
+                                "hoverBackgroundColor": "#3AAEE0"
+                            },
+                            "size": {
+                                "autoWidth": true,
+                                "width": "100%"
+                            },
+                            "textAlign": "center",
+                            "lineHeight": "120%",
+                            "padding": "10px 20px",
+                            "border": {},
+                            "borderRadius": "4px",
+                            "hideDesktop": false,
+                            "_meta": {
+                                "htmlID": "u_content_button_3",
+                                "htmlClassNames": "u_content_button"
+                            },
+                            "selectable": true,
+                            "draggable": true,
+                            "duplicatable": true,
+                            "deletable": true,
+                            "hideable": true,
+                            "text": "<span style=\"font-size: 14px; line-height: 16.8px;\">Button Text</span>"
+                        }
+                    }],
+                    "values": {
+                        "backgroundColor": "",
+                        "padding": "0px",
+                        "border": {},
+                        "borderRadius": "0px",
+                        "_meta": {
+                            "htmlID": "u_column_3",
+                            "htmlClassNames": "u_column"
+                        }
+                    }
+                }],
+                "values": {
+                    "displayCondition": null,
+                    "columns": false,
+                    "backgroundColor": "",
+                    "columnsBackgroundColor": "",
+                    "backgroundImage": {
+                        "url": "",
+                        "fullWidth": true,
+                        "repeat": false,
+                        "center": true,
+                        "cover": false
+                    },
+                    "padding": "0px",
+                    "hideDesktop": false,
+                    "_meta": {
+                        "htmlID": "u_row_3",
+                        "htmlClassNames": "u_row"
+                    },
+                    "selectable": true,
+                    "draggable": true,
+                    "duplicatable": true,
+                    "deletable": true,
+                    "hideable": true
+                }
+            }, {
+                "cells": [1, 1],
+                "columns": [{
+                    "contents": [{
+                        "type": "button",
+                        "values": {
+                            "containerPadding": "10px",
+                            "href": {
+                                "name": "web",
+                                "values": {
+                                    "href": "",
+                                    "target": "_blank"
+                                }
+                            },
+                            "buttonColors": {
+                                "color": "#FFFFFF",
+                                "backgroundColor": "#3AAEE0",
+                                "hoverColor": "#FFFFFF",
+                                "hoverBackgroundColor": "#3AAEE0"
+                            },
+                            "size": {
+                                "autoWidth": true,
+                                "width": "100%"
+                            },
+                            "textAlign": "center",
+                            "lineHeight": "120%",
+                            "padding": "10px 20px",
+                            "border": {},
+                            "borderRadius": "4px",
+                            "hideDesktop": false,
+                            "_meta": {
+                                "htmlID": "u_content_button_4",
+                                "htmlClassNames": "u_content_button"
+                            },
+                            "selectable": true,
+                            "draggable": true,
+                            "duplicatable": true,
+                            "deletable": true,
+                            "hideable": true,
+                            "text": "<span style=\"font-size: 14px; line-height: 16.8px;\">Button Text</span>"
+                        }
+                    }],
+                    "values": {
+                        "backgroundColor": "",
+                        "padding": "0px",
+                        "border": {},
+                        "borderRadius": "0px",
+                        "_meta": {
+                            "htmlID": "u_column_4",
+                            "htmlClassNames": "u_column"
+                        }
+                    }
+                },
+                {
+                    "contents": [{
+                        "type": "button",
+                        "values": {
+                            "containerPadding": "10px",
+                            "href": {
+                                "name": "web",
+                                "values": {
+                                    "href": "",
+                                    "target": "_blank"
+                                }
+                            },
+                            "buttonColors": {
+                                "color": "#FFFFFF",
+                                "backgroundColor": "#3AAEE0",
+                                "hoverColor": "#FFFFFF",
+                                "hoverBackgroundColor": "#3AAEE0"
+                            },
+                            "size": {
+                                "autoWidth": true,
+                                "width": "100%"
+                            },
+                            "textAlign": "center",
+                            "lineHeight": "120%",
+                            "padding": "10px 20px",
+                            "border": {},
+                            "borderRadius": "4px",
+                            "hideDesktop": false,
+                            "_meta": {
+                                "htmlID": "u_content_button_5",
+                                "htmlClassNames": "u_content_button"
+                            },
+                            "selectable": true,
+                            "draggable": true,
+                            "duplicatable": true,
+                            "deletable": true,
+                            "hideable": true,
+                            "text": "<span style=\"font-size: 14px; line-height: 16.8px;\">Button Text</span>"
+                        }
+                    }],
+                    "values": {
+                        "backgroundColor": "",
+                        "padding": "0px",
+                        "border": {},
+                        "borderRadius": "0px",
+                        "_meta": {
+                            "htmlID": "u_column_5",
+                            "htmlClassNames": "u_column"
+                        }
+                    }
+                }],
+                "values": {
+                    "displayCondition": null,
+                    "columns": false,
+                    "backgroundColor": "",
+                    "columnsBackgroundColor": "",
+                    "backgroundImage": {
+                        "url": "",
+                        "fullWidth": true,
+                        "repeat": false,
+                        "center": true,
+                        "cover": false
+                    },
+                    "padding": "0px",
+                    "hideDesktop": false,
+                    "_meta": {
+                        "htmlID": "u_row_4",
+                        "htmlClassNames": "u_row"
+                    },
+                    "selectable": true,
+                    "draggable": true,
+                    "duplicatable": true,
+                    "deletable": true,
+                    "hideable": true
+                }
+            }, {
+                "cells": [1],
+                "columns": [{
+                    "contents": [{
+                        "type": "button",
+                        "values": {
+                            "containerPadding": "10px",
+                            "href": {
+                                "name": "web",
+                                "values": {
+                                    "href": "",
+                                    "target": "_blank"
+                                }
+                            },
+                            "buttonColors": {
+                                "color": "#FFFFFF",
+                                "backgroundColor": "#3AAEE0",
+                                "hoverColor": "#FFFFFF",
+                                "hoverBackgroundColor": "#3AAEE0"
+                            },
+                            "size": {
+                                "autoWidth": true,
+                                "width": "100%"
+                            },
+                            "textAlign": "center",
+                            "lineHeight": "120%",
+                            "padding": "10px 20px",
+                            "border": {},
+                            "borderRadius": "4px",
+                            "hideDesktop": false,
+                            "_meta": {
+                                "htmlID": "u_content_button_6",
+                                "htmlClassNames": "u_content_button"
+                            },
+                            "selectable": true,
+                            "draggable": true,
+                            "duplicatable": true,
+                            "deletable": true,
+                            "hideable": true,
+                            "text": "<span style=\"font-size: 14px; line-height: 16.8px;\">Button Text</span>"
+                        }
+                    }],
+                    "values": {
+                        "backgroundColor": "",
+                        "padding": "0px",
+                        "border": {},
+                        "borderRadius": "0px",
+                        "_meta": {
+                            "htmlID": "u_column_6",
+                            "htmlClassNames": "u_column"
+                        }
+                    }
+                }],
+                "values": {
+                    "displayCondition": null,
+                    "columns": false,
+                    "backgroundColor": "",
+                    "columnsBackgroundColor": "",
+                    "backgroundImage": {
+                        "url": "",
+                        "fullWidth": true,
+                        "repeat": false,
+                        "center": true,
+                        "cover": false
+                    },
+                    "padding": "0px",
+                    "hideDesktop": false,
+                    "_meta": {
+                        "htmlID": "u_row_5",
+                        "htmlClassNames": "u_row"
+                    },
+                    "selectable": true,
+                    "draggable": true,
+                    "duplicatable": true,
+                    "deletable": true,
+                    "hideable": true
+                }
+            }],
+            "values": {
+                "textColor": "#000000",
+                "backgroundColor": "#e7e7e7",
+                "backgroundImage": {
+                    "url": "",
+                    "fullWidth": true,
+                    "repeat": false,
+                    "center": true,
+                    "cover": false
+                },
+                "contentWidth": "500px",
+                "contentAlign": "center",
+                "fontFamily": {
+                    "label": "Arial",
+                    "value": "arial,helvetica,sans-serif"
+                },
+                "preheaderText": "",
+                "linkStyle": {
+                    "body": true,
+                    "linkColor": "#0000ee",
+                    "linkHoverColor": "#0000ee",
+                    "linkUnderline": true,
+                    "linkHoverUnderline": true
+                },
+                "_meta": {
+                    "htmlID": "u_body",
+                    "htmlClassNames": "u_body"
+                }
+            }
+        },
+        "schemaVersion": 6
+    },
+    "Content": "<html></html>"
+}
+
+###
 GET {{base}}/WeatherForecast
 
 ###
