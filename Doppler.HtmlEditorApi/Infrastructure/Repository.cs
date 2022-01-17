@@ -24,8 +24,7 @@ JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
 JOIN [User] u ON u.IdUser = ca.IdUser
 WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType = 5";
                 var result = await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { campaignId, accountName });
-                var res = JsonSerializer.Deserialize<ContentModel>(result.Meta);
-                return res == null ? null : res;
+                return result == null ? null : JsonSerializer.Deserialize<ContentModel>(result.Meta);
             }
         }
 
