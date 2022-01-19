@@ -54,8 +54,8 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
                     databaseExec = @"UPDATE Content SET Content = @htmlContent, Meta = @metaModel WHERE IdCampaign = @campaignId";
                 }
 
-                var modelSerialize = JsonSerializer.Serialize(request.Meta);
-                var result = await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = request.Content, metaModel = modelSerialize });
+                var metaModel = request.Meta.ToString();
+                var result = await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = request.Content, metaModel });
                 return result > 0;
             }
         }
