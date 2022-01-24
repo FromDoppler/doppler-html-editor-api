@@ -38,7 +38,7 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
             return Task.FromResult<TemplateModel>(null);
         }
 
-        public async Task<bool> SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest request)
+        public async Task SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest request)
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
@@ -55,8 +55,7 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
                 }
 
                 var metaModel = request.Meta.ToString();
-                var result = await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = request.Content, metaModel });
-                return result > 0;
+                await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = request.Content, metaModel });
             }
         }
 
