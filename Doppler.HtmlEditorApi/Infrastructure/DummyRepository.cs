@@ -8,9 +8,9 @@ namespace Doppler.HtmlEditorApi.Infrastructure
 {
     public class DummyRepository : IRepository
     {
-        public async Task<ContentModel> GetCampaignModel(string accountName, int campaignId)
+        public Task<ContentModel> GetCampaignModel(string accountName, int campaignId)
         {
-            return new()
+            return Task.FromResult(new ContentModel()
             {
                 counters = new()
                 {
@@ -59,10 +59,10 @@ namespace Doppler.HtmlEditorApi.Infrastructure
                     }
                 },
                 schemaVersion = 6
-            };
+            });
         }
 
-        public async Task<TemplateModel> GetTemplateModel(string accountName, int templateId)
+        public Task<TemplateModel> GetTemplateModel(string accountName, int templateId)
         {
             TemplateModel template = new()
             {
@@ -116,10 +116,10 @@ namespace Doppler.HtmlEditorApi.Infrastructure
                 schemaVersion = 6
             };
 
-            return template;
+            return Task.FromResult(template);
         }
 
-        public async Task<TemplateModel> GetSharedTemplateModel(int templateId)
+        public Task<TemplateModel> GetSharedTemplateModel(int templateId)
         {
             TemplateModel sharedTemplate = new()
             {
@@ -173,7 +173,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
                 schemaVersion = 6
             };
 
-            return sharedTemplate;
+            return Task.FromResult(sharedTemplate);
         }
 
         public Task<bool> SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest campaignModel)

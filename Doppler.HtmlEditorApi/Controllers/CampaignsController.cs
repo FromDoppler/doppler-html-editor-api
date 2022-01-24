@@ -32,10 +32,10 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content/thumbnail")]
-        public async Task<ActionResult> GetCampaignThumbnail(string accountName, int campaignId)
+        public Task<ActionResult> GetCampaignThumbnail(string accountName, int campaignId)
         {
             var uriCampaignThumbnail = "https://via.placeholder.com/200x200";
-            return new RedirectResult(uriCampaignThumbnail);
+            return Task.FromResult<ActionResult>(new RedirectResult(uriCampaignThumbnail));
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
