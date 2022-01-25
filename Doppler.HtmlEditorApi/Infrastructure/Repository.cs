@@ -28,14 +28,14 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
             }
         }
 
-        public async Task<TemplateModel> GetTemplateModel(string accountName, int templateId)
+        public Task<TemplateModel> GetTemplateModel(string accountName, int templateId)
         {
-            return null;
+            return Task.FromResult<TemplateModel>(null);
         }
 
-        public async Task<TemplateModel> GetSharedTemplateModel(int templateId)
+        public Task<TemplateModel> GetSharedTemplateModel(int templateId)
         {
-            return null;
+            return Task.FromResult<TemplateModel>(null);
         }
 
         public async Task<bool> SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest request)
