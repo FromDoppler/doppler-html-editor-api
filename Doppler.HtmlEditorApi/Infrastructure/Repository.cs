@@ -30,11 +30,11 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
                     return null;
                 }
 
-                using var doc = JsonDocument.Parse(result.Meta);
+                using var doc = JsonDocument.Parse(result.meta);
 
                 return new CampaignContent(
                     meta: doc.RootElement,
-                    htmlContent: result.Content);
+                    htmlContent: result.content);
             }
         }
 
