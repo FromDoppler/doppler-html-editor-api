@@ -28,16 +28,6 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
             }
         }
 
-        public Task<TemplateModel> GetTemplateModel(string accountName, int templateId)
-        {
-            return Task.FromResult<TemplateModel>(null);
-        }
-
-        public Task<TemplateModel> GetSharedTemplateModel(int templateId)
-        {
-            return Task.FromResult<TemplateModel>(null);
-        }
-
         public async Task SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest request)
         {
             using (var connection = await _connectionFactory.GetConnection())
@@ -57,16 +47,6 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
                 var metaModel = request.Meta.ToString();
                 await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = request.Content, metaModel });
             }
-        }
-
-        public Task SaveTemplateContent(string accountName, int templateId, TemplateModel templateModel)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task CreateTemplate(string accountName, TemplateModel templateModel)
-        {
-            return Task.CompletedTask;
         }
     }
 }
