@@ -59,16 +59,20 @@ namespace Doppler.HtmlEditorApi.Infrastructure
             schemaVersion = 6
         };
 
-        public Task<CampaignContent> GetCampaignModel(string accountName, int campaignId)
+        public Task<ContentRow> GetCampaignModel(string accountName, int campaignId)
         {
-            var campaign = new CampaignContent(
-                meta: JsonSerializer.SerializeToElement(_demoMeta),
-                htmlContent: "<html></html>");
+            var contentRow = new ContentRow()
+            {
+                Meta = JsonSerializer.Serialize(_demoMeta),
+                Content = "<html></html>",
+                IdCampaign = campaignId,
+                EditorType = 5
+            };
 
-            return Task.FromResult(campaign);
+            return Task.FromResult(contentRow);
         }
 
-        public Task SaveCampaignContent(string accountName, int campaignId, CampaignContent campaignModel)
+        public Task SaveCampaignContent(string accountName, int campaignId, ContentRow campaignModel)
         {
             return Task.CompletedTask;
         }

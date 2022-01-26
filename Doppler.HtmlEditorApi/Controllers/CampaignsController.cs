@@ -7,6 +7,7 @@ using Doppler.HtmlEditorApi.DopplerSecurity;
 using Microsoft.AspNetCore.Authorization;
 using Doppler.HtmlEditorApi.Model;
 using Doppler.HtmlEditorApi.Infrastructure;
+using System.Text.Json;
 
 namespace Doppler.HtmlEditorApi.Controllers
 {
@@ -26,8 +27,20 @@ namespace Doppler.HtmlEditorApi.Controllers
         public async Task<ActionResult<CampaignContent>> GetCampaign(string accountName, int campaignId)
         {
             // TODO: Considere refactoring accountName validation
-            var campaignModel = await _repository.GetCampaignModel(accountName, campaignId);
-            return campaignModel != null ? campaignModel : new NotFoundObjectResult("Campaign not found");
+            var contentRow = await _repository.GetCampaignModel(accountName, campaignId);
+
+            if (contentRow == null)
+            {
+                return new NotFoundObjectResult("Campaign not found");
+            }
+
+            // TODO: Research if disposing JsonDocument is necessary
+            var doc = JsonDocument.Parse(contentRow.Meta);
+            var result = new CampaignContent(
+                meta: doc.RootElement,
+                htmlContent: contentRow.Content);
+
+            return result;
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
@@ -42,7 +55,15 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            await _repository.SaveCampaignContent(accountName, campaignId, campaignContent);
+            var contentRow = new ContentRow()
+            {
+                Content = campaignContent.htmlContent,
+                Meta = campaignContent.meta.ToString(),
+                EditorType = 5,
+                IdCampaign = campaignId
+            };
+
+            await _repository.SaveCampaignContent(accountName, campaignId, contentRow);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
     }

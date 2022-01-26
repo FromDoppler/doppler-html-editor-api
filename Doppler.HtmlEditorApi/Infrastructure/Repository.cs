@@ -15,7 +15,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
             _connectionFactory = connectionFactory;
         }
 
-        public async Task<CampaignContent> GetCampaignModel(string accountName, int campaignId)
+        public async Task<ContentRow> GetCampaignModel(string accountName, int campaignId)
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
@@ -23,40 +23,27 @@ namespace Doppler.HtmlEditorApi.Infrastructure
 JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
 JOIN [User] u ON u.IdUser = ca.IdUser
 WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType = 5";
-                var result = await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { campaignId, accountName });
-
-                if (result == null)
-                {
-                    return null;
-                }
-
-                using var doc = JsonDocument.Parse(result.Meta);
-
-                return new CampaignContent(
-                    meta: doc.RootElement,
-                    htmlContent: result.Content);
+                return await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { campaignId, accountName });
             }
         }
 
-        public async Task SaveCampaignContent(string accountName, int campaignId, CampaignContent campaignContent)
+        public async Task SaveCampaignContent(string accountName, int campaignId, ContentRow contentRow)
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
                 var databaseQuery = @"SELECT co.IdCampaign FROM Content co
 JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
 JOIN [User] u ON u.IdUser = ca.IdUser
-WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType = 5";
-                var checkIfExistAndUserIsOwner = await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { campaignId, accountName });
+WHERE co.IdCampaign = @IdCampaign  AND u.Email = @accountName AND co.EditorType = 5";
+                var checkIfExistAndUserIsOwner = await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { IdCampaign = campaignId, accountName });
                 // TODO: maybe need check if exist as other owner
-                var databaseExec = @"INSERT INTO Content (IdCampaign, Content, Meta, EditorType) VALUES (@campaignId, @htmlContent, @metaModel, 5)";
+                var databaseExec = @"INSERT INTO Content (IdCampaign, Content, Meta, EditorType) VALUES (@IdCampaign, @Content, @Meta, @EditorType)";
                 if (checkIfExistAndUserIsOwner != null)
                 {
-                    databaseExec = @"UPDATE Content SET Content = @htmlContent, Meta = @metaModel WHERE IdCampaign = @campaignId";
+                    databaseExec = @"UPDATE Content SET Content = @Content, Meta = @Meta, EditorType = @EditorType WHERE IdCampaign = @IdCampaign";
                 }
 
-                var metaModel = campaignContent.meta.ToString();
-
-                await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = campaignContent.htmlContent, metaModel });
+                await connection.ExecuteAsync(databaseExec, contentRow);
             }
         }
     }
