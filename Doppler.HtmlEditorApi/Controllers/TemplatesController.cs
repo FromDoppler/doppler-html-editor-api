@@ -25,34 +25,30 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/templates/{templateId}")]
-        public async Task<ActionResult<TemplateModel>> GetTemplate(string accountName, int templateId)
+        public Task<ActionResult<TemplateModel>> GetTemplate(string accountName, int templateId)
         {
-            var template = await _repository.GetTemplateModel(accountName, templateId);
-            return template;
+            throw new NotImplementedException();
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpPut("/accounts/{accountName}/templates/{templateId}")]
-        public async Task<IActionResult> SaveTemplate(string accountName, int templateId, TemplateModel templateModel)
+        public Task<IActionResult> SaveTemplate(string accountName, int templateId, TemplateModel templateModel)
         {
-            await _repository.SaveTemplateContent(accountName, templateId, templateModel);
-            return new OkObjectResult($"El template '{templateId}' se guardó exitosamente.");
+            throw new NotImplementedException();
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpPost("/accounts/{accountName}/templates")]
-        public async Task<IActionResult> CreateTemplate(string accountName, TemplateModel templateModel)
+        public Task<IActionResult> CreateTemplate(string accountName, TemplateModel templateModel)
         {
-            await _repository.CreateTemplate(accountName, templateModel);
-            return new OkObjectResult($"El template se creó exitosamente en la cuenta '{accountName}'");
+            throw new NotImplementedException();
         }
 
         [Authorize(Policies.ONLY_SUPERUSER)]
         [HttpPost("/shared/templates/{templateId}")]
-        public async Task<ActionResult<TemplateModel>> GetSharedTemplate(int templateId)
+        public Task<ActionResult<TemplateModel>> GetSharedTemplate(int templateId)
         {
-            var sharedTemplate = await _repository.GetSharedTemplateModel(templateId);
-            return sharedTemplate;
+            throw new NotImplementedException();
         }
     }
 }
