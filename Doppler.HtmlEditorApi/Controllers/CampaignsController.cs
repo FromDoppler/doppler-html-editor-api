@@ -22,7 +22,7 @@ namespace Doppler.HtmlEditorApi.Controllers
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content/design")]
+        [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<ActionResult<CampaignContent>> GetCampaign(string accountName, int campaignId)
         {
             // TODO: Considere refactoring accountName validation
@@ -39,7 +39,7 @@ namespace Doppler.HtmlEditorApi.Controllers
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content/")]
+        [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
             await _repository.SaveCampaignContent(accountName, campaignId, campaignContent);

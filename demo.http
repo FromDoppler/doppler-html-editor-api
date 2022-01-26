@@ -7,7 +7,7 @@
 # @base=https://apisqa.fromdoppler.net/hello
 
 ###
-GET {{base}}/accounts/amoschini@makingsense.com/campaigns/33882793/content/design
+GET {{base}}/accounts/amoschini@makingsense.com/campaigns/33882793/content
 Authorization: Bearer {{Token}}
 
 ###

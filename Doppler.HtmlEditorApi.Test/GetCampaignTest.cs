@@ -33,7 +33,7 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/x@x.com/campaigns/123/content/design", HttpStatusCode.Unauthorized)]
+        [InlineData("/accounts/x@x.com/campaigns/123/content", HttpStatusCode.Unauthorized)]
         public async Task GET_campaign_should_require_token(string url, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -49,8 +49,8 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/x@x.com/campaigns/123/content/design", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, HttpStatusCode.Forbidden)]
-        [InlineData("/accounts/x@x.com/campaigns/123/content/design", TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
+        [InlineData("/accounts/x@x.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, HttpStatusCode.Forbidden)]
+        [InlineData("/accounts/x@x.com/campaigns/123/content", TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
         public async Task GET_campaign_should_not_accept_the_token_of_another_account(string url, string token, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -66,8 +66,8 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
         public async Task GET_campaign_should_not_accept_a_expired_token(string url, string token, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -86,9 +86,9 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/otro@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
+        [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
         public async Task GET_campaign_should_accept_right_tokens_and_return_404_when_DB_returns_null(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
@@ -118,9 +118,9 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/otro@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
+        [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
         public async Task GET_campaign_should_accept_right_tokens_and_return_content_as_it_is_in_DB(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange

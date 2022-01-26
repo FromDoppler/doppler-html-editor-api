@@ -3,7 +3,7 @@
 ## Campaigns
 
 ```http
-GET /accounts/{accountName}/campaigns/{campaignId}/content/design
+GET /accounts/{accountName}/campaigns/{campaignId}/content
 ```
 
 Response:
