@@ -8,61 +8,67 @@ namespace Doppler.HtmlEditorApi.Infrastructure
 {
     public class DummyRepository : IRepository
     {
-        public Task<ContentModel> GetCampaignModel(string accountName, int campaignId)
+        private static readonly object _demoMeta = new
         {
-            return Task.FromResult(new ContentModel()
+            counters = new
             {
-                counters = new()
+                u_row = 1,
+                u_column = 2,
+                u_content_text = 1,
+                u_content_heading = 1,
+                u_content_menu = 1
+            },
+            body = new
+            {
+                rows = new object[0],
+                values = new
                 {
-                    u_row = 1,
-                    u_column = 2,
-                    u_content_text = 1,
-                    u_content_heading = 1,
-                    u_content_menu = 1
-                },
-                body = new()
-                {
-                    rows = new List<Row>(),
-                    values = new()
+                    textColor = "#000000",
+                    backgroundColor = "#e7e7e7",
+                    backgroundImage = new
                     {
-                        textColor = "#000000",
-                        backgroundColor = "#e7e7e7",
-                        backgroundImage = new()
-                        {
-                            url = "",
-                            fullWidth = true,
-                            repeat = false,
-                            center = true,
-                            cover = false
-                        },
-                        contentWidth = "500px",
-                        contentAlign = "center",
-                        fontFamily = new()
-                        {
-                            label = "Arial",
-                            value = "arial,helvetica,sans-serif"
-                        },
-                        preheaderText = "",
-                        linkStyle = new()
-                        {
-                            body = true,
-                            linkColor = "#0000ee",
-                            linkHoverColor = "#0000ee",
-                            linkUnderline = true,
-                            linkHoverUnderline = true
-                        },
-                        _meta = new()
-                        {
-                            htmlID = "u_body",
-                            htmlClassNames = "u_body"
-                        }
+                        url = "",
+                        fullWidth = true,
+                        repeat = false,
+                        center = true,
+                        cover = false
+                    },
+                    contentWidth = "500px",
+                    contentAlign = "center",
+                    fontFamily = new
+                    {
+                        label = "Arial",
+                        value = "arial,helvetica,sans-serif"
+                    },
+                    preheaderText = "",
+                    linkStyle = new
+                    {
+                        body = true,
+                        linkColor = "#0000ee",
+                        linkHoverColor = "#0000ee",
+                        linkUnderline = true,
+                        linkHoverUnderline = true
+                    },
+                    _meta = new
+                    {
+                        htmlID = "u_body",
+                        htmlClassNames = "u_body"
                     }
-                },
-                schemaVersion = 6
-            });
+                }
+            },
+            schemaVersion = 6
+        };
+
+        public Task<CampaignContent> GetCampaignModel(string accountName, int campaignId)
+        {
+            var campaign = new CampaignContent(
+                meta: JsonSerializer.SerializeToElement(_demoMeta),
+                htmlContent: "<html></html>");
+
+            return Task.FromResult(campaign);
         }
 
-        public Task SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest campaignModel)
+        public Task SaveCampaignContent(string accountName, int campaignId, CampaignContent campaignModel)
         {
             return Task.CompletedTask;
         }

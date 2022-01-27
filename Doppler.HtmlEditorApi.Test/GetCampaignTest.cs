@@ -33,7 +33,7 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/x@x.com/campaigns/123/content/design", HttpStatusCode.Unauthorized)]
+        [InlineData("/accounts/x@x.com/campaigns/123/content", HttpStatusCode.Unauthorized)]
         public async Task GET_campaign_should_require_token(string url, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -49,8 +49,8 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/x@x.com/campaigns/123/content/design", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, HttpStatusCode.Forbidden)]
-        [InlineData("/accounts/x@x.com/campaigns/123/content/design", TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
+        [InlineData("/accounts/x@x.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, HttpStatusCode.Forbidden)]
+        [InlineData("/accounts/x@x.com/campaigns/123/content", TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
         public async Task GET_campaign_should_not_accept_the_token_of_another_account(string url, string token, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -66,8 +66,8 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
         public async Task GET_campaign_should_not_accept_a_expired_token(string url, string token, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -86,14 +86,14 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/otro@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
+        [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
         public async Task GET_campaign_should_accept_right_tokens_and_return_404_when_DB_returns_null(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
             // TODO: consider to mock Dapper in place of IRepository
-            ContentModel emptyContentModel = null;
+            CampaignContent emptyContentModel = null;
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
                 .ReturnsAsync(emptyContentModel);
@@ -118,21 +118,22 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/otro@test.com/campaigns/123/content/design", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
+        [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
         public async Task GET_campaign_should_accept_right_tokens_and_return_content_as_it_is_in_DB(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
-            ContentModel contentModel = new ContentModel()
+            var expectedSchemaVersion = 999;
+            var campaignContent = new CampaignContent(JsonSerializer.SerializeToElement(new
             {
-                schemaVersion = 9999
-            };
+                schemaVersion = expectedSchemaVersion
+            }), "<html></html>");
 
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-                .ReturnsAsync(contentModel);
+                .ReturnsAsync(campaignContent);
 
             var client = _factory
                 .WithWebHostBuilder(c =>
@@ -149,12 +150,15 @@ namespace Doppler.HtmlEditorApi
             var response = await client.GetAsync(url);
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
-            var contentModelResponse = JsonSerializer.Deserialize<ContentModel>
+            var contentModelResponse = JsonSerializer.Deserialize<CampaignContent>
                 (responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal(contentModel.schemaVersion, contentModelResponse.schemaVersion);
+            Assert.True(contentModelResponse.meta.TryGetProperty("schemaVersion", out var resultSchemaVersionProp), "schemaVersion property is not present");
+            Assert.Equal(JsonValueKind.Number, resultSchemaVersionProp.ValueKind);
+            Assert.True(resultSchemaVersionProp.TryGetInt32(out var resultSchemaVersion), "schemaVersion is not a valid Int32 value");
+            Assert.Equal(expectedSchemaVersion, resultSchemaVersion);
 
             // TODO: fix it, why does it not work?
             // Assert.Equal("application/json", response.Headers.GetValues("Content-Type").First());

@@ -15,7 +15,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
             _connectionFactory = connectionFactory;
         }
 
-        public async Task<ContentModel> GetCampaignModel(string accountName, int campaignId)
+        public async Task<CampaignContent> GetCampaignModel(string accountName, int campaignId)
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
@@ -24,11 +24,21 @@ JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
 JOIN [User] u ON u.IdUser = ca.IdUser
 WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType = 5";
                 var result = await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { campaignId, accountName });
-                return result == null ? null : JsonSerializer.Deserialize<ContentModel>(result.Meta);
+
+                if (result == null)
+                {
+                    return null;
+                }
+
+                using var doc = JsonDocument.Parse(result.Meta);
+
+                return new CampaignContent(
+                    meta: doc.RootElement,
+                    htmlContent: result.Content);
             }
         }
 
-        public async Task SaveCampaignContent(string accountName, int campaignId, CampaignContentRequest request)
+        public async Task SaveCampaignContent(string accountName, int campaignId, CampaignContent campaignContent)
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
@@ -44,8 +54,9 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
                     databaseExec = @"UPDATE Content SET Content = @htmlContent, Meta = @metaModel WHERE IdCampaign = @campaignId";
                 }
 
-                var metaModel = request.Meta.ToString();
-                await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = request.Content, metaModel });
+                var metaModel = campaignContent.meta.ToString();
+
+                await connection.ExecuteAsync(databaseExec, new { campaignId, htmlContent = campaignContent.htmlContent, metaModel });
             }
         }
     }

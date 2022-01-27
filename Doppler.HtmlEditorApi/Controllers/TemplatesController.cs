@@ -25,28 +25,28 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/templates/{templateId}")]
-        public Task<ActionResult<TemplateModel>> GetTemplate(string accountName, int templateId)
+        public Task<ActionResult<Template>> GetTemplate(string accountName, int templateId)
         {
             throw new NotImplementedException();
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpPut("/accounts/{accountName}/templates/{templateId}")]
-        public Task<IActionResult> SaveTemplate(string accountName, int templateId, TemplateModel templateModel)
+        public Task<IActionResult> SaveTemplate(string accountName, int templateId, Template templateModel)
         {
             throw new NotImplementedException();
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpPost("/accounts/{accountName}/templates")]
-        public Task<IActionResult> CreateTemplate(string accountName, TemplateModel templateModel)
+        public Task<IActionResult> CreateTemplate(string accountName, Template templateModel)
         {
             throw new NotImplementedException();
         }
 
         [Authorize(Policies.ONLY_SUPERUSER)]
         [HttpPost("/shared/templates/{templateId}")]
-        public Task<ActionResult<TemplateModel>> GetSharedTemplate(int templateId)
+        public Task<ActionResult<Template>> GetSharedTemplate(int templateId)
         {
             throw new NotImplementedException();
         }

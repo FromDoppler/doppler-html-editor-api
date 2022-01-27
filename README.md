@@ -3,16 +3,20 @@
 ## Campaigns
 
 ```http
-GET /accounts/{accountName}/campaigns/{campaignId}/content/design
+GET /accounts/{accountName}/campaigns/{campaignId}/content
 ```
 
 Response:
 
 ```json
 {
-  "counters": {},
-  "body": {},
-  "schemaVersion": 6
+  "meta": {
+    "counters": {...},
+    "body": {...},
+    "schemaVersion": 6,
+  },
+  "HTML": "",
+  "thumbnailUrl": ""
 }
 ```
 
@@ -29,14 +33,16 @@ PNG/JPG file or redirect to image URI
 ## Save Campaign
 
 ```http
-PUT /accounts/{accountName}/campaigns/{campaignId}/content/
+PUT /accounts/{accountName}/campaigns/{campaignId}/content
 
 {
-  "counters": {...},
-  "body": {...},
-  "schemaVersion": 6,
-  "HTML": "",	// HTML
-  "thumbnailUrl": "" // URI Image
+  "meta": {
+    "counters": {...},
+    "body": {...},
+    "schemaVersion": 6,
+  },
+  "HTML": "",
+  "thumbnailUrl": ""
 }
 ```
 
@@ -52,10 +58,14 @@ Response:
 
 ```json
 {
-  "counters": {},
-  "body": {},
   "name": "",
-  "schemaVersion": 6
+  "meta": {
+    "counters": {},
+    "body": {},
+    "schemaVersion": 6
+  },
+  "HTML": "",
+  "thumbnailUrl": ""
 }
 ```
 
@@ -66,11 +76,13 @@ PUT /accounts/{accountName}/templates/{templateId}
 
 {
   "name": "",
-  "counters": {...},
-  "body": {...},
-  "schemaVersion": 6,
-  "HTML": "",	// HTML
-  "thumbnailUrl": "" // URI Image
+  "meta": {
+    "counters": {},
+    "body": {},
+    "schemaVersion": 6
+  },
+  "HTML": "",
+  "thumbnailUrl": ""
 }
 ```
 
@@ -81,11 +93,13 @@ POST /accounts/{accountName}/templates
 
 {
   "name": "",
-  "counters": {},
-  "body": {...},
-  "schemaVersion": 6,
-  "HTML": "",	// HTML
-  "thumbnailUrl": "" // URI Image
+  "meta": {
+    "counters": {},
+    "body": {},
+    "schemaVersion": 6
+  },
+  "HTML": "",
+  "thumbnailUrl": ""
 }
 ```
 
@@ -99,9 +113,13 @@ Response:
 
 ```json
 {
-  "counters": {},
-  "body": {},
   "name": "",
-  "schemaVersion": 6
+  "meta": {
+    "counters": {},
+    "body": {},
+    "schemaVersion": 6
+  },
+  "HTML": "",
+  "thumbnailUrl": ""
 }
 ```

@@ -22,8 +22,8 @@ namespace Doppler.HtmlEditorApi.Controllers
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content/design")]
-        public async Task<ActionResult<ContentModel>> GetCampaign(string accountName, int campaignId)
+        [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content")]
+        public async Task<ActionResult<CampaignContent>> GetCampaign(string accountName, int campaignId)
         {
             // TODO: Considere refactoring accountName validation
             var campaignModel = await _repository.GetCampaignModel(accountName, campaignId);
@@ -39,10 +39,10 @@ namespace Doppler.HtmlEditorApi.Controllers
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content/")]
-        public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContentRequest data)
+        [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
+        public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            await _repository.SaveCampaignContent(accountName, campaignId, data);
+            await _repository.SaveCampaignContent(accountName, campaignId, campaignContent);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
     }
