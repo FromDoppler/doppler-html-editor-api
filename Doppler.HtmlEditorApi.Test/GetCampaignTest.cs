@@ -93,7 +93,7 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             // TODO: consider to mock Dapper in place of IRepository
-            CampaignContent emptyContentModel = null;
+            ContentRow emptyContentModel = null;
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
                 .ReturnsAsync(emptyContentModel);
@@ -125,15 +125,21 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             var expectedSchemaVersion = 999;
-            var campaignContent = new CampaignContent(JsonSerializer.SerializeToElement(new
+            ContentRow contentRow = new ContentRow()
             {
-                schemaVersion = expectedSchemaVersion
-            }), "<html></html>");
+                Meta = JsonSerializer.Serialize(new
+                {
+                    schemaVersion = expectedSchemaVersion
+                }),
+                Content = "<html></html>",
+                EditorType = 5,
+                IdCampaign = expectedIdCampaign
+            };
 
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-                .ReturnsAsync(campaignContent);
+                .ReturnsAsync(contentRow);
 
             var client = _factory
                 .WithWebHostBuilder(c =>
