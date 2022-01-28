@@ -34,10 +34,9 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return new NotFoundObjectResult("Campaign not found");
             }
 
-            // TODO: Research if disposing JsonDocument is necessary
-            var doc = JsonDocument.Parse(contentRow.Meta);
+            using var doc = JsonDocument.Parse(contentRow.Meta);
             var result = new CampaignContent(
-                meta: doc.RootElement,
+                meta: doc.RootElement.Clone(),
                 htmlContent: contentRow.Content);
 
             return result;
