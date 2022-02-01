@@ -19,6 +19,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
+                // TODO: Differentiate result when the campaign does not existe, is from another user or the campaign exists but content does not
                 var databaseQuery = @"SELECT co.IdCampaign, co.Content, co.EditorType, co.Meta FROM Content co
 JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
 JOIN [User] u ON u.IdUser = ca.IdUser
