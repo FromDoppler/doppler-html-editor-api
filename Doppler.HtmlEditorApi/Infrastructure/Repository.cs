@@ -31,19 +31,29 @@ WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType 
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
-                var databaseQuery = @"SELECT co.IdCampaign FROM Content co
-JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
-JOIN [User] u ON u.IdUser = ca.IdUser
-WHERE co.IdCampaign = @IdCampaign  AND u.Email = @accountName AND co.EditorType = 5";
-                var checkIfExistAndUserIsOwner = await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { IdCampaign = campaignId, accountName });
-                // TODO: maybe need check if exist as other owner
-                var databaseExec = @"INSERT INTO Content (IdCampaign, Content, Meta, EditorType) VALUES (@IdCampaign, @Content, @Meta, @EditorType)";
-                if (checkIfExistAndUserIsOwner != null)
+                var databaseQuery = @"
+SELECT
+    CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS OwnCampaignExists,
+    CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS ContentExists,
+    co.EditorType
+FROM [User] u
+LEFT JOIN [Campaign] ca ON u.IdUser = ca.IdUser
+    AND ca.IdCampaign = @IdCampaign
+LEFT JOIN [Content] co ON ca.IdCampaign = co.IdCampaign
+WHERE u.Email = @accountName
+";
+                var campaignStatus = await connection.QueryFirstOrDefaultAsync<dynamic>(databaseQuery, new { IdCampaign = campaignId, accountName });
+
+                if (!campaignStatus.OwnCampaignExists)
                 {
-                    databaseExec = @"UPDATE Content SET Content = @Content, Meta = @Meta, EditorType = @EditorType WHERE IdCampaign = @IdCampaign";
+                    throw new ApplicationException($"CampaignId {campaignId} does not exists or belongs to another user than {accountName}");
                 }
 
-                await connection.ExecuteAsync(databaseExec, contentRow);
+                var query = campaignStatus.ContentExists
+                    ? @"UPDATE Content SET Content = @Content, Meta = @Meta, EditorType = @EditorType WHERE IdCampaign = @IdCampaign"
+                    : @"INSERT INTO Content (IdCampaign, Content, Meta, EditorType) VALUES (@IdCampaign, @Content, @Meta, @EditorType)";
+
+                await connection.ExecuteAsync(query, contentRow);
             }
         }
     }
