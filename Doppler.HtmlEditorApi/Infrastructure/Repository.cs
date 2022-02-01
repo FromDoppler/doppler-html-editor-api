@@ -50,6 +50,8 @@ WHERE u.Email = @accountName
                     throw new ApplicationException($"CampaignId {campaignId} does not exists or belongs to another user than {accountName}");
                 }
 
+                // NOTE: It is updating even when the EditorType is different than 5
+
                 var query = campaignStatus.ContentExists
                     ? @"UPDATE Content SET Content = @Content, Meta = @Meta, EditorType = @EditorType WHERE IdCampaign = @IdCampaign"
                     : @"INSERT INTO Content (IdCampaign, Content, Meta, EditorType) VALUES (@IdCampaign, @Content, @Meta, @EditorType)";
