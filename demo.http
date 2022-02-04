@@ -16,7 +16,7 @@ Content-Type: application/json
 Authorization: Bearer {{Token}}
 
 {
-    "Meta":
+    "meta":
     {
         "counters": {
             "u_row": 5,
@@ -340,7 +340,7 @@ Authorization: Bearer {{Token}}
         },
         "schemaVersion": 6
     },
-    "Content": "<html></html>"
+    "htmlContent": "<html></html>"
 }
 
 ###
