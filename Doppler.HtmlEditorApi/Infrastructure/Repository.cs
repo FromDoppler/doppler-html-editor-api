@@ -19,12 +19,38 @@ namespace Doppler.HtmlEditorApi.Infrastructure
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
-                // TODO: Differentiate result when the campaign does not existe, is from another user or the campaign exists but content does not
-                var databaseQuery = @"SELECT co.IdCampaign, co.Content, co.EditorType, co.Meta FROM Content co
-JOIN Campaign ca ON ca.IdCampaign = co.IdCampaign
-JOIN [User] u ON u.IdUser = ca.IdUser
-WHERE co.IdCampaign = @campaignId  AND u.Email = @accountName AND co.EditorType = 5";
-                return await connection.QueryFirstOrDefaultAsync<ContentRow>(databaseQuery, new { campaignId, accountName });
+                var databaseQuery = @"
+SELECT
+    CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
+    CAST (CASE WHEN ca.IdUser IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignBelongsUser,
+    CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
+    ca.IdCampaign, co.Content, co.EditorType, co.Meta
+FROM [User] u
+LEFT JOIN [Campaign] ca ON u.IdUser = ca.IdUser
+    AND ca.IdCampaign = @IdCampaign
+LEFT JOIN [Content] co ON ca.IdCampaign = co.IdCampaign
+WHERE u.Email = @accountName";
+
+                var queryResult = await connection.QueryFirstOrDefaultAsync<dynamic>(databaseQuery, new { IdCampaign = campaignId, accountName });
+
+                if (!queryResult.CampaignBelongsUser || !queryResult.CampaignExists)
+                {
+                    return null;
+                }
+
+                if (!queryResult.CampaignHasContent)
+                {
+                    var emptyResult = ContentRow.CreateEmpty(campaignId);
+                    return emptyResult;
+                };
+
+                return new ContentRow()
+                {
+                    Content = queryResult.Content,
+                    Meta = queryResult.Meta,
+                    EditorType = queryResult.EditorType,
+                    IdCampaign = queryResult.IdCampaign
+                };
             }
         }
 
