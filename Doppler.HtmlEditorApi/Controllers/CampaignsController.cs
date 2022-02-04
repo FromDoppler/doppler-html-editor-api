@@ -31,7 +31,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             if (contentRow == null)
             {
-                return new NotFoundObjectResult("Campaign not found");
+                return new NotFoundObjectResult("Campaign not found or belongs to a different account");
             }
 
             using var doc = JsonDocument.Parse(contentRow.Meta);
