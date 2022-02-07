@@ -161,7 +161,9 @@ namespace Doppler.HtmlEditorApi
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.True(contentModelResponse.meta.TryGetProperty("schemaVersion", out var resultSchemaVersionProp), "schemaVersion property is not present");
+            Assert.Matches("\"type\":\"unlayer\"", responseContent);
+            Assert.NotNull(contentModelResponse.meta);
+            Assert.True(contentModelResponse.meta.Value.TryGetProperty("schemaVersion", out var resultSchemaVersionProp), "schemaVersion property is not present");
             Assert.Equal(JsonValueKind.Number, resultSchemaVersionProp.ValueKind);
             Assert.True(resultSchemaVersionProp.TryGetInt32(out var resultSchemaVersion), "schemaVersion is not a valid Int32 value");
             Assert.Equal(expectedSchemaVersion, resultSchemaVersion);

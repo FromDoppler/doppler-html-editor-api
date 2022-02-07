@@ -36,6 +36,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             using var doc = JsonDocument.Parse(contentRow.Meta);
             var result = new CampaignContent(
+                type: ContentType.unlayer,
                 meta: doc.RootElement.Clone(),
                 htmlContent: contentRow.Content);
 
