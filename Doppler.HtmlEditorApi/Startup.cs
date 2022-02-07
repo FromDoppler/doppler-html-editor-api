@@ -29,7 +29,11 @@ namespace Doppler.HtmlEditorApi
         {
             services.AddProblemDetails();
             services.AddDopplerSecurity();
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(o =>
+                {
+                    o.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+                });
             services.AddCors();
             services.AddSingleton<Weather.IWeatherForecastService, Weather.WeatherForecastService>();
             services.AddSingleton<Weather.DataService>();
