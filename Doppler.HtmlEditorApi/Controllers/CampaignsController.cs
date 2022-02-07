@@ -55,13 +55,10 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            var contentRow = new ContentRow()
-            {
-                Content = campaignContent.htmlContent,
-                Meta = campaignContent.meta.ToString(),
-                EditorType = 5,
-                IdCampaign = campaignId
-            };
+            var contentRow = ContentRow.CreateUnlayerContentRow(
+                content: campaignContent.htmlContent,
+                meta: campaignContent.meta.ToString(),
+                idCampaign: campaignId);
 
             await _repository.SaveCampaignContent(accountName, campaignId, contentRow);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");

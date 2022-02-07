@@ -125,16 +125,13 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             var expectedSchemaVersion = 999;
-            ContentRow contentRow = new ContentRow()
-            {
-                Meta = JsonSerializer.Serialize(new
+            var contentRow = ContentRow.CreateUnlayerContentRow(
+                meta: JsonSerializer.Serialize(new
                 {
                     schemaVersion = expectedSchemaVersion
                 }),
-                Content = "<html></html>",
-                EditorType = 5,
-                IdCampaign = expectedIdCampaign
-            };
+                content: "<html></html>",
+                idCampaign: expectedIdCampaign);
 
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
