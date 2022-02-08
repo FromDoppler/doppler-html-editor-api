@@ -54,7 +54,7 @@ WHERE u.Email = @accountName";
             }
         }
 
-        public async Task SaveCampaignContent(string accountName, int campaignId, ContentRow contentRow)
+        public async Task SaveCampaignContent(string accountName, ContentRow contentRow)
         {
             using (var connection = await _connectionFactory.GetConnection())
             {
@@ -69,11 +69,11 @@ LEFT JOIN [Campaign] ca ON u.IdUser = ca.IdUser
 LEFT JOIN [Content] co ON ca.IdCampaign = co.IdCampaign
 WHERE u.Email = @accountName
 ";
-                var campaignStatus = await connection.QueryFirstOrDefaultAsync<dynamic>(databaseQuery, new { IdCampaign = campaignId, accountName });
+                var campaignStatus = await connection.QueryFirstOrDefaultAsync<dynamic>(databaseQuery, new { contentRow.IdCampaign, accountName });
 
                 if (!campaignStatus.OwnCampaignExists)
                 {
-                    throw new ApplicationException($"CampaignId {campaignId} does not exists or belongs to another user than {accountName}");
+                    throw new ApplicationException($"CampaignId {contentRow.IdCampaign} does not exists or belongs to another user than {accountName}");
                 }
 
                 var query = campaignStatus.ContentExists

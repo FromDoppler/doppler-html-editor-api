@@ -101,7 +101,7 @@ namespace Doppler.HtmlEditorApi
 
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.SaveCampaignContent(expectedAccountName, expectedIdCampaign, contentMock))
+            repositoryMock.Setup(x => x.SaveCampaignContent(expectedAccountName, contentMock))
                 .Returns(Task.CompletedTask);
 
             var client = _factory
@@ -265,7 +265,7 @@ namespace Doppler.HtmlEditorApi
             // TODO: consider to mock Dapper in place of IRepository
             var htmlContent = "My HTML Content";
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<ContentRow>()))
+            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<ContentRow>()))
                 .Returns(Task.CompletedTask);
 
             var client = _factory
@@ -293,7 +293,6 @@ namespace Doppler.HtmlEditorApi
             repositoryMock.Verify(x =>
                 x.SaveCampaignContent(
                     expectedAccountName,
-                    expectedIdCampaign,
                     It.Is<ContentRow>(r =>
                         r.EditorType == 3
                         && r.Content == htmlContent

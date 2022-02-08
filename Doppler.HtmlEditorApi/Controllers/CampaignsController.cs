@@ -70,7 +70,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
-            await _repository.SaveCampaignContent(accountName, campaignId, contentRow);
+            await _repository.SaveCampaignContent(accountName, contentRow);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
     }
