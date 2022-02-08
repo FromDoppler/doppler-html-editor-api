@@ -64,6 +64,9 @@ namespace Doppler.HtmlEditorApi.Controllers
                     content: campaignContent.htmlContent,
                     meta: campaignContent.meta.ToString(),
                     idCampaign: campaignId),
+                ContentType.html => ContentRow.CreateHtmlContentRow(
+                    content: campaignContent.htmlContent,
+                    idCampaign: campaignId),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 

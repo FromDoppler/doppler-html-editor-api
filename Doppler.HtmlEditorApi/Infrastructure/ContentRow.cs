@@ -31,6 +31,15 @@ public class ContentRow
             IdCampaign = idCampaign
         };
 
+    public static ContentRow CreateHtmlContentRow(string content, int idCampaign) =>
+        new ContentRow()
+        {
+            Content = content,
+            Meta = string.Empty,
+            EditorType = HTML_EDITOR_TYPE,
+            IdCampaign = idCampaign
+        };
+
     public bool HasHtmlEditorType => EditorType == HTML_EDITOR_TYPE;
     public bool HasUnlayerEditorType => EditorType == UNLAYER_EDITOR_TYPE;
 
