@@ -69,7 +69,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure
             return Task.FromResult(contentRow);
         }
 
-        public Task SaveCampaignContent(string accountName, int campaignId, ContentRow campaignModel)
+        public Task SaveCampaignContent(string accountName, ContentRow campaignModel)
         {
             return Task.CompletedTask;
         }
