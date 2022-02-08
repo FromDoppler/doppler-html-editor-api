@@ -12,11 +12,22 @@ Response:
 
 ```json
 {
+  "type": "unlayer",
   "meta": {
     "counters": {...},
     "body": {...},
     "schemaVersion": 6,
   },
+  "HTML": "",
+  "thumbnailUrl": ""
+}
+```
+
+or
+
+```json
+{
+  "type": "html",
   "HTML": "",
   "thumbnailUrl": ""
 }
@@ -38,11 +49,24 @@ PNG/JPG file or redirect to image URI
 PUT /accounts/{accountName}/campaigns/{campaignId}/content
 
 {
+  "type": "unlayer",
   "meta": {
     "counters": {...},
     "body": {...},
     "schemaVersion": 6,
   },
+  "HTML": "",
+  "thumbnailUrl": ""
+}
+```
+
+or
+
+```http
+PUT /accounts/{accountName}/campaigns/{campaignId}/content
+
+{
+  "type": "html",
   "HTML": "",
   "thumbnailUrl": ""
 }
