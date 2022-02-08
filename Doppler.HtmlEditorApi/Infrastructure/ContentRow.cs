@@ -2,6 +2,7 @@ namespace Doppler.HtmlEditorApi.Infrastructure;
 
 public class ContentRow
 {
+    private const int HTML_EDITOR_TYPE = 3;
     private const int UNLAYER_EDITOR_TYPE = 5;
 
     public string Content { get; set; }
@@ -30,6 +31,7 @@ public class ContentRow
             IdCampaign = idCampaign
         };
 
+    public bool HasHtmlEditorType => EditorType == HTML_EDITOR_TYPE;
     public bool HasUnlayerEditorType => EditorType == UNLAYER_EDITOR_TYPE;
 
 }
