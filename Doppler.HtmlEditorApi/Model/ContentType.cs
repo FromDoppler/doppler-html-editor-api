@@ -7,6 +7,7 @@ namespace Doppler.HtmlEditorApi.Model;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ContentType
 {
-    html = 3,
-    unlayer = 5,
+    unset = 0,
+    html,
+    unlayer,
 }
