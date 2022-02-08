@@ -34,10 +34,9 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return new NotFoundObjectResult("Campaign not found or belongs to a different account");
             }
 
-            using var doc = JsonDocument.Parse(contentRow.Meta);
             var result = new CampaignContent(
                 type: ContentType.unlayer,
-                meta: doc.RootElement.Clone(),
+                meta: Utils.ParseAsJsonElement(contentRow.Meta),
                 htmlContent: contentRow.Content);
 
             return result;
