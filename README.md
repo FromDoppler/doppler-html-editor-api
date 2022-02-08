@@ -1,6 +1,8 @@
 # Doppler HTML Editor API
 
-## Campaigns
+## API preliminar design
+
+### Campaigns
 
 ```http
 GET /accounts/{accountName}/campaigns/{campaignId}/content
@@ -20,7 +22,7 @@ Response:
 }
 ```
 
-## Thumbnails
+### Thumbnails
 
 ```http
 GET /accounts/{accountName}/campaigns/{campaignId}/content/thumbnail
@@ -103,7 +105,7 @@ POST /accounts/{accountName}/templates
 }
 ```
 
-## Shared Templates
+### Shared Templates
 
 ```http
 GET /shared/templates/{templateId}
