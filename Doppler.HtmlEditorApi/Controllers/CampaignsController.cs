@@ -29,15 +29,15 @@ namespace Doppler.HtmlEditorApi.Controllers
             // TODO: Considere refactoring accountName validation
             var contentRow = await _repository.GetCampaignModel(accountName, campaignId);
 
-            if (contentRow == null)
+            ActionResult<CampaignContent> result = contentRow switch
             {
-                return new NotFoundObjectResult("Campaign not found or belongs to a different account");
-            }
-
-            var result = new CampaignContent(
-                type: ContentType.unlayer,
-                meta: Utils.ParseAsJsonElement(contentRow.Meta),
-                htmlContent: contentRow.Content);
+                null => new NotFoundObjectResult("Campaign not found or belongs to a different account"),
+                var r when r.HasUnlayerEditorType => new CampaignContent(
+                    type: ContentType.unlayer,
+                    meta: Utils.ParseAsJsonElement(r.Meta),
+                    htmlContent: r.Content),
+                _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.EditorType}")
+            };
 
             return result;
         }
@@ -54,10 +54,14 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            var contentRow = ContentRow.CreateUnlayerContentRow(
-                content: campaignContent.htmlContent,
-                meta: campaignContent.meta.ToString(),
-                idCampaign: campaignId);
+            var contentRow = campaignContent.type switch
+            {
+                ContentType.unlayer => ContentRow.CreateUnlayerContentRow(
+                    content: campaignContent.htmlContent,
+                    meta: campaignContent.meta.ToString(),
+                    idCampaign: campaignId),
+                _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
+            };
 
             await _repository.SaveCampaignContent(accountName, campaignId, contentRow);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
