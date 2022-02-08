@@ -256,5 +256,50 @@ namespace Doppler.HtmlEditorApi
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Matches("\"$.type\":\\[\"The JSON value could not be converted to Doppler.HtmlEditorApi.Model.CampaignContent. Path: $.type | LineNumber: \\d+ | BytePositionInLine: \\d+.\"\\]", responseContent);
         }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task PUT_campaign_should_accept_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            // Arrange
+            // TODO: consider to mock Dapper in place of IRepository
+            var htmlContent = "My HTML Content";
+            var repositoryMock = new Mock<IRepository>();
+            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<ContentRow>()))
+                .Returns(Task.CompletedTask);
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(repositoryMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "html",
+                htmlContent
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            repositoryMock.Verify(x =>
+                x.SaveCampaignContent(
+                    expectedAccountName,
+                    expectedIdCampaign,
+                    It.Is<ContentRow>(r =>
+                        r.EditorType == 3
+                        && r.Content == htmlContent
+                        && r.Meta == string.Empty
+                        && r.IdCampaign == expectedIdCampaign)
+                ), Times.Exactly(1));
+        }
     }
 }

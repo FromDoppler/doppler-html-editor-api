@@ -168,5 +168,48 @@ namespace Doppler.HtmlEditorApi
             // TODO: fix it, why does it not work?
             // Assert.Equal("application/json", response.Headers.GetValues("Content-Type").First());
         }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_return_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            var html = "<html></html>";
+            ContentRow contentRow = new ContentRow()
+            {
+                Meta = "Should not be included",
+                Content = html,
+                EditorType = 3,
+                IdCampaign = expectedIdCampaign
+            };
+
+            // TODO: consider to mock Dapper in place of IRepository
+            var repositoryMock = new Mock<IRepository>();
+            repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
+                .ReturnsAsync(contentRow);
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(repositoryMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            using var responseContentDoc = JsonDocument.Parse(responseContent);
+            var responseContentJson = responseContentDoc.RootElement;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.False(responseContentJson.TryGetProperty("meta", out _));
+            Assert.Equal("html", responseContentJson.GetProperty("type").GetString());
+            Assert.Equal(html, responseContentJson.GetProperty("htmlContent").GetString());
+        }
     }
 }

@@ -36,6 +36,10 @@ namespace Doppler.HtmlEditorApi.Controllers
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(r.Meta),
                     htmlContent: r.Content),
+                var r when r.HasHtmlEditorType => new CampaignContent(
+                    type: ContentType.html,
+                    meta: null,
+                    htmlContent: r.Content),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.EditorType}")
             };
 
@@ -59,6 +63,9 @@ namespace Doppler.HtmlEditorApi.Controllers
                 ContentType.unlayer => ContentRow.CreateUnlayerContentRow(
                     content: campaignContent.htmlContent,
                     meta: campaignContent.meta.ToString(),
+                    idCampaign: campaignId),
+                ContentType.html => ContentRow.CreateHtmlContentRow(
+                    content: campaignContent.htmlContent,
                     idCampaign: campaignId),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
