@@ -125,16 +125,13 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             var expectedSchemaVersion = 999;
-            ContentRow contentRow = new ContentRow()
-            {
-                Meta = JsonSerializer.Serialize(new
+            var contentRow = ContentRow.CreateUnlayerContentRow(
+                meta: JsonSerializer.Serialize(new
                 {
                     schemaVersion = expectedSchemaVersion
                 }),
-                Content = "<html></html>",
-                EditorType = 5,
-                IdCampaign = expectedIdCampaign
-            };
+                content: "<html></html>",
+                idCampaign: expectedIdCampaign);
 
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
@@ -161,7 +158,9 @@ namespace Doppler.HtmlEditorApi
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.True(contentModelResponse.meta.TryGetProperty("schemaVersion", out var resultSchemaVersionProp), "schemaVersion property is not present");
+            Assert.Matches("\"type\":\"unlayer\"", responseContent);
+            Assert.NotNull(contentModelResponse.meta);
+            Assert.True(contentModelResponse.meta.Value.TryGetProperty("schemaVersion", out var resultSchemaVersionProp), "schemaVersion property is not present");
             Assert.Equal(JsonValueKind.Number, resultSchemaVersionProp.ValueKind);
             Assert.True(resultSchemaVersionProp.TryGetInt32(out var resultSchemaVersion), "schemaVersion is not a valid Int32 value");
             Assert.Equal(expectedSchemaVersion, resultSchemaVersion);

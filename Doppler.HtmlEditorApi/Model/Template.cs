@@ -2,4 +2,4 @@ using System.Text.Json;
 
 namespace Doppler.HtmlEditorApi.Model;
 
-public record Template(string name, JsonElement meta, string htmlContent) : Content(meta, htmlContent);
+public record Template(ContentType type, string name, JsonElement? meta, string htmlContent) : Content(type, meta, htmlContent);

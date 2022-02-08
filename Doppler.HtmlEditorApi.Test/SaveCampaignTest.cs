@@ -116,7 +116,12 @@ namespace Doppler.HtmlEditorApi
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             // Act
-            var response = await client.PutAsync(url, JsonContent.Create(new { htmlContent = "<html></html>", meta = new { } }));
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent = "<html></html>",
+                meta = new { }
+            }));
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
 
@@ -169,13 +174,17 @@ namespace Doppler.HtmlEditorApi
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             // Act
-            var response = await client.PutAsync(url, JsonContent.Create(new { htmlContent = "<html></html>" }));
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent = "<html></html>"
+            }));
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Matches("\"meta\":\\[\"The meta field is required.\"\\]", responseContent);
+            Assert.Matches("\"meta\":\\[\"The meta field is required for unlayer content.\"\\]", responseContent);
         }
 
         [Theory]
@@ -187,13 +196,65 @@ namespace Doppler.HtmlEditorApi
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             // Act
-            var response = await client.PutAsync(url, JsonContent.Create(new { htmlContent = "<html></html>", meta = "" }));
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent = "<html></html>",
+                meta = ""
+            }));
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Matches("\"meta\":\\[\"The meta field is required.\"\\]", responseContent);
+            Assert.Matches("\"meta\":\\[\"The meta field is required for unlayer content.\"\\]", responseContent);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        public async Task PUT_campaign_should_return_error_when_type_is_not_defined(string url, string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                htmlContent = "<html></html>",
+                meta = ""
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Matches("\"type\":\\[\"The type field is required.\"\\]", responseContent);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "")]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, null)]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "noexisto")]
+        public async Task PUT_campaign_should_return_error_when_type_is_invalid(string url, string token, string type)
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type,
+                htmlContent = "<html></html>",
+                meta = ""
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Matches("\"$.type\":\\[\"The JSON value could not be converted to Doppler.HtmlEditorApi.Model.CampaignContent. Path: $.type | LineNumber: \\d+ | BytePositionInLine: \\d+.\"\\]", responseContent);
         }
     }
 }

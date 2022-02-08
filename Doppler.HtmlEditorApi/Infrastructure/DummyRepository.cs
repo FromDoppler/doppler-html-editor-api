@@ -61,13 +61,10 @@ namespace Doppler.HtmlEditorApi.Infrastructure
 
         public Task<ContentRow> GetCampaignModel(string accountName, int campaignId)
         {
-            var contentRow = new ContentRow()
-            {
-                Meta = JsonSerializer.Serialize(_demoMeta),
-                Content = "<html></html>",
-                IdCampaign = campaignId,
-                EditorType = 5
-            };
+            var contentRow = ContentRow.CreateUnlayerContentRow(
+                meta: JsonSerializer.Serialize(_demoMeta),
+                content: "<html></html>",
+                idCampaign: campaignId);
 
             return Task.FromResult(contentRow);
         }
