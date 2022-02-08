@@ -2,13 +2,13 @@ namespace Doppler.HtmlEditorApi.Infrastructure;
 
 public class ContentRow
 {
-    private const int HTML_EDITOR_TYPE = 3;
+    private static readonly int? HTML_EDITOR_TYPE = null;
     private const int UNLAYER_EDITOR_TYPE = 5;
 
     public string Content { get; set; }
     public string Meta { get; set; }
     public int IdCampaign { get; set; }
-    public int EditorType { get; set; }
+    public int? EditorType { get; set; }
 
     public static ContentRow CreateEmpty(int campaignId)
     {
@@ -35,7 +35,7 @@ public class ContentRow
         new ContentRow()
         {
             Content = content,
-            Meta = string.Empty,
+            Meta = null,
             EditorType = HTML_EDITOR_TYPE,
             IdCampaign = idCampaign
         };
