@@ -176,9 +176,9 @@ namespace Doppler.HtmlEditorApi
             var html = "<html></html>";
             ContentRow contentRow = new ContentRow()
             {
-                Meta = "Should not be included",
+                Meta = null,
                 Content = html,
-                EditorType = 3,
+                EditorType = null,
                 IdCampaign = expectedIdCampaign
             };
 

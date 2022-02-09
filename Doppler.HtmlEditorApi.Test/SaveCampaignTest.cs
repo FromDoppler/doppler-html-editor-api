@@ -294,9 +294,9 @@ namespace Doppler.HtmlEditorApi
                 x.SaveCampaignContent(
                     expectedAccountName,
                     It.Is<ContentRow>(r =>
-                        r.EditorType == 3
+                        r.EditorType == null
                         && r.Content == htmlContent
-                        && r.Meta == string.Empty
+                        && r.Meta == null
                         && r.IdCampaign == expectedIdCampaign)
                 ), Times.Exactly(1));
         }

@@ -16,7 +16,7 @@ public record CampaignContent(
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (type == (ContentType)0)
+        if (type == ContentType.unset)
         {
             yield return new ValidationResult($"The {nameof(type)} field is required.", new[] { nameof(type) });
         }
