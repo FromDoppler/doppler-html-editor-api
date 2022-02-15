@@ -6,13 +6,16 @@ namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 
 public class Repository : IRepository
 {
+    private const int EDITOR_TYPE_MSEDITOR = 4;
+    private const int EDITOR_TYPE_UNLAYER = 5;
+
     private readonly IDatabaseConnectionFactory _connectionFactory;
     public Repository(IDatabaseConnectionFactory connectionFactory)
     {
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<ContentRow> GetCampaignModel(string accountName, int campaignId)
+    public async Task<ContentData> GetCampaignModel(string accountName, int campaignId)
     {
         using (var connection = await _connectionFactory.GetConnection())
         {
@@ -37,21 +40,38 @@ WHERE u.Email = @accountName";
 
             if (!queryResult.CampaignHasContent)
             {
-                var emptyResult = ContentRow.CreateEmpty(campaignId);
-                return emptyResult;
+                return UnlayerContentData.CreateEmpty(campaignId);
             };
 
-            return new ContentRow()
+            if (queryResult.EditorType == EDITOR_TYPE_MSEDITOR)
             {
-                Content = queryResult.Content,
-                Meta = queryResult.Meta,
-                EditorType = queryResult.EditorType,
-                IdCampaign = queryResult.IdCampaign
-            };
+                return new MSEditorContentData(campaignId, queryResult.Content);
+            }
+
+            if (queryResult.EditorType == EDITOR_TYPE_UNLAYER)
+            {
+                return new UnlayerContentData(
+                    campaignId: queryResult.IdCampaign,
+                    htmlContent: queryResult.Content,
+                    meta: queryResult.Meta);
+            }
+
+            if (queryResult.EditorType == null)
+            {
+                return new HtmlContentData(
+                    campaignId: queryResult.IdCampaign,
+                    htmlContent: queryResult.Content);
+            }
+
+            return new UnknownContentData(
+                campaignId: queryResult.IdCampaign,
+                content: queryResult.Content,
+                meta: queryResult.Meta,
+                editorType: queryResult.EditorType);
         }
     }
 
-    public async Task SaveCampaignContent(string accountName, ContentRow contentRow)
+    public async Task SaveCampaignContent(string accountName, ContentData contentRow)
     {
         using (var connection = await _connectionFactory.GetConnection())
         {
@@ -66,18 +86,37 @@ AND ca.IdCampaign = @IdCampaign
 LEFT JOIN [Content] co ON ca.IdCampaign = co.IdCampaign
 WHERE u.Email = @accountName
 ";
-            var campaignStatus = await connection.QueryFirstOrDefaultAsync<dynamic>(databaseQuery, new { contentRow.IdCampaign, accountName });
+            var campaignStatus = await connection.QueryFirstOrDefaultAsync<dynamic>(databaseQuery, new { contentRow.campaignId, accountName });
 
             if (!campaignStatus.OwnCampaignExists)
             {
-                throw new ApplicationException($"CampaignId {contentRow.IdCampaign} does not exists or belongs to another user than {accountName}");
+                throw new ApplicationException($"CampaignId {contentRow.campaignId} does not exists or belongs to another user than {accountName}");
             }
 
             var query = campaignStatus.ContentExists
                 ? @"UPDATE Content SET Content = @Content, Meta = @Meta, EditorType = @EditorType WHERE IdCampaign = @IdCampaign"
                 : @"INSERT INTO Content (IdCampaign, Content, Meta, EditorType) VALUES (@IdCampaign, @Content, @Meta, @EditorType)";
 
-            await connection.ExecuteAsync(query, contentRow);
+            var queryParams = contentRow switch
+            {
+                UnlayerContentData unlayerContentData => new
+                {
+                    IdCampaign = unlayerContentData.campaignId,
+                    Content = unlayerContentData.htmlContent,
+                    Meta = unlayerContentData.meta,
+                    EditorType = (int?)EDITOR_TYPE_UNLAYER
+                },
+                HtmlContentData htmlContentData => new
+                {
+                    IdCampaign = htmlContentData.campaignId,
+                    Content = htmlContentData.htmlContent,
+                    Meta = (string)null,
+                    EditorType = (int?)null
+                },
+                _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
+            };
+
+            await connection.ExecuteAsync(query, queryParams);
         }
     }
 }

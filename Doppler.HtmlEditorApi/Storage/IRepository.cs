@@ -4,6 +4,6 @@ namespace Doppler.HtmlEditorApi.Storage;
 
 public interface IRepository
 {
-    Task<ContentRow> GetCampaignModel(string accountName, int campaignId);
-    Task SaveCampaignContent(string accountName, ContentRow contentRow);
+    Task<ContentData> GetCampaignModel(string accountName, int campaignId);
+    Task SaveCampaignContent(string accountName, ContentData contentRow);
 }

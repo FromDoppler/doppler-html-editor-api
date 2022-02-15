@@ -32,15 +32,15 @@ namespace Doppler.HtmlEditorApi.Controllers
             ActionResult<CampaignContent> result = contentRow switch
             {
                 null => new NotFoundObjectResult("Campaign not found or belongs to a different account"),
-                var r when r.HasUnlayerEditorType => new CampaignContent(
+                UnlayerContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
-                    meta: Utils.ParseAsJsonElement(r.Meta),
-                    htmlContent: r.Content),
-                var r when r.HasHtmlEditorType => new CampaignContent(
+                    meta: Utils.ParseAsJsonElement(unlayerContent.meta),
+                    htmlContent: unlayerContent.htmlContent),
+                BaseHtmlContentData htmlContent => new CampaignContent(
                     type: ContentType.html,
                     meta: null,
-                    htmlContent: r.Content),
-                _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.EditorType}")
+                    htmlContent: htmlContent.htmlContent),
+                _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
             };
 
             return result;
@@ -58,15 +58,15 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            var contentRow = campaignContent.type switch
+            BaseHtmlContentData contentRow = campaignContent.type switch
             {
-                ContentType.unlayer => ContentRow.CreateUnlayerContentRow(
-                    content: campaignContent.htmlContent,
+                ContentType.unlayer => new UnlayerContentData(
+                    htmlContent: campaignContent.htmlContent,
                     meta: campaignContent.meta.ToString(),
-                    idCampaign: campaignId),
-                ContentType.html => ContentRow.CreateHtmlContentRow(
-                    content: campaignContent.htmlContent,
-                    idCampaign: campaignId),
+                    campaignId: campaignId),
+                ContentType.html => new HtmlContentData(
+                    htmlContent: campaignContent.htmlContent,
+                    campaignId: campaignId),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 

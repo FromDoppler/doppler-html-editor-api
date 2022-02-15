@@ -92,15 +92,9 @@ namespace Doppler.HtmlEditorApi
         public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName)
         {
             // Arrange
-            ContentRow contentMock = new ContentRow()
-            {
-                Meta = "",
-                Content = "<html></html>"
-            };
-
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.SaveCampaignContent(expectedAccountName, contentMock))
+            repositoryMock.Setup(x => x.SaveCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
                 .Returns(Task.CompletedTask);
 
             var client = _factory
@@ -264,7 +258,7 @@ namespace Doppler.HtmlEditorApi
             // TODO: consider to mock Dapper in place of IRepository
             var htmlContent = "My HTML Content";
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<ContentRow>()))
+            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<BaseHtmlContentData>()))
                 .Returns(Task.CompletedTask);
 
             var client = _factory
@@ -292,11 +286,9 @@ namespace Doppler.HtmlEditorApi
             repositoryMock.Verify(x =>
                 x.SaveCampaignContent(
                     expectedAccountName,
-                    It.Is<ContentRow>(r =>
-                        r.EditorType == null
-                        && r.Content == htmlContent
-                        && r.Meta == null
-                        && r.IdCampaign == expectedIdCampaign)
+                    It.Is<HtmlContentData>(r =>
+                        r.htmlContent == htmlContent
+                        && r.campaignId == expectedIdCampaign)
                 ), Times.Exactly(1));
         }
     }

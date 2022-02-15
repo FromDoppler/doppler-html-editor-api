@@ -58,17 +58,17 @@ public class DummyRepository : IRepository
         schemaVersion = 6
     };
 
-    public Task<ContentRow> GetCampaignModel(string accountName, int campaignId)
+    public Task<ContentData> GetCampaignModel(string accountName, int campaignId)
     {
-        var contentRow = ContentRow.CreateUnlayerContentRow(
-            meta: JsonSerializer.Serialize(_demoMeta),
-            content: "<html></html>",
-            idCampaign: campaignId);
+        ContentData contentRow = new UnlayerContentData(
+            campaignId: campaignId,
+            htmlContent: "<html></html>",
+            meta: JsonSerializer.Serialize(_demoMeta));
 
         return Task.FromResult(contentRow);
     }
 
-    public Task SaveCampaignContent(string accountName, ContentRow campaignModel)
+    public Task SaveCampaignContent(string accountName, ContentData campaignModel)
     {
         return Task.CompletedTask;
     }
