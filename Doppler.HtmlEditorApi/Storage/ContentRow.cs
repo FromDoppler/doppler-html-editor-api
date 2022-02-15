@@ -1,4 +1,4 @@
-namespace Doppler.HtmlEditorApi.Infrastructure;
+namespace Doppler.HtmlEditorApi.Storage;
 
 public class ContentRow
 {

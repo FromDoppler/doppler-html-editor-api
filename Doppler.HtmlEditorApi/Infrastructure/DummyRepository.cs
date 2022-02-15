@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Collections.Generic;
+using Doppler.HtmlEditorApi.Storage;
 
 namespace Doppler.HtmlEditorApi.Infrastructure
 {

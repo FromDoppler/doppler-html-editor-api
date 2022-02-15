@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DopplerSecurity;
 using Microsoft.AspNetCore.Authorization;
 using Doppler.HtmlEditorApi.ApiModels;
-using Doppler.HtmlEditorApi.Infrastructure;
+using Doppler.HtmlEditorApi.Storage;
 using System.Text.Json;
 
 namespace Doppler.HtmlEditorApi.Controllers

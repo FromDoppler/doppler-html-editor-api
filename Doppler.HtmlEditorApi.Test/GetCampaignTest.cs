@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Doppler.HtmlEditorApi.Infrastructure;
+using Doppler.HtmlEditorApi.Storage;
 using Doppler.HtmlEditorApi.ApiModels;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Hellang.Middleware.ProblemDetails;
 using Doppler.HtmlEditorApi.Infrastructure;
+using Doppler.HtmlEditorApi.Storage;
 
 namespace Doppler.HtmlEditorApi
 {
