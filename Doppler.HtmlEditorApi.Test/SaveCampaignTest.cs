@@ -6,7 +6,6 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Infrastructure;
-using Doppler.HtmlEditorApi.Model;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;

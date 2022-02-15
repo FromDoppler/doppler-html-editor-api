@@ -1,5 +1,4 @@
 using System;
-using Doppler.HtmlEditorApi.Model;
 using System.Threading.Tasks;
 using Dapper;
 using System.Text.Json;

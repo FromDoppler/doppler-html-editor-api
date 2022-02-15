@@ -1,4 +1,3 @@
-using Doppler.HtmlEditorApi.Model;
 using System.Threading.Tasks;
 
 namespace Doppler.HtmlEditorApi.Infrastructure
