@@ -22,6 +22,7 @@ public class DatabaseConnectionFactory : IDatabaseConnectionFactory
     public async Task<IDbConnection> GetConnection()
     {
         var cn = new SqlConnection(_connectionString);
+        // TODO: deal with the dispose of this resource
         await cn.OpenAsync();
         return cn;
     }
