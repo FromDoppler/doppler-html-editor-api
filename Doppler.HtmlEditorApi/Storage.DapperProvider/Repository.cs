@@ -40,7 +40,7 @@ WHERE u.Email = @accountName";
 
             if (!queryResult.CampaignHasContent)
             {
-                return UnlayerContentData.CreateEmpty(campaignId);
+                return new EmptyContentData(campaignId);
             };
 
             if (queryResult.EditorType == EDITOR_TYPE_MSEDITOR)

@@ -15,6 +15,8 @@ namespace Doppler.HtmlEditorApi.Controllers
     [ApiController]
     public class CampaignsController
     {
+        private const string EMPTY_UNLAYER_CONTENT_JSON = "{\"body\":{\"rows\":[]}}";
+        private const string EMPTY_UNLAYER_CONTENT_HTML = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional //EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\"><head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <meta name=\"x-apple-disable-message-reformatting\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <title></title></head><body></body></html>";
         private readonly IRepository _repository;
 
         public CampaignsController(IRepository Repository)
@@ -32,6 +34,10 @@ namespace Doppler.HtmlEditorApi.Controllers
             ActionResult<CampaignContent> result = contentRow switch
             {
                 null => new NotFoundObjectResult("Campaign not found or belongs to a different account"),
+                EmptyContentData emptyContentData => new CampaignContent(
+                    type: ContentType.unlayer,
+                    meta: Utils.ParseAsJsonElement(EMPTY_UNLAYER_CONTENT_JSON),
+                    htmlContent: EMPTY_UNLAYER_CONTENT_HTML),
                 UnlayerContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(unlayerContent.meta),
