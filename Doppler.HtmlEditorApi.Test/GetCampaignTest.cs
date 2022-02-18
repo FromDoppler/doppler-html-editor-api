@@ -10,6 +10,7 @@ using Doppler.HtmlEditorApi.ApiModels;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using ReflectionMagic;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -184,17 +185,15 @@ namespace Doppler.HtmlEditorApi
                 .Setup(x => x.QueryFirstOrDefaultAsync(
                     It.IsAny<string>(),
                     It.IsAny<object>()))
-                .ReturnsAsync(() => {
-                    // I hate Expandos!
-                    dynamic r = new System.Dynamic.ExpandoObject();
-                    r.IdCampaign = expectedIdCampaign;
-                    r.CampaignBelongsUser = true;
-                    r.CampaignExists = true;
-                    r.CampaignHasContent = true;
-                    r.EditorType = (int?)null;
-                    r.Content = html;
-                    return r;
-                });
+                .ReturnsAsync((object)new
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignBelongsUser = true,
+                    CampaignExists = true,
+                    CampaignHasContent = true,
+                    EditorType = (int?)null,
+                    Content = html
+                }.AsDynamic());
 
             var client = _factory
                 .WithWebHostBuilder(c =>
