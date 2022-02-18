@@ -2,7 +2,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Doppler.HtmlEditorApi.Model;
+namespace Doppler.HtmlEditorApi.ApiModels;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ContentType

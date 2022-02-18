@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
-namespace Doppler.HtmlEditorApi.Model;
+namespace Doppler.HtmlEditorApi.ApiModels;
 
 public record CampaignContent(
     [Required]

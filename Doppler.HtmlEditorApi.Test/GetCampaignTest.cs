@@ -4,8 +4,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Doppler.HtmlEditorApi.Infrastructure;
-using Doppler.HtmlEditorApi.Model;
+using Doppler.HtmlEditorApi.Storage;
+using Doppler.HtmlEditorApi.ApiModels;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -93,7 +93,7 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             // TODO: consider to mock Dapper in place of IRepository
-            ContentRow emptyContentModel = null;
+            BaseHtmlContentData emptyContentModel = null;
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
                 .ReturnsAsync(emptyContentModel);
@@ -121,17 +121,17 @@ namespace Doppler.HtmlEditorApi
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
         [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
-        public async Task GET_campaign_should_accept_right_tokens_and_return_content_as_it_is_in_DB(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        public async Task GET_campaign_should_accept_right_tokens_and_return_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
             var expectedSchemaVersion = 999;
-            var contentRow = ContentRow.CreateUnlayerContentRow(
+            var contentRow = new UnlayerContentData(
                 meta: JsonSerializer.Serialize(new
                 {
                     schemaVersion = expectedSchemaVersion
                 }),
-                content: "<html></html>",
-                idCampaign: expectedIdCampaign);
+                htmlContent: "<html></html>",
+                campaignId: expectedIdCampaign);
 
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
@@ -174,13 +174,9 @@ namespace Doppler.HtmlEditorApi
         public async Task GET_campaign_should_return_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             var html = "<html></html>";
-            ContentRow contentRow = new ContentRow()
-            {
-                Meta = null,
-                Content = html,
-                EditorType = null,
-                IdCampaign = expectedIdCampaign
-            };
+            var contentRow = new HtmlContentData(
+                expectedIdCampaign,
+                html);
 
             // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
@@ -210,6 +206,42 @@ namespace Doppler.HtmlEditorApi
             Assert.False(responseContentJson.TryGetProperty("meta", out _));
             Assert.Equal("html", responseContentJson.GetProperty("type").GetString());
             Assert.Equal(html, responseContentJson.GetProperty("htmlContent").GetString());
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_return_empty_content_as_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            // Arrange
+            var contentRow = new EmptyContentData(expectedIdCampaign);
+
+            // TODO: consider to mock Dapper in place of IRepository
+            var repositoryMock = new Mock<IRepository>();
+            repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
+                .ReturnsAsync(contentRow);
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(repositoryMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var contentModelResponse = JsonSerializer.Deserialize<CampaignContent>
+                (responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Matches("\"type\":\"unlayer\"", responseContent);
+            Assert.NotNull(contentModelResponse.meta);
         }
     }
 }

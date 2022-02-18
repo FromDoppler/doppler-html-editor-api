@@ -5,8 +5,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Doppler.HtmlEditorApi.Infrastructure;
-using Doppler.HtmlEditorApi.Model;
+using Doppler.HtmlEditorApi.Storage;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -87,21 +86,14 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
-        [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
-        public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com")]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com")]
+        [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com")]
+        public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName)
         {
             // Arrange
-            ContentRow contentMock = new ContentRow()
-            {
-                Meta = "",
-                Content = "<html></html>"
-            };
-
-            // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.SaveCampaignContent(expectedAccountName, contentMock))
+            repositoryMock.Setup(x => x.SaveCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
                 .Returns(Task.CompletedTask);
 
             var client = _factory
@@ -167,7 +159,7 @@ namespace Doppler.HtmlEditorApi
 
         [Theory]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
-        public async Task PUT_campaign_should_return_error_when_meta_is_not_present(string url, string token)
+        public async Task PUT_campaign_should_return_error_when_type_is_unlayer_and_meta_is_not_present(string url, string token)
         {
             // Arrange
             var client = _factory.CreateClient();
@@ -189,7 +181,7 @@ namespace Doppler.HtmlEditorApi
 
         [Theory]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
-        public async Task PUT_campaign_should_return_error_when_meta_is_empty_string(string url, string token)
+        public async Task PUT_campaign_should_return_error_when_type_is_unlayer_and_meta_is_empty_string(string url, string token)
         {
             // Arrange
             var client = _factory.CreateClient();
@@ -259,13 +251,13 @@ namespace Doppler.HtmlEditorApi
 
         [Theory]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
-        public async Task PUT_campaign_should_accept_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        public async Task PUT_campaign_should_store_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
             // TODO: consider to mock Dapper in place of IRepository
             var htmlContent = "My HTML Content";
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<ContentRow>()))
+            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<BaseHtmlContentData>()))
                 .Returns(Task.CompletedTask);
 
             var client = _factory
@@ -293,11 +285,54 @@ namespace Doppler.HtmlEditorApi
             repositoryMock.Verify(x =>
                 x.SaveCampaignContent(
                     expectedAccountName,
-                    It.Is<ContentRow>(r =>
-                        r.EditorType == null
-                        && r.Content == htmlContent
-                        && r.Meta == null
-                        && r.IdCampaign == expectedIdCampaign)
+                    It.Is<HtmlContentData>(r =>
+                        r.htmlContent == htmlContent
+                        && r.campaignId == expectedIdCampaign)
+                ), Times.Exactly(1));
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task PUT_campaign_should_store_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            // Arrange
+            // TODO: consider to mock Dapper in place of IRepository
+            var htmlContent = "My HTML Content";
+            var metaAsString = "{\"data\":\"My Meta Content\"}";
+            var repositoryMock = new Mock<IRepository>();
+            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<BaseHtmlContentData>()))
+                .Returns(Task.CompletedTask);
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(repositoryMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent,
+                meta = Utils.ParseAsJsonElement(metaAsString)
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            repositoryMock.Verify(x =>
+                x.SaveCampaignContent(
+                    expectedAccountName,
+                    It.Is<UnlayerContentData>(r =>
+                        r.htmlContent == htmlContent
+                        && r.campaignId == expectedIdCampaign
+                        && r.meta.ToString() == metaAsString)
                 ), Times.Exactly(1));
         }
     }
