@@ -70,6 +70,7 @@ namespace Doppler.HtmlEditorApi
             });
             services.AddScoped<IRepository, Repository>();
             services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
+            services.AddScoped<IDbContext, DapperWrapperDbContext>();
             services.Configure<DopplerDatabaseSettings>(Configuration.GetSection(nameof(DopplerDatabaseSettings)));
         }
 
