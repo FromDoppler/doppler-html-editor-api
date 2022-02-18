@@ -181,14 +181,14 @@ namespace Doppler.HtmlEditorApi
                 expectedIdCampaign,
                 html);
 
-            dynamic dbParams = null;
-
             var dbContextMock = new Mock<IDbContext>();
             dbContextMock
-                .Setup(x => x.QueryFirstOrDefaultAsync(
+                .Setup(x => x.QueryFirstOrDefaultAsync<LoadCampaignQuery.Result>(
                     It.IsAny<string>(),
-                    It.Is<object>(x => AssertHelper.GetDynamicValueAndContinue(x, out dbParams))))
-                .ReturnsAsync((object)new
+                    It.Is<LoadCampaignQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new LoadCampaignQuery.Result()
                 {
                     IdCampaign = expectedIdCampaign,
                     CampaignBelongsUser = true,
@@ -196,7 +196,7 @@ namespace Doppler.HtmlEditorApi
                     CampaignHasContent = true,
                     EditorType = (int?)null,
                     Content = html
-                }.AsDynamic());
+                });
 
             var client = _factory
                 .WithWebHostBuilder(c =>
@@ -218,8 +218,6 @@ namespace Doppler.HtmlEditorApi
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal(expectedIdCampaign, dbParams.IdCampaign);
-            Assert.Equal(expectedAccountName, dbParams.accountName);
             Assert.False(responseContentJson.TryGetProperty("meta", out _));
             Assert.Equal("html", responseContentJson.GetProperty("type").GetString());
             Assert.Equal(html, responseContentJson.GetProperty("htmlContent").GetString());

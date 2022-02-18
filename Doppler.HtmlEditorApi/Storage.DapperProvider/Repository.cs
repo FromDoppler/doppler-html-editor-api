@@ -30,10 +30,16 @@ FROM [User] u
 LEFT JOIN [Campaign] ca ON u.IdUser = ca.IdUser
 AND ca.IdCampaign = @IdCampaign
 LEFT JOIN [Content] co ON ca.IdCampaign = co.IdCampaign
-WHERE u.Email = @accountName";
+WHERE u.Email = @AccountName";
 
         // TODO: use a type for the result
-        var queryResult = await _dbContext.QueryFirstOrDefaultAsync(databaseQuery, new { IdCampaign = campaignId, accountName });
+        var queryResult = await _dbContext.QueryFirstOrDefaultAsync<LoadCampaignQuery.Result>(
+            databaseQuery,
+            new LoadCampaignQuery.Parameters()
+            {
+                IdCampaign = campaignId,
+                AccountName = accountName
+            });
 
         // TODO: test these both scenarios
         // Related tests:
