@@ -29,7 +29,7 @@ public class Repository : IRepository
         // TODO: test these both scenarios
         // Related tests:
         // * GET_campaign_should_accept_right_tokens_and_return_404_when_DB_returns_null
-        if (!queryResult.CampaignExists)
+        if (queryResult == null || !queryResult.CampaignExists)
         {
             return null;
         }
