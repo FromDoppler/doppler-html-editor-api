@@ -11,8 +11,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Hellang.Middleware.ProblemDetails;
-using Doppler.HtmlEditorApi.Storage;
-using Doppler.HtmlEditorApi.Storage.DapperProvider;
 
 namespace Doppler.HtmlEditorApi
 {
@@ -68,10 +66,7 @@ namespace Doppler.HtmlEditorApi
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
                 };
             });
-            services.AddScoped<IRepository, Repository>();
-            services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
-            services.AddScoped<IDbContext, DapperWrapperDbContext>();
-            services.Configure<DopplerDatabaseSettings>(Configuration.GetSection(nameof(DopplerDatabaseSettings)));
+            services.AddDapperProvider(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
