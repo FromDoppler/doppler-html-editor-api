@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
     static public IServiceCollection AddDapperProvider(this IServiceCollection services, IConfiguration configuration)
         => services
             .AddScoped<IRepository, Repository>()
-            .AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>()
+            .AddSingleton<IDatabaseConnectionFactory, DatabaseConnectionFactory>()
             .AddScoped<IDbContext, DapperWrapperDbContext>()
             .Configure<DopplerDatabaseSettings>(configuration.GetSection(nameof(DopplerDatabaseSettings)));
 }
