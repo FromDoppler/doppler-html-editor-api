@@ -62,9 +62,6 @@ public class Repository : IRepository
                 meta: queryResult.Meta);
         }
 
-        // TODO: test this scenario
-        // Related tests:
-        // * GET_campaign_should_return_html_content
         if (queryResult.EditorType == null)
         {
             return new HtmlContentData(
@@ -72,7 +69,6 @@ public class Repository : IRepository
                 htmlContent: queryResult.Content);
         }
 
-        // TODO: test this scenario
         return new UnknownContentData(
             campaignId: queryResult.IdCampaign,
             content: queryResult.Content,

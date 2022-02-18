@@ -218,6 +218,53 @@ namespace Doppler.HtmlEditorApi
 
         [Theory]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_error_when_conten_is_unknown(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            var editorType = 8; // Unknown
+            var content = "content";
+            var meta = "meta";
+
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignExists = true,
+                    CampaignHasContent = true,
+                    EditorType = editorType,
+                    Content = content,
+                    Meta = meta
+                });
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            using var responseContentDoc = JsonDocument.Parse(responseContent);
+            var responseContentJson = responseContentDoc.RootElement;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
         public async Task GET_campaign_should_return_empty_content_as_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
