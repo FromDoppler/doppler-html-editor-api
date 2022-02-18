@@ -9,7 +9,6 @@ public static class LoadCampaignQuery
     private const string QUERY = @"
 SELECT
     CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
-    CAST (CASE WHEN ca.IdUser IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignBelongsUser,
     CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
     ca.IdCampaign,
     co.Content,
@@ -31,7 +30,6 @@ WHERE
     {
         public int IdCampaign { get; set; }
         public bool CampaignHasContent { get; set; }
-        public bool CampaignBelongsUser { get; set; }
         public bool CampaignExists { get; set; }
         public int? EditorType { get; set; }
         public string Content { get; set; }

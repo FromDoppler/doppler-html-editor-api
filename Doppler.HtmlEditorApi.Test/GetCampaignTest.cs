@@ -191,7 +191,6 @@ namespace Doppler.HtmlEditorApi
                 .ReturnsAsync(new LoadCampaignQuery.Result()
                 {
                     IdCampaign = expectedIdCampaign,
-                    CampaignBelongsUser = true,
                     CampaignExists = true,
                     CampaignHasContent = true,
                     EditorType = (int?)null,
