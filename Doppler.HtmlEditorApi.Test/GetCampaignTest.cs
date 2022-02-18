@@ -91,10 +91,9 @@ namespace Doppler.HtmlEditorApi
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com", 123)]
         [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
-        public async Task GET_campaign_should_accept_right_tokens_and_return_404_when_DB_returns_null(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        public async Task GET_campaign_should_accept_right_tokens_and_return_404_when_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
-            // TODO: consider to mock Dapper in place of IRepository
             BaseHtmlContentData emptyContentModel = null;
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
@@ -135,7 +134,6 @@ namespace Doppler.HtmlEditorApi
                 htmlContent: "<html></html>",
                 campaignId: expectedIdCampaign);
 
-            // TODO: consider to mock Dapper in place of IRepository
             var repositoryMock = new Mock<IRepository>();
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
                 .ReturnsAsync(contentRow);
@@ -176,9 +174,6 @@ namespace Doppler.HtmlEditorApi
         public async Task GET_campaign_should_return_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             var html = "<html></html>";
-            var contentRow = new HtmlContentData(
-                expectedIdCampaign,
-                html);
 
             var dbContextMock = new Mock<IDbContext>();
             dbContextMock
