@@ -8,7 +8,7 @@ public static class LoadCampaignQuery
 {
     private const string QUERY = @"
 SELECT
-    ca.IdCampaign,
+    @IdCampaign as IdCampaign,
     CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
     CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
     co.EditorType,
