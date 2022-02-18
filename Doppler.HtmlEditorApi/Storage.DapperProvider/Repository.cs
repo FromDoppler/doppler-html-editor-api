@@ -6,8 +6,7 @@ namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 
 public class Repository : IRepository
 {
-    // TODO: add types to represent Dapper queries results.
-    // Because dynamic Dapper results do nowork with Moq.Dapper.
+    // TODO: add types to represent Dapper pending queries results.
 
     private const int EDITOR_TYPE_MSEDITOR = 4;
     private const int EDITOR_TYPE_UNLAYER = 5;
@@ -20,7 +19,6 @@ public class Repository : IRepository
 
     public async Task<ContentData> GetCampaignModel(string accountName, int campaignId)
     {
-        // TODO: use a type for the result
         var queryResult = await _dbContext.QueryFirstOrDefaultAsync(
             new LoadCampaignQuery.Parameters()
             {
