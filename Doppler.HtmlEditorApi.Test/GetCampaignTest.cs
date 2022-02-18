@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Storage;
+using Doppler.HtmlEditorApi.Storage.DapperProvider;
 using Doppler.HtmlEditorApi.ApiModels;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -178,17 +179,29 @@ namespace Doppler.HtmlEditorApi
                 expectedIdCampaign,
                 html);
 
-            // TODO: consider to mock Dapper in place of IRepository
-            var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-                .ReturnsAsync(contentRow);
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<object>()))
+                .ReturnsAsync(() => {
+                    // I hate Expandos!
+                    dynamic r = new System.Dynamic.ExpandoObject();
+                    r.IdCampaign = expectedIdCampaign;
+                    r.CampaignBelongsUser = true;
+                    r.CampaignExists = true;
+                    r.CampaignHasContent = true;
+                    r.EditorType = (int?)null;
+                    r.Content = html;
+                    return r;
+                });
 
             var client = _factory
                 .WithWebHostBuilder(c =>
                 {
                     c.ConfigureServices(s =>
                     {
-                        s.AddSingleton(repositoryMock.Object);
+                        s.AddSingleton(dbContextMock.Object);
                     });
                 })
                 .CreateClient(new WebApplicationFactoryClientOptions());
