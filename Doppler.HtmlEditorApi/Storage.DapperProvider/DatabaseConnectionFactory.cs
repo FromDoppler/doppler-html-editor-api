@@ -10,9 +10,9 @@ public class DatabaseConnectionFactory : IDatabaseConnectionFactory
 {
     private readonly string _connectionString;
 
-    public DatabaseConnectionFactory(IOptions<DopplerDatabaseSettings> dopplerDataBaseSettings)
+    public DatabaseConnectionFactory(IOptions<DopplerDatabaseSettings> dopplerDatabaseSettings)
     {
-        _connectionString = dopplerDataBaseSettings.Value.GetSqlConnectionString();
+        _connectionString = dopplerDatabaseSettings.Value.GetSqlConnectionString();
     }
 
     public IDbConnection GetConnection()
