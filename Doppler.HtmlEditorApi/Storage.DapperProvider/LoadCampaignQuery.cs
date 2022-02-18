@@ -8,11 +8,11 @@ public static class LoadCampaignQuery
 {
     private const string QUERY = @"
 SELECT
-    CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
-    CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
     ca.IdCampaign,
-    co.Content,
+    CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
+    CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
     co.EditorType,
+    co.Content,
     co.Meta
 FROM [User] u
 LEFT JOIN [Campaign] ca ON
@@ -29,8 +29,8 @@ WHERE
     public class Result
     {
         public int IdCampaign { get; set; }
-        public bool CampaignHasContent { get; set; }
         public bool CampaignExists { get; set; }
+        public bool CampaignHasContent { get; set; }
         public int? EditorType { get; set; }
         public string Content { get; set; }
         public string Meta { get; set; }
