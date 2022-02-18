@@ -5,10 +5,13 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Storage;
+using Doppler.HtmlEditorApi.Storage.DapperProvider;
+using Doppler.HtmlEditorApi.Test.Utils;
 using Doppler.HtmlEditorApi.ApiModels;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using ReflectionMagic;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -178,17 +181,29 @@ namespace Doppler.HtmlEditorApi
                 expectedIdCampaign,
                 html);
 
-            // TODO: consider to mock Dapper in place of IRepository
-            var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-                .ReturnsAsync(contentRow);
+            dynamic dbParams = null;
+
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync(
+                    It.IsAny<string>(),
+                    It.Is<object>(x => AssertHelper.GetDynamicValueAndContinue(x, out dbParams))))
+                .ReturnsAsync((object)new
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignBelongsUser = true,
+                    CampaignExists = true,
+                    CampaignHasContent = true,
+                    EditorType = (int?)null,
+                    Content = html
+                }.AsDynamic());
 
             var client = _factory
                 .WithWebHostBuilder(c =>
                 {
                     c.ConfigureServices(s =>
                     {
-                        s.AddSingleton(repositoryMock.Object);
+                        s.AddSingleton(dbContextMock.Object);
                     });
                 })
                 .CreateClient(new WebApplicationFactoryClientOptions());
@@ -203,6 +218,8 @@ namespace Doppler.HtmlEditorApi
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(expectedIdCampaign, dbParams.IdCampaign);
+            Assert.Equal(expectedAccountName, dbParams.accountName);
             Assert.False(responseContentJson.TryGetProperty("meta", out _));
             Assert.Equal("html", responseContentJson.GetProperty("type").GetString());
             Assert.Equal(html, responseContentJson.GetProperty("htmlContent").GetString());
