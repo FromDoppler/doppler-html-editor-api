@@ -20,7 +20,7 @@ public class Repository : IRepository
 
     public async Task<ContentData> GetCampaignModel(string accountName, int campaignId)
     {
-        using (var connection = await _connectionFactory.GetConnection())
+        using (var connection = _connectionFactory.GetConnection())
         {
             var databaseQuery = @"
 SELECT
@@ -91,7 +91,7 @@ WHERE u.Email = @accountName";
 
     public async Task SaveCampaignContent(string accountName, ContentData contentRow)
     {
-        using (var connection = await _connectionFactory.GetConnection())
+        using (var connection = _connectionFactory.GetConnection())
         {
             var databaseQuery = @"
 SELECT

@@ -15,15 +15,6 @@ public class DatabaseConnectionFactory : IDatabaseConnectionFactory
         _connectionString = dopplerDataBaseSettings.Value.GetSqlConnectionString();
     }
 
-    /// <summary>
-    /// Open new connection and return it for use
-    /// </summary>
-    /// <returns></returns>
-    public async Task<IDbConnection> GetConnection()
-    {
-        var cn = new SqlConnection(_connectionString);
-        // TODO: deal with the dispose of this resource
-        await cn.OpenAsync();
-        return cn;
-    }
+    public IDbConnection GetConnection()
+        => new SqlConnection(_connectionString);
 }
