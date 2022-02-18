@@ -6,6 +6,27 @@ namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 
 public static class LoadCampaignQuery
 {
+    private const string QUERY = @"
+SELECT
+    CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
+    CAST (CASE WHEN ca.IdUser IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignBelongsUser,
+    CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
+    ca.IdCampaign,
+    co.Content,
+    co.EditorType,
+    co.Meta
+FROM [User] u
+LEFT JOIN [Campaign] ca ON
+    u.IdUser = ca.IdUser
+    AND ca.IdCampaign = @IdCampaign
+LEFT JOIN [Content] co ON
+    ca.IdCampaign = co.IdCampaign
+WHERE
+    u.Email = @AccountName";
+
+    public static Task<Result> QueryFirstOrDefaultAsync(this IDbContext dbContext, Parameters param)
+        => dbContext.QueryFirstOrDefaultAsync<Result>(QUERY, param);
+
     public class Result
     {
         public int IdCampaign { get; set; }
