@@ -7,8 +7,6 @@ namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 
 public class Repository : IRepository
 {
-    // TODO: add types to represent Dapper pending queries results.
-
     private const int EDITOR_TYPE_MSEDITOR = 4;
     private const int EDITOR_TYPE_UNLAYER = 5;
 
@@ -27,10 +25,6 @@ public class Repository : IRepository
                 AccountName = accountName
             });
 
-        // TODO: test these both scenarios
-        // Related tests:
-        // * GET_campaign_should_accept_right_tokens_and_return_404_when_not_exist
-        // But we should create others mocking IDbContext in place of dapper
         if (queryResult == null || !queryResult.CampaignExists)
         {
             return null;

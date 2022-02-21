@@ -171,6 +171,82 @@ namespace Doppler.HtmlEditorApi
 
         [Theory]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_return_404_error_when_campaign_does_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignExists = false,
+                    CampaignHasContent = false,
+                    EditorType = null,
+                    Content = null,
+                    Meta = null
+                });
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_return_404_error_when_user_does_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync((FirstOrDefaultContentWithCampaignStatusDbQuery.Result)null);
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
         public async Task GET_campaign_should_error_when_content_is_mseditor(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             var editorType = 4;
