@@ -1,13 +1,13 @@
 using System;
 using System.Threading.Tasks;
 using Dapper;
+using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 
 public class Repository : IRepository
 {
-    // TODO: add types to represent Dapper queries results.
-    // Because dynamic Dapper results do nowork with Moq.Dapper.
+    // TODO: add types to represent Dapper pending queries results.
 
     private const int EDITOR_TYPE_MSEDITOR = 4;
     private const int EDITOR_TYPE_UNLAYER = 5;
@@ -20,20 +20,12 @@ public class Repository : IRepository
 
     public async Task<ContentData> GetCampaignModel(string accountName, int campaignId)
     {
-        var databaseQuery = @"
-SELECT
-CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
-CAST (CASE WHEN ca.IdUser IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignBelongsUser,
-CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
-ca.IdCampaign, co.Content, co.EditorType, co.Meta
-FROM [User] u
-LEFT JOIN [Campaign] ca ON u.IdUser = ca.IdUser
-AND ca.IdCampaign = @IdCampaign
-LEFT JOIN [Content] co ON ca.IdCampaign = co.IdCampaign
-WHERE u.Email = @accountName";
-
-        // TODO: use a type for the result
-        var queryResult = await _dbContext.QueryFirstOrDefaultAsync(databaseQuery, new { IdCampaign = campaignId, accountName });
+        var queryResult = await new FirstOrDefaultContentWithCampaignStatusDbQuery(_dbContext)
+            .ExecuteAsync(new()
+            {
+                IdCampaign = campaignId,
+                AccountName = accountName
+            });
 
         // TODO: test these both scenarios
         // Related tests:
