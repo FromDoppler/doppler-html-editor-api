@@ -9,7 +9,6 @@ public class FirstOrDefaultContentWithCampaignStatusDbQuery : DbQuery<FirstOrDef
     protected override string SqlQuery => @"
 SELECT
     CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
-    CAST (CASE WHEN ca.IdUser IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignBelongsUser,
     CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
     ca.IdCampaign,
     co.Content,
@@ -31,7 +30,6 @@ WHERE
     {
         public int IdCampaign { get; init; }
         public bool CampaignHasContent { get; init; }
-        public bool CampaignBelongsUser { get; init; }
         public bool CampaignExists { get; init; }
         public int? EditorType { get; init; }
         public string Content { get; init; }
