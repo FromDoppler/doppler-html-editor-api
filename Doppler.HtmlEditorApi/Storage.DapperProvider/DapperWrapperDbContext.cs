@@ -18,9 +18,6 @@ public class DapperWrapperDbContext : IDbContext, IDisposable
     public Task<TResult> QueryFirstOrDefaultAsync<TResult>(string query, object param)
         => _lazyDbConnection.Value.QueryFirstOrDefaultAsync<TResult>(query, param);
 
-    public Task<dynamic> QueryFirstOrDefaultAsync(string query, object param)
-        => _lazyDbConnection.Value.QueryFirstOrDefaultAsync(query, param);
-
     public Task<int> ExecuteAsync(string query, object param)
         => _lazyDbConnection.Value.ExecuteAsync(query, param);
 

@@ -64,19 +64,12 @@ public class Repository : IRepository
 
     public async Task SaveCampaignContent(string accountName, ContentData contentRow)
     {
-        var databaseQuery = @"
-SELECT
-CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS OwnCampaignExists,
-CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS ContentExists,
-co.EditorType
-FROM [User] u
-LEFT JOIN [Campaign] ca ON u.IdUser = ca.IdUser
-AND ca.IdCampaign = @IdCampaign
-LEFT JOIN [Content] co ON ca.IdCampaign = co.IdCampaign
-WHERE u.Email = @accountName
-";
-        // TODO: use a type for the result
-        var campaignStatus = await _dbContext.QueryFirstOrDefaultAsync(databaseQuery, new { contentRow.campaignId, accountName });
+        var campaignStatus = await new FirstOrDefaultCampaignStatusDbQuery(_dbContext)
+            .ExecuteAsync(new()
+            {
+                AccountName = accountName,
+                IdCampaign = contentRow.campaignId
+            });
 
         // TODO: consider returning 404 NotFound
         // TODO: test this scenario
