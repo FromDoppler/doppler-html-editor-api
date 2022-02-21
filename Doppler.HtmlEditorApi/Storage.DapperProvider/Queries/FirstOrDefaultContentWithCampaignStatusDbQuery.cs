@@ -8,7 +8,7 @@ public class FirstOrDefaultContentWithCampaignStatusDbQuery : DbQuery<FirstOrDef
 
     protected override string SqlQuery => @"
 SELECT
-    ca.IdCampaign,
+    @IdCampaign as IdCampaign,
     CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignExists,
     CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
     co.EditorType,
