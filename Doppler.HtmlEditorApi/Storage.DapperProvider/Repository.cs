@@ -50,10 +50,6 @@ public class Repository : IRepository
             return new MSEditorContentData(campaignId, queryResult.Content);
         }
 
-        // TODO: test this scenario
-        // Related tests:
-        // * GET_campaign_should_accept_right_tokens_and_return_unlayer_content
-        // But we should create others mocking IDbContext in place of dapper
         if (queryResult.EditorType == EDITOR_TYPE_UNLAYER)
         {
             return new UnlayerContentData(
