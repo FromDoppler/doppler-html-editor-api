@@ -44,7 +44,6 @@ public class Repository : IRepository
             return new EmptyContentData(campaignId);
         };
 
-        // TODO: test this scenario
         if (queryResult.EditorType == EDITOR_TYPE_MSEDITOR)
         {
             return new MSEditorContentData(campaignId, queryResult.Content);
