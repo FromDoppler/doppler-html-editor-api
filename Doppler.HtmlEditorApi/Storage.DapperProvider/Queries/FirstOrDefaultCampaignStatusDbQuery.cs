@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
-public class FirstOrDefaultCampaignStatusDbQuery : DbQuery<FirstOrDefaultCampaignStatusDbQuery.Parameters, FirstOrDefaultCampaignStatusDbQuery.Result>
+public class FirstOrDefaultCampaignStatusDbQuery : DbQuery<ByCampaignIdAndAccountNameParameters, FirstOrDefaultCampaignStatusDbQuery.Result>
 {
     public FirstOrDefaultCampaignStatusDbQuery(IDbContext dbContext) : base(dbContext) { }
 
@@ -19,7 +19,7 @@ LEFT JOIN [Content] co ON
     ca.IdCampaign = co.IdCampaign
 WHERE u.Email = @accountName";
 
-    public override Task<Result> ExecuteAsync(Parameters parameters)
+    public override Task<Result> ExecuteAsync(ByCampaignIdAndAccountNameParameters parameters)
         => DbContext.QueryFirstOrDefaultAsync<Result>(SqlQuery, parameters);
 
     public class Result
@@ -27,11 +27,5 @@ WHERE u.Email = @accountName";
         public bool OwnCampaignExists { get; init; }
         public bool ContentExists { get; init; }
         public int? EditorType { get; init; }
-    }
-
-    public class Parameters
-    {
-        public int IdCampaign { get; init; }
-        public string AccountName { get; init; }
     }
 }
