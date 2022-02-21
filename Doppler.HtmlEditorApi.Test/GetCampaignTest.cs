@@ -365,19 +365,26 @@ namespace Doppler.HtmlEditorApi
         public async Task GET_campaign_should_return_empty_content_as_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             // Arrange
-            var contentRow = new EmptyContentData(expectedIdCampaign);
-
-            // TODO: consider to mock Dapper in place of IRepository
-            var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-                .ReturnsAsync(contentRow);
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignExists = true,
+                    CampaignHasContent = false,
+                });
 
             var client = _factory
                 .WithWebHostBuilder(c =>
                 {
                     c.ConfigureServices(s =>
                     {
-                        s.AddSingleton(repositoryMock.Object);
+                        s.AddSingleton(dbContextMock.Object);
                     });
                 })
                 .CreateClient(new WebApplicationFactoryClientOptions());
@@ -387,13 +394,15 @@ namespace Doppler.HtmlEditorApi
             var response = await client.GetAsync(url);
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
-            var contentModelResponse = JsonSerializer.Deserialize<CampaignContent>
-                (responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            using var responseContentDoc = JsonDocument.Parse(responseContent);
+            var responseContentJson = responseContentDoc.RootElement;
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Matches("\"type\":\"unlayer\"", responseContent);
-            Assert.NotNull(contentModelResponse.meta);
+            Assert.Equal("unlayer", responseContentJson.GetProperty("type").GetString());
+            Assert.NotEmpty(responseContentJson.GetProperty("htmlContent").GetString());
+            Assert.Equal(JsonValueKind.Object, responseContentJson.GetProperty("meta").ValueKind);
+            Assert.NotEmpty(responseContentJson.GetProperty("meta").ToString());
         }
     }
 }

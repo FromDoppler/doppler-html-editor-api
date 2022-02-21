@@ -36,9 +36,6 @@ public class Repository : IRepository
             return null;
         }
 
-        // TODO: test this scenario
-        // Related tests:
-        // * GET_campaign_should_return_empty_content_as_unlayer_content
         if (!queryResult.CampaignHasContent)
         {
             return new EmptyContentData(campaignId);
