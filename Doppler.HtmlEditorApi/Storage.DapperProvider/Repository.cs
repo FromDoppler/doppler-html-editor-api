@@ -79,16 +79,16 @@ public class Repository : IRepository
         }
 
         // TODO: test these scenarios
-        var query = campaignStatus.ContentExists
-            ? @"UPDATE Content SET Content = @Content, Meta = @Meta, EditorType = @EditorType WHERE IdCampaign = @IdCampaign"
-            : @"INSERT INTO Content (IdCampaign, Content, Meta, EditorType) VALUES (@IdCampaign, @Content, @Meta, @EditorType)";
+        DbQuery<ContentRow, int> query = campaignStatus.ContentExists
+            ? new UpdateCampaignContentDbQuery(_dbContext)
+            : new InsertCampaignContentDbQuery(_dbContext);
 
         var queryParams = contentRow switch
         {
             // TODO: test this scenario
             // Related tests:
             // * PUT_campaign_should_store_unlayer_content
-            UnlayerContentData unlayerContentData => new
+            UnlayerContentData unlayerContentData => new ContentRow()
             {
                 IdCampaign = unlayerContentData.campaignId,
                 Content = unlayerContentData.htmlContent,
@@ -98,7 +98,7 @@ public class Repository : IRepository
             // TODO: test this scenario
             // Related tests:
             // * PUT_campaign_should_store_html_content
-            HtmlContentData htmlContentData => new
+            HtmlContentData htmlContentData => new ContentRow()
             {
                 IdCampaign = htmlContentData.campaignId,
                 Content = htmlContentData.htmlContent,
@@ -110,6 +110,6 @@ public class Repository : IRepository
             _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
         };
 
-        await _dbContext.ExecuteAsync(query, queryParams);
+        await query.ExecuteAsync(queryParams);
     }
 }
