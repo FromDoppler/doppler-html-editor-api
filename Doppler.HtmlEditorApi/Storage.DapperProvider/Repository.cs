@@ -29,8 +29,9 @@ public class Repository : IRepository
 
         // TODO: test these both scenarios
         // Related tests:
-        // * GET_campaign_should_accept_right_tokens_and_return_404_when_DB_returns_null
-        if (!queryResult.CampaignBelongsUser || !queryResult.CampaignExists)
+        // * GET_campaign_should_accept_right_tokens_and_return_404_when_not_exist
+        // But we should create others mocking IDbContext in place of dapper
+        if (queryResult == null || !queryResult.CampaignExists)
         {
             return null;
         }
@@ -52,6 +53,7 @@ public class Repository : IRepository
         // TODO: test this scenario
         // Related tests:
         // * GET_campaign_should_accept_right_tokens_and_return_unlayer_content
+        // But we should create others mocking IDbContext in place of dapper
         if (queryResult.EditorType == EDITOR_TYPE_UNLAYER)
         {
             return new UnlayerContentData(
