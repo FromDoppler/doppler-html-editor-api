@@ -7,8 +7,6 @@ namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 
 public class Repository : IRepository
 {
-    // TODO: add types to represent Dapper pending queries results.
-
     private const int EDITOR_TYPE_MSEDITOR = 4;
     private const int EDITOR_TYPE_UNLAYER = 5;
 
@@ -27,33 +25,21 @@ public class Repository : IRepository
                 AccountName = accountName
             });
 
-        // TODO: test these both scenarios
-        // Related tests:
-        // * GET_campaign_should_accept_right_tokens_and_return_404_when_not_exist
-        // But we should create others mocking IDbContext in place of dapper
         if (queryResult == null || !queryResult.CampaignExists)
         {
             return null;
         }
 
-        // TODO: test this scenario
-        // Related tests:
-        // * GET_campaign_should_return_empty_content_as_unlayer_content
         if (!queryResult.CampaignHasContent)
         {
             return new EmptyContentData(campaignId);
         };
 
-        // TODO: test this scenario
         if (queryResult.EditorType == EDITOR_TYPE_MSEDITOR)
         {
             return new MSEditorContentData(campaignId, queryResult.Content);
         }
 
-        // TODO: test this scenario
-        // Related tests:
-        // * GET_campaign_should_accept_right_tokens_and_return_unlayer_content
-        // But we should create others mocking IDbContext in place of dapper
         if (queryResult.EditorType == EDITOR_TYPE_UNLAYER)
         {
             return new UnlayerContentData(
@@ -62,9 +48,6 @@ public class Repository : IRepository
                 meta: queryResult.Meta);
         }
 
-        // TODO: test this scenario
-        // Related tests:
-        // * GET_campaign_should_return_html_content
         if (queryResult.EditorType == null)
         {
             return new HtmlContentData(
@@ -72,7 +55,6 @@ public class Repository : IRepository
                 htmlContent: queryResult.Content);
         }
 
-        // TODO: test this scenario
         return new UnknownContentData(
             campaignId: queryResult.IdCampaign,
             content: queryResult.Content,

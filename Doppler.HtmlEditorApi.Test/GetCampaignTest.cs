@@ -171,6 +171,179 @@ namespace Doppler.HtmlEditorApi
 
         [Theory]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_return_404_error_when_campaign_does_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignExists = false,
+                    CampaignHasContent = false,
+                    EditorType = null,
+                    Content = null,
+                    Meta = null
+                });
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_return_404_error_when_user_does_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync((FirstOrDefaultContentWithCampaignStatusDbQuery.Result)null);
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_error_when_content_is_mseditor(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            var editorType = 4;
+            var content = "content";
+            var meta = (string)null;
+
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignExists = true,
+                    CampaignHasContent = true,
+                    EditorType = editorType,
+                    Content = content,
+                    Meta = meta
+                });
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            using var responseContentDoc = JsonDocument.Parse(responseContent);
+            var responseContentJson = responseContentDoc.RootElement;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_return_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            var meta = "{\"demo\":\"unlayer\"}";
+            var html = "<html></html>";
+
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignExists = true,
+                    CampaignHasContent = true,
+                    EditorType = 5,
+                    Content = html,
+                    Meta = meta
+                });
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            using var responseContentDoc = JsonDocument.Parse(responseContent);
+            var responseContentJson = responseContentDoc.RootElement;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("unlayer", responseContentJson.GetProperty("type").GetString());
+            Assert.Equal(html, responseContentJson.GetProperty("htmlContent").GetString());
+            Assert.Equal(JsonValueKind.Object, responseContentJson.GetProperty("meta").ValueKind);
+            Assert.Equal(meta, responseContentJson.GetProperty("meta").ToString());
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
         public async Task GET_campaign_should_return_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             var html = "<html></html>";
@@ -218,22 +391,35 @@ namespace Doppler.HtmlEditorApi
 
         [Theory]
         [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
-        public async Task GET_campaign_should_return_empty_content_as_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        public async Task GET_campaign_should_error_when_content_is_unknown(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
-            // Arrange
-            var contentRow = new EmptyContentData(expectedIdCampaign);
+            var editorType = 8; // Unknown
+            var content = "content";
+            var meta = "meta";
 
-            // TODO: consider to mock Dapper in place of IRepository
-            var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-                .ReturnsAsync(contentRow);
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignExists = true,
+                    CampaignHasContent = true,
+                    EditorType = editorType,
+                    Content = content,
+                    Meta = meta
+                });
 
             var client = _factory
                 .WithWebHostBuilder(c =>
                 {
                     c.ConfigureServices(s =>
                     {
-                        s.AddSingleton(repositoryMock.Object);
+                        s.AddSingleton(dbContextMock.Object);
                     });
                 })
                 .CreateClient(new WebApplicationFactoryClientOptions());
@@ -243,13 +429,56 @@ namespace Doppler.HtmlEditorApi
             var response = await client.GetAsync(url);
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
-            var contentModelResponse = JsonSerializer.Deserialize<CampaignContent>
-                (responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            using var responseContentDoc = JsonDocument.Parse(responseContent);
+            var responseContentJson = responseContentDoc.RootElement;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
+        public async Task GET_campaign_should_return_empty_content_as_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        {
+            // Arrange
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+                {
+                    IdCampaign = expectedIdCampaign,
+                    CampaignExists = true,
+                    CampaignHasContent = false,
+                });
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.GetAsync(url);
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            using var responseContentDoc = JsonDocument.Parse(responseContent);
+            var responseContentJson = responseContentDoc.RootElement;
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Matches("\"type\":\"unlayer\"", responseContent);
-            Assert.NotNull(contentModelResponse.meta);
+            Assert.Equal("unlayer", responseContentJson.GetProperty("type").GetString());
+            Assert.NotEmpty(responseContentJson.GetProperty("htmlContent").GetString());
+            Assert.Equal(JsonValueKind.Object, responseContentJson.GetProperty("meta").ValueKind);
+            Assert.NotEmpty(responseContentJson.GetProperty("meta").ToString());
         }
     }
 }
