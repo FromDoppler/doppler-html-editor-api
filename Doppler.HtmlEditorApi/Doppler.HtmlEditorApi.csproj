@@ -22,6 +22,7 @@
     <PackageReference Include="Serilog.Sinks.Loggly" Version="5.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.42" />
   </ItemGroup>
 
 </Project>
