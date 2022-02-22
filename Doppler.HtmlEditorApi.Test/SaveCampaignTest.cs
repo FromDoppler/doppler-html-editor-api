@@ -252,6 +252,115 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
+        [InlineData("html")]
+        [InlineData("unlayer")]
+        public async Task PUT_campaign_should_return_500_error_when_campaign_does_not_exist(string type)
+        {
+            // Arrange
+            var url = "/accounts/test1@test.com/campaigns/123/content";
+            var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
+            var expectedAccountName = "test1@test.com";
+            var expectedIdCampaign = 123;
+            var htmlContent = "My HTML Content";
+
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+                {
+                    OwnCampaignExists = false,
+                    ContentExists = false,
+                    EditorType = null,
+                });
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = type,
+                htmlContent,
+                meta = "true" // it does not care
+            }));
+
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            dbContextMock.VerifyAll();
+            dbContextMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData("html")]
+        [InlineData("unlayer")]
+        public async Task PUT_campaign_should_return_500_error_when_user_does_not_exist(string type)
+        {
+            // Arrange
+            var url = "/accounts/test1@test.com/campaigns/123/content";
+            var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
+            var expectedAccountName = "test1@test.com";
+            var expectedIdCampaign = 123;
+            var htmlContent = "My HTML Content";
+
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+                {
+                    OwnCampaignExists = false,
+                    ContentExists = false,
+                    EditorType = null,
+                });
+
+            var client = _factory
+                .WithWebHostBuilder(c =>
+                {
+                    c.ConfigureServices(s =>
+                    {
+                        s.AddSingleton(dbContextMock.Object);
+                    });
+                })
+                .CreateClient(new WebApplicationFactoryClientOptions());
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = type,
+                htmlContent,
+                meta = "true" // it does not care
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            dbContextMock.VerifyAll();
+            dbContextMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
         [InlineData(null, true, "UPDATE")]
         [InlineData(55, true, "UPDATE")]
         [InlineData(4, true, "UPDATE")]

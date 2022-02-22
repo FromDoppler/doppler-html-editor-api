@@ -72,7 +72,6 @@ public class Repository : IRepository
             });
 
         // TODO: consider returning 404 NotFound
-        // TODO: test this scenario
         if (campaignStatus == null || !campaignStatus.OwnCampaignExists)
         {
             throw new ApplicationException($"CampaignId {contentRow.campaignId} does not exists or belongs to another user than {accountName}");
