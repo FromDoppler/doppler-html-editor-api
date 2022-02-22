@@ -11,6 +11,7 @@ public class UpdateCampaignContentDbQuery : DbQuery<ContentRow, int>
 UPDATE Content
 SET
     Content = @Content,
+    Head = @Head,
     Meta = @Meta,
     EditorType = @EditorType
 WHERE IdCampaign = @IdCampaign";
