@@ -91,9 +91,6 @@ public class Repository : IRepository
                 Meta = unlayerContentData.meta,
                 EditorType = (int?)EDITOR_TYPE_UNLAYER
             },
-            // TODO: test this scenario
-            // Related tests:
-            // * PUT_campaign_should_store_html_content
             HtmlContentData htmlContentData => new ContentRow()
             {
                 IdCampaign = htmlContentData.campaignId,

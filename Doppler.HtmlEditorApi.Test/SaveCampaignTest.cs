@@ -252,22 +252,49 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com", 123)]
-        public async Task PUT_campaign_should_store_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
+        [InlineData(null, true, "UPDATE")]
+        [InlineData(55, true, "UPDATE")]
+        [InlineData(4, true, "UPDATE")]
+        [InlineData(5, true, "UPDATE")]
+        [InlineData(null, false, "INSERT")]
+        public async Task PUT_campaign_should_store_html_content(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
         {
             // Arrange
-            // TODO: consider to mock Dapper in place of IRepository
+            var url = "/accounts/test1@test.com/campaigns/123/content";
+            var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
+            var expectedAccountName = "test1@test.com";
+            var expectedIdCampaign = 123;
             var htmlContent = "My HTML Content";
-            var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.SaveCampaignContent(It.IsAny<string>(), It.IsAny<BaseHtmlContentData>()))
-                .Returns(Task.CompletedTask);
+
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+                {
+                    OwnCampaignExists = true,
+                    ContentExists = contentExists,
+                    EditorType = currentEditorType,
+                });
+
+            dbContextMock
+                .Setup(x => x.ExecuteAsync(
+                    It.Is<string>(s => s.Trim().StartsWith(sqlQueryStartsWith)),
+                    It.Is<ContentRow>(c =>
+                        c.IdCampaign == expectedIdCampaign
+                        && c.Content == htmlContent
+                        && c.Meta == null)))
+                .ReturnsAsync(1);
 
             var client = _factory
                 .WithWebHostBuilder(c =>
                 {
                     c.ConfigureServices(s =>
                     {
-                        s.AddSingleton(repositoryMock.Object);
+                        s.AddSingleton(dbContextMock.Object);
                     });
                 })
                 .CreateClient(new WebApplicationFactoryClientOptions());
@@ -284,13 +311,8 @@ namespace Doppler.HtmlEditorApi
             _output.WriteLine(responseContent);
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            repositoryMock.Verify(x =>
-                x.SaveCampaignContent(
-                    expectedAccountName,
-                    It.Is<HtmlContentData>(r =>
-                        r.htmlContent == htmlContent
-                        && r.campaignId == expectedIdCampaign)
-                ), Times.Exactly(1));
+            dbContextMock.VerifyAll();
+            dbContextMock.VerifyNoOtherCalls();
         }
 
         [Theory]
