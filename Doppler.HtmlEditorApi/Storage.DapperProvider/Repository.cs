@@ -78,16 +78,12 @@ public class Repository : IRepository
             throw new ApplicationException($"CampaignId {contentRow.campaignId} does not exists or belongs to another user than {accountName}");
         }
 
-        // TODO: test these scenarios
         DbQuery<ContentRow, int> query = campaignStatus.ContentExists
             ? new UpdateCampaignContentDbQuery(_dbContext)
             : new InsertCampaignContentDbQuery(_dbContext);
 
         var queryParams = contentRow switch
         {
-            // TODO: test this scenario
-            // Related tests:
-            // * PUT_campaign_should_store_unlayer_content
             UnlayerContentData unlayerContentData => new ContentRow()
             {
                 IdCampaign = unlayerContentData.campaignId,
