@@ -13,6 +13,7 @@ SELECT
     CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS CampaignHasContent,
     co.EditorType,
     co.Content,
+    co.Head,
     co.Meta
 FROM [User] u
 LEFT JOIN [Campaign] ca ON
@@ -33,6 +34,7 @@ WHERE
         public bool CampaignHasContent { get; init; }
         public int? EditorType { get; init; }
         public string Content { get; init; }
+        public string Head { get; init; }
         public string Meta { get; init; }
     }
 }

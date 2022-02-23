@@ -8,6 +8,7 @@ using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using System.Text.Json;
 using Xunit.Abstractions;
 using Xunit;
 
@@ -23,6 +24,8 @@ public class HtmlContentProcessingIntegrationTests
     const string TOKEN_SUPERUSER_EXPIRE_20330518 = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1NVIjp0cnVlLCJleHAiOjIwMDAwMDAwMDB9.rUtvRqMxrnQzVHDuAjgWa2GJAJwZ-wpaxqdjwP7gmVa7XJ1pEmvdTMBdirKL5BJIE7j2_hsMvEOKUKVjWUY-IE0e0u7c82TH0l_4zsIztRyHMKtt9QE9rBRQnJf8dcT5PnLiWkV_qEkpiIKQ-wcMZ1m7vQJ0auEPZyyFBKmU2caxkZZOZ8Kw_1dx-7lGUdOsUYad-1Rt-iuETGAFijQrWggcm3kV_KmVe8utznshv2bAdLJWydbsAUEfNof0kZK5Wu9A80DJd3CRiNk8mWjQxF_qPOrGCANOIYofhB13yuYi48_8zVPYku-llDQjF77BmQIIIMrCXs8IMT3Lksdxuw";
 
     #region Content examples
+    const string META_CONTENT = "{\"body\":{\"rows\":[]},\"example\":true}";
+    const string HEAD_CONTENT = "<title>Hello head!</title>";
     const string BODY_CONTENT = "<div>Hello body!</div>";
     const string ORPHAN_DIV_CONTENT = "<div>Hello orphan div!</div>";
     const string HTML_WITHOUT_HEAD = $@"<!doctype html>
@@ -119,5 +122,67 @@ public class HtmlContentProcessingIntegrationTests
         Assert.Equal(idCampaign, contentRow.IdCampaign);
         Assert.Equal(expectedContent, contentRow.Content);
         Assert.Equal(expectedHead, contentRow.Head);
+    }
+
+    [Theory]
+    [InlineData(BODY_CONTENT, HEAD_CONTENT, BODY_CONTENT, null, null)]
+    [InlineData(BODY_CONTENT, HEAD_CONTENT, BODY_CONTENT, META_CONTENT, 5)]
+    [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, null, null)]
+    [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, META_CONTENT, 5)]
+    [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, null, null)]
+    [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, META_CONTENT, 5)]
+    [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, null)]
+    [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, META_CONTENT, 5)]
+    [InlineData(ORPHAN_DIV_CONTENT, HEAD_CONTENT, ORPHAN_DIV_CONTENT, null, null)]
+    [InlineData(ORPHAN_DIV_CONTENT, HEAD_CONTENT, ORPHAN_DIV_CONTENT, META_CONTENT, 5)]
+    public async Task GET_campaign_should_return_not_include_head_in_the_content(string expectedHtml, string storedHead, string storedContent, string storedMeta, int? editorType)
+    {
+        // Arrange
+        var url = "/accounts/test1@test.com/campaigns/123/content";
+        var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
+        var expectedAccountName = "test1@test.com";
+        var idCampaign = 123;
+
+        var dbContextMock = new Mock<IDbContext>();
+        dbContextMock
+            .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
+                It.IsAny<string>(),
+                It.Is<ByCampaignIdAndAccountNameParameters>(x =>
+                    x.AccountName == expectedAccountName
+                    && x.IdCampaign == idCampaign)))
+            .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+            {
+                IdCampaign = idCampaign,
+                CampaignExists = true,
+                CampaignHasContent = true,
+                Content = storedContent,
+                Head = storedHead,
+                Meta = storedMeta,
+                EditorType = editorType
+            });
+
+        var client = _factory
+            .WithWebHostBuilder(c =>
+            {
+                c.ConfigureServices(s =>
+                {
+                    s.AddSingleton(dbContextMock.Object);
+                });
+            })
+            .CreateClient(new WebApplicationFactoryClientOptions());
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        var response = await client.GetAsync(url);
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+        using var responseContentDoc = JsonDocument.Parse(responseContent);
+        var responseContentJson = responseContentDoc.RootElement;
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.VerifyAll();
+        Assert.Equal(expectedHtml, responseContentJson.GetProperty("htmlContent").GetString());
     }
 }
