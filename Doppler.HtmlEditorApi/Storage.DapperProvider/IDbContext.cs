@@ -7,6 +7,5 @@ namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 public interface IDbContext
 {
     Task<TResult> QueryFirstOrDefaultAsync<TResult>(string query, object param);
-    Task<dynamic> QueryFirstOrDefaultAsync(string query, object param);
     Task<int> ExecuteAsync(string query, object param);
 }

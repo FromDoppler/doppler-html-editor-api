@@ -177,7 +177,7 @@ namespace Doppler.HtmlEditorApi
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
-                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
                         x.AccountName == expectedAccountName
                         && x.IdCampaign == expectedIdCampaign)))
                 .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
@@ -219,7 +219,7 @@ namespace Doppler.HtmlEditorApi
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
-                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
                         x.AccountName == expectedAccountName
                         && x.IdCampaign == expectedIdCampaign)))
                 .ReturnsAsync((FirstOrDefaultContentWithCampaignStatusDbQuery.Result)null);
@@ -257,7 +257,7 @@ namespace Doppler.HtmlEditorApi
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
-                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
                         x.AccountName == expectedAccountName
                         && x.IdCampaign == expectedIdCampaign)))
                 .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
@@ -303,7 +303,7 @@ namespace Doppler.HtmlEditorApi
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
-                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
                         x.AccountName == expectedAccountName
                         && x.IdCampaign == expectedIdCampaign)))
                 .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
@@ -352,7 +352,7 @@ namespace Doppler.HtmlEditorApi
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
-                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
                         x.AccountName == expectedAccountName
                         && x.IdCampaign == expectedIdCampaign)))
                 .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
@@ -401,7 +401,7 @@ namespace Doppler.HtmlEditorApi
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
-                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
                         x.AccountName == expectedAccountName
                         && x.IdCampaign == expectedIdCampaign)))
                 .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
@@ -445,7 +445,7 @@ namespace Doppler.HtmlEditorApi
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
-                    It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery.Parameters>(x =>
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
                         x.AccountName == expectedAccountName
                         && x.IdCampaign == expectedIdCampaign)))
                 .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
