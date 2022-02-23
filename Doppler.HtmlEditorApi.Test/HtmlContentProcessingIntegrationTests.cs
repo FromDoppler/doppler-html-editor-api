@@ -28,16 +28,47 @@ public class HtmlContentProcessingIntegrationTests
     const string HEAD_CONTENT = "<title>Hello head!</title>";
     const string BODY_CONTENT = "<div>Hello body!</div>";
     const string ORPHAN_DIV_CONTENT = "<div>Hello orphan div!</div>";
+    const string ONLY_HEAD = $"<head>{HEAD_CONTENT}</head>";
+    const string HTML_WITH_HEAD_AND_BODY = $@"<!doctype html>
+        <html>
+        <head>
+            {HEAD_CONTENT}
+        </head>
+        <body>
+            {BODY_CONTENT}
+        </body>
+        </html>";
     const string HTML_WITHOUT_HEAD = $@"<!doctype html>
-<html>
-<body>
-{BODY_CONTENT}
-</body>
-</html>";
+        <html>
+        <body>
+        {BODY_CONTENT}
+        </body>
+        </html>";
     const string HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV = $@"<!doctype html>
-<html>
-{ORPHAN_DIV_CONTENT}
-</html>";
+        <html>
+        {ORPHAN_DIV_CONTENT}
+        </html>";
+    const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV = $@"<!doctype html>
+        <html>
+            <head>
+                {HEAD_CONTENT}
+            </head>
+            <div>
+                {ORPHAN_DIV_CONTENT}
+            </div>
+        </html>";
+    const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD = $@"<!doctype html>
+        <html>
+            <div>
+                {ORPHAN_DIV_CONTENT}
+            </div>
+        </html>";
+    const string HTML_WITHOUT_BODY = $@"<!doctype html>
+        <html>
+            <head>
+                {HEAD_CONTENT}
+            </head>
+        </html>";
     #endregion Content examples
 
     private readonly WebApplicationFactory<Startup> _factory;
@@ -50,15 +81,24 @@ public class HtmlContentProcessingIntegrationTests
     }
 
     [Theory]
+    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "html", true)]
+    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "html", false)]
+    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "unlayer", true)]
     [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "html", true)]
     [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "html", false)]
     [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "unlayer", true)]
+    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "html", true)]
+    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "html", false)]
+    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "unlayer", true)]
     [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "html", true)]
     [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "html", false)]
     [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "unlayer", true)]
     [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "html", true)]
     [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "html", false)]
     [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "unlayer", true)]
+    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "html", true)]
+    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "html", false)]
+    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "unlayer", true)]
     public async Task PUT_campaign_should_split_html_in_head_and_content(string htmlInput, string expectedHead, string expectedContent, string type, bool existingContent)
     {
         // Arrange
@@ -120,8 +160,8 @@ public class HtmlContentProcessingIntegrationTests
             It.Is<ContentRow>(x => AssertHelper.GetValueAndContinue(x, out contentRow))));
 
         Assert.Equal(idCampaign, contentRow.IdCampaign);
-        Assert.Equal(expectedContent, contentRow.Content);
-        Assert.Equal(expectedHead, contentRow.Head);
+        AssertHelper.EqualIgnoringSpaces(expectedContent, contentRow.Content);
+        AssertHelper.EqualIgnoringSpaces(expectedHead, contentRow.Head);
     }
 
     [Theory]

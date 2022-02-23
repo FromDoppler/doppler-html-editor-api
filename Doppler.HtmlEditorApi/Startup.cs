@@ -67,7 +67,7 @@ namespace Doppler.HtmlEditorApi
                 };
             });
             services.AddDapperProvider(Configuration);
-            services.AddDummyDopplerHtml();
+            services.AddAgilityPackDopplerHtml();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
