@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.DopplerHtml;
 using Doppler.HtmlEditorApi.DopplerSecurity;
 using Microsoft.AspNetCore.Authorization;
 using Doppler.HtmlEditorApi.ApiModels;
@@ -18,10 +19,12 @@ namespace Doppler.HtmlEditorApi.Controllers
         private const string EMPTY_UNLAYER_CONTENT_JSON = "{\"body\":{\"rows\":[]}}";
         private const string EMPTY_UNLAYER_CONTENT_HTML = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional //EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\"><head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <meta name=\"x-apple-disable-message-reformatting\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <title></title></head><body></body></html>";
         private readonly IRepository _repository;
+        private readonly IDopplerHtmlProcessor _dopplerHtmlProcessor;
 
-        public CampaignsController(IRepository Repository)
+        public CampaignsController(IRepository Repository, IDopplerHtmlProcessor dopplerHtmlProcessor)
         {
             _repository = Repository;
+            _dopplerHtmlProcessor = dopplerHtmlProcessor;
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
@@ -41,11 +44,11 @@ namespace Doppler.HtmlEditorApi.Controllers
                 UnlayerContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(unlayerContent.meta),
-                    htmlContent: unlayerContent.htmlContent),
+                    htmlContent: GenerateHtmlContent(unlayerContent)),
                 BaseHtmlContentData htmlContent => new CampaignContent(
                     type: ContentType.html,
                     meta: null,
-                    htmlContent: htmlContent.htmlContent),
+                    htmlContent: GenerateHtmlContent(htmlContent)),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
             };
 
@@ -64,14 +67,18 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
+            var dopplerHtmlData = _dopplerHtmlProcessor.ExtractDopplerHtmlData(campaignContent.htmlContent);
+
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
                 ContentType.unlayer => new UnlayerContentData(
-                    htmlContent: campaignContent.htmlContent,
+                    htmlContent: dopplerHtmlData.htmlContent,
+                    htmlHead: dopplerHtmlData.head,
                     meta: campaignContent.meta.ToString(),
                     campaignId: campaignId),
                 ContentType.html => new HtmlContentData(
-                    htmlContent: campaignContent.htmlContent,
+                    htmlContent: dopplerHtmlData.htmlContent,
+                    htmlHead: dopplerHtmlData.head,
                     campaignId: campaignId),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
@@ -79,5 +86,8 @@ namespace Doppler.HtmlEditorApi.Controllers
             await _repository.SaveCampaignContent(accountName, contentRow);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
+
+        private string GenerateHtmlContent(BaseHtmlContentData content)
+            => _dopplerHtmlProcessor.GenerateHtmlContent(new DopplerHtmlData(content.htmlHead, content.htmlContent));
     }
 }
