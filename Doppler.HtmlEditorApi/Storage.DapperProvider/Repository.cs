@@ -103,5 +103,13 @@ public class Repository : IRepository
         };
 
         await upsertContentQuery.ExecuteAsync(queryParams);
+
+        var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(_dbContext);
+
+        await updateCampaignStatusQuery.ExecuteAsync(new UpdateCampaignStatusDbQuery.Parameters(
+            setCurrentStep: 2,
+            setHtmlSourceType: UpdateCampaignStatusDbQuery.TEMPLATE_HTML_SOURCE_TYPE,
+            whenIdCampaignIs: contentRow.campaignId,
+            whenCurrentStepIs: 1));
     }
 }
