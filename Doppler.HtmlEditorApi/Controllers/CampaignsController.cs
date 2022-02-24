@@ -64,7 +64,12 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
+            var dopplerFieldsProcessor = new DopplerFieldsProcessor();
+
             var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
+            htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
+            htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
+
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
 
