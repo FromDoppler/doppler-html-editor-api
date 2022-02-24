@@ -1,3 +1,4 @@
+using System;
 using HtmlAgilityPack;
 
 namespace Doppler.HtmlEditorApi;
@@ -30,6 +31,12 @@ public class DopplerHtmlDocument
 
     public string GetHeadContent()
         => _headNode?.InnerHtml;
+
+    public void ReplaceInContent(Func<string, string> replaceFunc)
+    {
+        // TODO: optimize it to do many replacements while traversing the HTML document
+        _contentNode.InnerHtml = replaceFunc(_contentNode.InnerHtml);
+    }
 
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
