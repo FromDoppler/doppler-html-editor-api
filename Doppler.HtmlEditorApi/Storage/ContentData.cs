@@ -10,6 +10,7 @@ public sealed record EmptyContentData(
 public sealed record UnknownContentData(
     int campaignId,
     string content,
+    string head,
     string meta,
     int? editorType)
     : ContentData(campaignId);
@@ -21,16 +22,19 @@ public sealed record MSEditorContentData(
 
 public abstract record BaseHtmlContentData(
     int campaignId,
-    string htmlContent)
+    string htmlContent,
+    string htmlHead)
     : ContentData(campaignId);
 
 public sealed record HtmlContentData(
     int campaignId,
-    string htmlContent)
-    : BaseHtmlContentData(campaignId, htmlContent);
+    string htmlContent,
+    string htmlHead)
+    : BaseHtmlContentData(campaignId, htmlContent, htmlHead);
 
 public sealed record UnlayerContentData(
     int campaignId,
     string htmlContent,
+    string htmlHead,
     string meta)
-    : BaseHtmlContentData(campaignId, htmlContent);
+    : BaseHtmlContentData(campaignId, htmlContent, htmlHead);

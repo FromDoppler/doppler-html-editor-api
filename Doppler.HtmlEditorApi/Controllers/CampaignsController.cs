@@ -41,11 +41,11 @@ namespace Doppler.HtmlEditorApi.Controllers
                 UnlayerContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(unlayerContent.meta),
-                    htmlContent: unlayerContent.htmlContent),
+                    htmlContent: GenerateHtmlContent(unlayerContent)),
                 BaseHtmlContentData htmlContent => new CampaignContent(
                     type: ContentType.html,
                     meta: null,
-                    htmlContent: htmlContent.htmlContent),
+                    htmlContent: GenerateHtmlContent(htmlContent)),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
             };
 
@@ -64,14 +64,20 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
+            var htmlParser = new DopplerHtmlParser(campaignContent.htmlContent);
+            var head = htmlParser.GetHeadContent();
+            var content = htmlParser.GetDopplerContent();
+
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
                 ContentType.unlayer => new UnlayerContentData(
-                    htmlContent: campaignContent.htmlContent,
+                    htmlContent: content,
+                    htmlHead: head,
                     meta: campaignContent.meta.ToString(),
                     campaignId: campaignId),
                 ContentType.html => new HtmlContentData(
-                    htmlContent: campaignContent.htmlContent,
+                    htmlContent: content,
+                    htmlHead: head,
                     campaignId: campaignId),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
@@ -79,5 +85,12 @@ namespace Doppler.HtmlEditorApi.Controllers
             await _repository.SaveCampaignContent(accountName, contentRow);
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
+
+        private string GenerateHtmlContent(BaseHtmlContentData content)
+            // Notice that it is not symmetric with ExtractDopplerHtmlData.
+            // The head is being lossed here. It is not good if we try to edit an imported content.
+            // Old Doppler code:
+            // https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.HypermediaAPI/ApiMappers/FromDoppler/DtoContent_To_CampaignContent.cs#L23
+            => content.htmlContent;
     }
 }
