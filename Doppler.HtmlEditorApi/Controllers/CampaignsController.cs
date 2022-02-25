@@ -79,7 +79,18 @@ namespace Doppler.HtmlEditorApi.Controllers
                 new Field(106667, "GDPR", true),
             };
 
-            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields);
+            // TODO: get this information from the configuration
+            var fieldAliases = new[]
+            {
+                new FieldAliasesDef("BIRTHDAY", new[] { "CUMPLEANOS", "CUMPLEAÑOS", "DATE OF BIRTH", "DOB", "FECHA DE NACIMIENTO", "NACIMIENTO" }),
+                new FieldAliasesDef("COUNTRY", new[] { "PAIS", "PAÍS" }),
+                new FieldAliasesDef("EMAIL", new[] { "CORREO", "CORREO ELECTRONICO", "CORREO ELECTRÓNICO", "CORREO_ELECTRONICO", "CORREO_ELECTRÓNICO", "E-MAIL", "MAIL" }),
+                new FieldAliasesDef("FIRST_NAME", new[] { "FIRST NAME", "FIRST-NAME", "FIRSTNAME", "NAME", "NOMBRE" }),
+                new FieldAliasesDef("GENDER", new[] { "GENERO", "GÉNERO", "SEXO" }),
+                new FieldAliasesDef("LAST_NAME", new[] { "LAST NAME", "LAST-NAME", "LASTNAME", "SURNAME", "APELLIDO" }),
+            };
+
+            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields, fieldAliases);
 
             var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
             htmlDocument.ReplaceInContent(dopplerFieldsProcessor.ReplaceFieldNamesToFieldIdsInHtmlContent);
