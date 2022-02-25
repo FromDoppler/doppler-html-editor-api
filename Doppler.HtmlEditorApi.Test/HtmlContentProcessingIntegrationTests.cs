@@ -165,8 +165,8 @@ public class HtmlContentProcessingIntegrationTests
     }
 
     [Theory]
-    [InlineData("unlayer", "<div>Hola |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola , tenemos una oferta para vos</div>")]
-    [InlineData("html", "<div>Hola |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola , tenemos una oferta para vos</div>")]
+    [InlineData("unlayer", "<div>Hola |*|319*|* |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* , tenemos una oferta para vos</div>")]
+    [InlineData("html", "<div>Hola |*|319*|* |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* , tenemos una oferta para vos</div>")]
     public async Task PUT_campaign_should_remove_unknown_fieldIds(string type, string htmlInput, string expectedContent)
     {
         // Arrange

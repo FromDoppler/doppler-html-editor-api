@@ -64,7 +64,22 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            var dopplerFieldsProcessor = new DopplerFieldsProcessor();
+            // TODO: get this information from a repository
+            var fields = new[]
+            {
+                new Field(319, "FIRST_NAME", true),
+                new Field(320, "LAST_NAME", true),
+                new Field(321, "EMAIL", true),
+                new Field(322, "GENDER", true),
+                new Field(323, "BIRTHDAY", true),
+                new Field(324, "COUNTRY", true),
+                new Field(325, "CONSENT", true),
+                new Field(326, "ORIGIN", true),
+                new Field(327, "SCORE", true),
+                new Field(106667, "GDPR", true),
+            };
+
+            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields);
 
             var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
             htmlDocument.ReplaceInContent(dopplerFieldsProcessor.ReplaceFieldNamesToFieldIdsInHtmlContent);
@@ -72,7 +87,6 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
-
 
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
