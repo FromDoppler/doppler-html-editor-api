@@ -77,7 +77,7 @@ public class Repository : IRepository
             throw new ApplicationException($"CampaignId {contentRow.campaignId} does not exists or belongs to another user than {accountName}");
         }
 
-        DbQuery<ContentRow, int> query = campaignStatus.ContentExists
+        DbQuery<ContentRow, int> upsertContentQuery = campaignStatus.ContentExists
             ? new UpdateCampaignContentDbQuery(_dbContext)
             : new InsertCampaignContentDbQuery(_dbContext);
 
@@ -102,6 +102,14 @@ public class Repository : IRepository
             _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
         };
 
-        await query.ExecuteAsync(queryParams);
+        await upsertContentQuery.ExecuteAsync(queryParams);
+
+        var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(_dbContext);
+
+        await updateCampaignStatusQuery.ExecuteAsync(new UpdateCampaignStatusDbQuery.Parameters(
+            setCurrentStep: 2,
+            setHtmlSourceType: UpdateCampaignStatusDbQuery.TEMPLATE_HTML_SOURCE_TYPE,
+            whenIdCampaignIs: contentRow.campaignId,
+            whenCurrentStepIs: 1));
     }
 }

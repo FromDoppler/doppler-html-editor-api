@@ -366,7 +366,7 @@ namespace Doppler.HtmlEditorApi
         [InlineData(4, true, "UPDATE")]
         [InlineData(5, true, "UPDATE")]
         [InlineData(null, false, "INSERT")]
-        public async Task PUT_campaign_should_store_html_content(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
+        public async Task PUT_campaign_should_store_html_content_and_ensure_campaign_status(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
         {
             // Arrange
             var url = "/accounts/test1@test.com/campaigns/123/content";
@@ -396,6 +396,16 @@ namespace Doppler.HtmlEditorApi
                         c.IdCampaign == expectedIdCampaign
                         && c.Content == htmlContent
                         && c.Meta == null)))
+                .ReturnsAsync(1);
+
+            dbContextMock
+                .Setup(x => x.ExecuteAsync(
+                    It.Is<string>(s => s.Trim().StartsWith("UPDATE Campaign")),
+                    It.Is<UpdateCampaignStatusDbQuery.Parameters>(c =>
+                        c.setCurrentStep == 2
+                        && c.setHtmlSourceType == 2
+                        && c.whenCurrentStepIs == 1
+                        && c.whenIdCampaignIs == expectedIdCampaign)))
                 .ReturnsAsync(1);
 
             var client = _factory
@@ -430,7 +440,7 @@ namespace Doppler.HtmlEditorApi
         [InlineData(4, true, "UPDATE")]
         [InlineData(5, true, "UPDATE")]
         [InlineData(null, false, "INSERT")]
-        public async Task PUT_campaign_should_store_unlayer_content(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
+        public async Task PUT_campaign_should_store_unlayer_content_and_ensure_campaign_status(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
         {
             // Arrange
             var url = "/accounts/test1@test.com/campaigns/123/content";
@@ -461,6 +471,16 @@ namespace Doppler.HtmlEditorApi
                         c.IdCampaign == expectedIdCampaign
                         && c.Content == htmlContent
                         && c.Meta == metaAsString)))
+                .ReturnsAsync(1);
+
+            dbContextMock
+                .Setup(x => x.ExecuteAsync(
+                    It.Is<string>(s => s.Trim().StartsWith("UPDATE Campaign")),
+                    It.Is<UpdateCampaignStatusDbQuery.Parameters>(c =>
+                        c.setCurrentStep == 2
+                        && c.setHtmlSourceType == 2
+                        && c.whenCurrentStepIs == 1
+                        && c.whenIdCampaignIs == expectedIdCampaign)))
                 .ReturnsAsync(1);
 
             var client = _factory
