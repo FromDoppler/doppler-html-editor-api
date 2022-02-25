@@ -63,6 +63,7 @@ public class DummyRepository : IRepository
         ContentData contentRow = new UnlayerContentData(
             campaignId: campaignId,
             htmlContent: "<html></html>",
+            htmlHead: null,
             meta: JsonSerializer.Serialize(_demoMeta));
 
         return Task.FromResult(contentRow);

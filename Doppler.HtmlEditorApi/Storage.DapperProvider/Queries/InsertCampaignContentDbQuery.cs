@@ -11,11 +11,13 @@ public class InsertCampaignContentDbQuery : DbQuery<ContentRow, int>
 INSERT INTO Content (
     IdCampaign,
     Content,
+    Head,
     Meta,
     EditorType
 ) VALUES (
     @IdCampaign,
     @Content,
+    @Head,
     @Meta,
     @EditorType
 )";

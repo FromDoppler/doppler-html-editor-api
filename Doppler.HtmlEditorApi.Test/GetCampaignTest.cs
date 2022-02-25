@@ -132,6 +132,7 @@ namespace Doppler.HtmlEditorApi
                     schemaVersion = expectedSchemaVersion
                 }),
                 htmlContent: "<html></html>",
+                htmlHead: null,
                 campaignId: expectedIdCampaign);
 
             var repositoryMock = new Mock<IRepository>();

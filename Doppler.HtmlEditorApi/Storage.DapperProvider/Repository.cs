@@ -45,6 +45,7 @@ public class Repository : IRepository
             return new UnlayerContentData(
                 campaignId: queryResult.IdCampaign,
                 htmlContent: queryResult.Content,
+                htmlHead: queryResult.Head,
                 meta: queryResult.Meta);
         }
 
@@ -52,12 +53,14 @@ public class Repository : IRepository
         {
             return new HtmlContentData(
                 campaignId: queryResult.IdCampaign,
-                htmlContent: queryResult.Content);
+                htmlContent: queryResult.Content,
+                htmlHead: queryResult.Head);
         }
 
         return new UnknownContentData(
             campaignId: queryResult.IdCampaign,
             content: queryResult.Content,
+            head: queryResult.Head,
             meta: queryResult.Meta,
             editorType: queryResult.EditorType);
     }
@@ -87,6 +90,7 @@ public class Repository : IRepository
             {
                 IdCampaign = unlayerContentData.campaignId,
                 Content = unlayerContentData.htmlContent,
+                Head = unlayerContentData.htmlHead,
                 Meta = unlayerContentData.meta,
                 EditorType = (int?)EDITOR_TYPE_UNLAYER
             },
@@ -94,6 +98,7 @@ public class Repository : IRepository
             {
                 IdCampaign = htmlContentData.campaignId,
                 Content = htmlContentData.htmlContent,
+                Head = htmlContentData.htmlHead,
                 Meta = (string)null,
                 EditorType = (int?)null
             },
