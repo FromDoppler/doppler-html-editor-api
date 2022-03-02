@@ -64,9 +64,9 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            var htmlParser = new DopplerHtmlParser(campaignContent.htmlContent);
-            var head = htmlParser.GetHeadContent();
-            var content = htmlParser.GetDopplerContent();
+            var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
+            var head = htmlDocument.GetHeadContent();
+            var content = htmlDocument.GetDopplerContent();
 
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
