@@ -32,10 +32,11 @@ public class DopplerHtmlDocument
     public string GetHeadContent()
         => _headNode?.InnerHtml;
 
-    public void ReplaceInContent(Func<string, string> replaceFunc)
+    // TODO: ESTO NO PERMITE RECORRER SIN REEMPLAZAR CUANDO NO ES NECESARIO
+    public void TraverseAndReplace(Func<string, string> transform)
     {
         // TODO: optimize it to do many replacements while traversing the HTML document
-        _contentNode.InnerHtml = replaceFunc(_contentNode.InnerHtml);
+        _contentNode.InnerHtml = transform(_contentNode.InnerHtml);
     }
 
     private static string EnsureContent(string htmlContent)

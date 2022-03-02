@@ -58,7 +58,7 @@ public class DopplerFieldsProcessor
                 ? $"{FIELD_START_DELIMITER_BACK_END}{fieldId}{FIELD_END_DELIMITER_BACK_END}"
                 : match.Value);
 
-    public string ClearInexistentFieldIs(string inputHtml)
+    public string ClearInexistentFieldIds(string inputHtml)
         => BACKEND_FIELD_REGEX.Replace(
             inputHtml,
             match => FieldIdExist(int.Parse(match.Groups[1].Value)) ? match.Value : string.Empty);
