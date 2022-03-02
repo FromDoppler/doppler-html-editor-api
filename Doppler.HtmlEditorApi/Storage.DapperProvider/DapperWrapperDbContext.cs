@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -17,6 +18,9 @@ public class DapperWrapperDbContext : IDbContext, IDisposable
 
     public Task<TResult> QueryFirstOrDefaultAsync<TResult>(string query, object param)
         => _lazyDbConnection.Value.QueryFirstOrDefaultAsync<TResult>(query, param);
+
+    public Task<IEnumerable<TResult>> QueryAsync<TResult>(string query)
+        => _lazyDbConnection.Value.QueryAsync<TResult>(query);
 
     public Task<int> ExecuteAsync(string query, object param)
         => _lazyDbConnection.Value.ExecuteAsync(query, param);
