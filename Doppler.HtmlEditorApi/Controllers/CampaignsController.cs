@@ -64,9 +64,40 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            var htmlParser = new DopplerHtmlParser(campaignContent.htmlContent);
-            var head = htmlParser.GetHeadContent();
-            var content = htmlParser.GetDopplerContent();
+            // TODO: get this information from the configuration
+            var fieldAliases = new[]
+            {
+                new FieldAliasesDef("BIRTHDAY", new[] { "CUMPLEANOS", "CUMPLEAÑOS", "DATE OF BIRTH", "DOB", "FECHA DE NACIMIENTO", "NACIMIENTO" }),
+                new FieldAliasesDef("COUNTRY", new[] { "PAIS", "PAÍS" }),
+                new FieldAliasesDef("EMAIL", new[] { "CORREO", "CORREO ELECTRONICO", "CORREO ELECTRÓNICO", "CORREO_ELECTRONICO", "CORREO_ELECTRÓNICO", "E-MAIL", "MAIL" }),
+                new FieldAliasesDef("FIRST_NAME", new[] { "FIRST NAME", "FIRST-NAME", "FIRSTNAME", "NAME", "NOMBRE" }),
+                new FieldAliasesDef("GENDER", new[] { "GENERO", "GÉNERO", "SEXO" }),
+                new FieldAliasesDef("LAST_NAME", new[] { "LAST NAME", "LAST-NAME", "LASTNAME", "SURNAME", "APELLIDO" }),
+            };
+
+            // TODO: get this information from a repository
+            var fields = new[]
+            {
+                new Field(319, "FIRST_NAME", true),
+                new Field(320, "LAST_NAME", true),
+                new Field(321, "EMAIL", true),
+                new Field(322, "GENDER", true),
+                new Field(323, "BIRTHDAY", true),
+                new Field(324, "COUNTRY", true),
+                new Field(325, "CONSENT", true),
+                new Field(326, "ORIGIN", true),
+                new Field(327, "SCORE", true),
+                new Field(106667, "GDPR", true),
+            };
+
+            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields, fieldAliases);
+
+            var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
+            htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
+            htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
+
+            var head = htmlDocument.GetHeadContent();
+            var content = htmlDocument.GetDopplerContent();
 
             BaseHtmlContentData contentRow = campaignContent.type switch
             {

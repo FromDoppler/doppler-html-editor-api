@@ -165,6 +165,74 @@ public class HtmlContentProcessingIntegrationTests
     }
 
     [Theory]
+    [InlineData("unlayer", "<div>Hola |*|319*|* |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* , tenemos una oferta para vos</div>")]
+    [InlineData("html", "<div>Hola |*|319*|* |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* , tenemos una oferta para vos</div>")]
+    [InlineData("unlayer", "<div>Hola [[[FIRST_NAME]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
+    [InlineData("html", "<div>Hola [[[first_name]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
+    [InlineData("unlayer", "<div>Hola [[[nombre]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
+    [InlineData("unlayer", "<div>Hola [[[first name]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
+    [InlineData("html", "Hoy ([[[cumpleaños]]]) es tu cumpleaños", "Hoy (|*|323*|*) es tu cumpleaños")]
+    public async Task PUT_campaign_should_remove_unknown_fieldIds(string type, string htmlInput, string expectedContent)
+    {
+        // Arrange
+        var url = "/accounts/test1@test.com/campaigns/123/content";
+        var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
+        var idCampaign = 123;
+
+        var dbContextMock = new Mock<IDbContext>();
+        dbContextMock
+            .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
+                It.IsAny<string>(),
+                It.IsAny<ByCampaignIdAndAccountNameParameters>()))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = true,
+                EditorType = null,
+            });
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                It.IsAny<string>(),
+                It.IsAny<ContentRow>()))
+            .ReturnsAsync(1);
+
+        var client = _factory
+            .WithWebHostBuilder(c =>
+            {
+                c.ConfigureServices(s =>
+                {
+                    s.AddSingleton(dbContextMock.Object);
+                });
+            })
+            .CreateClient(new WebApplicationFactoryClientOptions());
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = type,
+            htmlContent = htmlInput,
+            meta = "true" // it does not care
+        }));
+
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        ContentRow contentRow = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.IsAny<string>(),
+            It.Is<ContentRow>(x => AssertHelper.GetValueAndContinue(x, out contentRow))));
+
+        Assert.Equal(idCampaign, contentRow.IdCampaign);
+        AssertHelper.EqualIgnoringSpaces(expectedContent, contentRow.Content);
+    }
+
+    [Theory]
     [InlineData(BODY_CONTENT, HEAD_CONTENT, BODY_CONTENT, null, null)]
     [InlineData(BODY_CONTENT, HEAD_CONTENT, BODY_CONTENT, META_CONTENT, 5)]
     [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, null, null)]
