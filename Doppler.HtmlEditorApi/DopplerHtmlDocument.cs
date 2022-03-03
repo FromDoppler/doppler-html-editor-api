@@ -27,8 +27,8 @@ public class DopplerHtmlDocument
     private const string FIELD_NAME_TAG_END_DELIMITER = "]]]";
     private const string FIELD_ID_TAG_START_DELIMITER = "|*|";
     private const string FIELD_ID_TAG_END_DELIMITER = "*|*";
-    // % is here to accept %20
-    private static readonly Regex FIELD_NAME_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_NAME_TAG_START_DELIMITER)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%]+){Regex.Escape(FIELD_NAME_TAG_END_DELIMITER)}");
+    // &, # and ; are here to accept HTML Entities
+    private static readonly Regex FIELD_NAME_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_NAME_TAG_START_DELIMITER)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%&;#]+){Regex.Escape(FIELD_NAME_TAG_END_DELIMITER)}");
     private static readonly Regex FIELD_ID_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_ID_TAG_START_DELIMITER)}(\d+){Regex.Escape(FIELD_ID_TAG_END_DELIMITER)}");
 
     private readonly HtmlNode _headNode;
@@ -57,7 +57,7 @@ public class DopplerHtmlDocument
             text,
             match =>
             {
-                var fieldName = match.Groups[1].Value;
+                var fieldName = HtmlEntity.DeEntitize(match.Groups[1].Value.Replace("%20", " "));
                 var fieldId = getFieldIdOrNullFunc(fieldName);
                 return fieldId.HasValue
                     ? CreateFieldIdTag(fieldId.GetValueOrDefault())
