@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,11 +11,15 @@ namespace Doppler.HtmlEditorApi;
 /// </summary>
 public class DopplerFieldsProcessor
 {
+    private readonly ReadOnlyDictionary<string, int> _fieldIdsByNameOrAlias;
+
     private readonly ReadOnlyDictionary<int, string> _fieldNamesById;
 
     public DopplerFieldsProcessor(IEnumerable<Field> fields)
     {
-        // TODO: receive and prepare fields information
+        // TODO: support field aliases
+        _fieldIdsByNameOrAlias = new ReadOnlyDictionary<string, int>(
+            fields.ToDictionary(x => x.name, x => x.id, StringComparer.OrdinalIgnoreCase));
 
         // Only canonical names
         _fieldNamesById = new ReadOnlyDictionary<int, string>(
@@ -22,8 +27,9 @@ public class DopplerFieldsProcessor
     }
 
     public int? GetFieldIdOrNull(string fieldName)
-        // TODO: complete the behavior here
-        => null;
+        => _fieldIdsByNameOrAlias.TryGetValue(fieldName, out var fieldId)
+            ? fieldId
+            : null;
 
     public bool FieldIdExist(int fieldId)
         => _fieldNamesById.ContainsKey(fieldId);
