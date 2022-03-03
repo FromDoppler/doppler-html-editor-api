@@ -64,6 +64,17 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
+            // TODO: get this information from the configuration
+            var fieldAliases = new[]
+            {
+                new FieldAliasesDef("BIRTHDAY", new[] { "CUMPLEANOS", "CUMPLEAÑOS", "DATE OF BIRTH", "DOB", "FECHA DE NACIMIENTO", "NACIMIENTO" }),
+                new FieldAliasesDef("COUNTRY", new[] { "PAIS", "PAÍS" }),
+                new FieldAliasesDef("EMAIL", new[] { "CORREO", "CORREO ELECTRONICO", "CORREO ELECTRÓNICO", "CORREO_ELECTRONICO", "CORREO_ELECTRÓNICO", "E-MAIL", "MAIL" }),
+                new FieldAliasesDef("FIRST_NAME", new[] { "FIRST NAME", "FIRST-NAME", "FIRSTNAME", "NAME", "NOMBRE" }),
+                new FieldAliasesDef("GENDER", new[] { "GENERO", "GÉNERO", "SEXO" }),
+                new FieldAliasesDef("LAST_NAME", new[] { "LAST NAME", "LAST-NAME", "LASTNAME", "SURNAME", "APELLIDO" }),
+            };
+
             // TODO: get this information from a repository
             var fields = new[]
             {
@@ -79,7 +90,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 new Field(106667, "GDPR", true),
             };
 
-            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields);
+            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields, fieldAliases);
 
             var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
             htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
