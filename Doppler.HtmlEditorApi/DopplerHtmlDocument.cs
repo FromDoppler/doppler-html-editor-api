@@ -53,10 +53,8 @@ public class DopplerHtmlDocument
 
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
     {
-        // TODO: optimize it to do many replacements while traversing the HTML document
-        _contentNode.InnerHtml = FIELD_NAME_TAG_REGEX.Replace(
-            _contentNode.InnerHtml,
-            // TODO: take into account %20 and that kind of things
+        _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FIELD_NAME_TAG_REGEX.Replace(
+            text,
             match =>
             {
                 var fieldName = match.Groups[1].Value;
@@ -65,17 +63,16 @@ public class DopplerHtmlDocument
                     ? CreateFieldIdTag(fieldId.GetValueOrDefault())
                     // keep the name when field doesn't exist
                     : match.Value;
-            });
+            }));
     }
 
     public void RemoveUnknownFieldIdTags(Func<int, bool> fieldIdExistFunc)
     {
-        // TODO: optimize it to do many replacements while traversing the HTML document
-        _contentNode.InnerHtml = FIELD_ID_TAG_REGEX.Replace(
-            _contentNode.InnerHtml,
+        _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FIELD_ID_TAG_REGEX.Replace(
+            text,
             match => fieldIdExistFunc(int.Parse(match.Groups[1].ValueSpan))
                 ? match.Value
-                : string.Empty);
+                : string.Empty));
     }
 
     private static string CreateFieldIdTag(int? fieldId)
