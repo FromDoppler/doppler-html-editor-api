@@ -36,13 +36,13 @@ public class DopplerHtmlDocument
 
     public DopplerHtmlDocument(string inputHtml)
     {
-        var htmlDocument = LoadHtml(inputHtml);
+        var htmlDocument = HtmlAgilityPackUtils.LoadHtml(inputHtml);
 
         _headNode = htmlDocument.DocumentNode.SelectSingleNode("//head");
 
         _contentNode = _headNode == null ? htmlDocument.DocumentNode
             : htmlDocument.DocumentNode.SelectSingleNode("//body")
-            ?? LoadHtml(inputHtml.Replace(_headNode.OuterHtml, string.Empty)).DocumentNode;
+            ?? HtmlAgilityPackUtils.LoadHtml(inputHtml.Replace(_headNode.OuterHtml, string.Empty)).DocumentNode;
     }
 
     public string GetDopplerContent()
@@ -84,10 +84,4 @@ public class DopplerHtmlDocument
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
 
-    private static HtmlDocument LoadHtml(string inputHtml)
-    {
-        var htmlDocument = new HtmlDocument();
-        htmlDocument.LoadHtml(inputHtml);
-        return htmlDocument;
-    }
 }
