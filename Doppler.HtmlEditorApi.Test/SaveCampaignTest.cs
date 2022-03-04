@@ -113,6 +113,7 @@ namespace Doppler.HtmlEditorApi
             }));
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
