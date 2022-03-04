@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -91,7 +89,9 @@ namespace Doppler.HtmlEditorApi
             // Arrange
             BaseHtmlContentData emptyContentModel = null;
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
+
+            repositoryMock
+                .Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
                 .ReturnsAsync(emptyContentModel);
 
             var client = _factory.CreateSutClient(
@@ -124,7 +124,9 @@ namespace Doppler.HtmlEditorApi
                 campaignId: expectedIdCampaign);
 
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
+
+            repositoryMock
+                .Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
                 .ReturnsAsync(contentRow);
 
             var client = _factory.CreateSutClient(
@@ -156,6 +158,7 @@ namespace Doppler.HtmlEditorApi
         public async Task GET_campaign_should_return_404_error_when_campaign_does_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -191,6 +194,7 @@ namespace Doppler.HtmlEditorApi
         public async Task GET_campaign_should_return_404_error_when_user_does_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
         {
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -222,6 +226,7 @@ namespace Doppler.HtmlEditorApi
             var meta = (string)null;
 
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -261,6 +266,7 @@ namespace Doppler.HtmlEditorApi
             var html = "<html></html>";
 
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -303,6 +309,7 @@ namespace Doppler.HtmlEditorApi
             var html = "<html></html>";
 
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -345,6 +352,7 @@ namespace Doppler.HtmlEditorApi
             var meta = "meta";
 
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -382,6 +390,7 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),

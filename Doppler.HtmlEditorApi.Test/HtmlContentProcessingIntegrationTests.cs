@@ -1,13 +1,11 @@
 using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 using Doppler.HtmlEditorApi.Storage.DapperProvider;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Test.Utils;
 using TUD = Doppler.HtmlEditorApi.Test.Utils.TestUsersData;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Text.Json;
 using Xunit.Abstractions;
@@ -103,6 +101,7 @@ public class HtmlContentProcessingIntegrationTests
         var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content";
 
         var dbContextMock = new Mock<IDbContext>();
+
         dbContextMock
             .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
                 It.IsAny<string>(),
@@ -177,6 +176,7 @@ public class HtmlContentProcessingIntegrationTests
         var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content";
 
         var dbContextMock = new Mock<IDbContext>();
+
         dbContextMock
             .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
                 It.IsAny<string>(),
@@ -242,6 +242,7 @@ public class HtmlContentProcessingIntegrationTests
         var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content";
 
         var dbContextMock = new Mock<IDbContext>();
+
         dbContextMock
             .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
                 It.IsAny<string>(),

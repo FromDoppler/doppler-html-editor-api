@@ -1,10 +1,8 @@
 using System;
 using System.Net;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -51,7 +49,9 @@ namespace Doppler.HtmlEditorApi
             // Arrange
             var exceptionMessage = "Test unexpected exception";
             var weatherForecastServiceMock = new Mock<Weather.IWeatherForecastService>();
-            weatherForecastServiceMock.Setup(x => x.GetForecasts())
+
+            weatherForecastServiceMock
+                .Setup(x => x.GetForecasts())
                 .Throws(new Exception(exceptionMessage));
 
             var client = _factory.CreateSutClient(
@@ -71,6 +71,5 @@ namespace Doppler.HtmlEditorApi
             Assert.Contains("\"type\":\"System.Exception\"", responseContent);
             Assert.Contains($"\"raw\":\"System.Exception: {exceptionMessage}", responseContent);
         }
-
     }
 }

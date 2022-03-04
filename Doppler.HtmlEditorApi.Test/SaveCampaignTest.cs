@@ -1,9 +1,6 @@
-using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Storage;
 using Doppler.HtmlEditorApi.Storage.DapperProvider;
@@ -11,7 +8,6 @@ using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 using Doppler.HtmlEditorApi.Test.Utils;
 using TUD = Doppler.HtmlEditorApi.Test.Utils.TestUsersData;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 using Xunit.Abstractions;
@@ -91,7 +87,9 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             var repositoryMock = new Mock<IRepository>();
-            repositoryMock.Setup(x => x.SaveCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
+
+            repositoryMock
+                .Setup(x => x.SaveCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
                 .Returns(Task.CompletedTask);
 
             var client = _factory.CreateSutClient(
@@ -126,6 +124,7 @@ namespace Doppler.HtmlEditorApi
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
+
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Matches("\"htmlContent\":\\[\"The htmlContent field is required.\"\\]", responseContent);
@@ -144,6 +143,7 @@ namespace Doppler.HtmlEditorApi
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
+
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Matches("\"htmlContent\":\\[\"The htmlContent field is required.\"\\]", responseContent);
@@ -166,6 +166,7 @@ namespace Doppler.HtmlEditorApi
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
+
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Matches("\"meta\":\\[\"The meta field is required for unlayer content.\"\\]", responseContent);
@@ -189,6 +190,7 @@ namespace Doppler.HtmlEditorApi
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
+
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Matches("\"meta\":\\[\"The meta field is required for unlayer content.\"\\]", responseContent);
@@ -211,6 +213,7 @@ namespace Doppler.HtmlEditorApi
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
+
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Matches("\"type\":\\[\"The type field is required.\"\\]", responseContent);
@@ -236,6 +239,7 @@ namespace Doppler.HtmlEditorApi
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
+
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Matches("\"$.type\":\\[\"The JSON value could not be converted to Doppler.HtmlEditorApi.Model.CampaignContent. Path: $.type | LineNumber: \\d+ | BytePositionInLine: \\d+.\"\\]", responseContent);
@@ -254,6 +258,7 @@ namespace Doppler.HtmlEditorApi
             var htmlContent = "My HTML Content";
 
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -301,6 +306,7 @@ namespace Doppler.HtmlEditorApi
             var htmlContent = "My HTML Content";
 
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -350,6 +356,7 @@ namespace Doppler.HtmlEditorApi
             var htmlContent = "My HTML Content";
 
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
@@ -395,6 +402,7 @@ namespace Doppler.HtmlEditorApi
             _output.WriteLine(response.GetHeadersAsString());
             var responseContent = await response.Content.ReadAsStringAsync();
             _output.WriteLine(responseContent);
+
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
@@ -417,6 +425,7 @@ namespace Doppler.HtmlEditorApi
             var metaAsString = "{\"data\":\"My Meta Content\"}";
 
             var dbContextMock = new Mock<IDbContext>();
+
             dbContextMock
                 .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
                     It.IsAny<string>(),
