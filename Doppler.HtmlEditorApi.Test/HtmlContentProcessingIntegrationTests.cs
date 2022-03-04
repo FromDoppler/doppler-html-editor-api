@@ -122,16 +122,9 @@ public class HtmlContentProcessingIntegrationTests
                 It.IsAny<ContentRow>()))
             .ReturnsAsync(1);
 
-        var client = _factory
-            .WithWebHostBuilder(c =>
-            {
-                c.ConfigureServices(s =>
-                {
-                    s.AddSingleton(dbContextMock.Object);
-                });
-            })
-            .CreateClient(new WebApplicationFactoryClientOptions());
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
 
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
@@ -201,16 +194,9 @@ public class HtmlContentProcessingIntegrationTests
                 It.IsAny<ContentRow>()))
             .ReturnsAsync(1);
 
-        var client = _factory
-            .WithWebHostBuilder(c =>
-            {
-                c.ConfigureServices(s =>
-                {
-                    s.AddSingleton(dbContextMock.Object);
-                });
-            })
-            .CreateClient(new WebApplicationFactoryClientOptions());
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
 
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
@@ -273,16 +259,9 @@ public class HtmlContentProcessingIntegrationTests
                 EditorType = editorType
             });
 
-        var client = _factory
-            .WithWebHostBuilder(c =>
-            {
-                c.ConfigureServices(s =>
-                {
-                    s.AddSingleton(dbContextMock.Object);
-                });
-            })
-            .CreateClient(new WebApplicationFactoryClientOptions());
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
 
         // Act
         var response = await client.GetAsync(url);

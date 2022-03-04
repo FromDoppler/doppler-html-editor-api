@@ -9,11 +9,11 @@ using Doppler.HtmlEditorApi.Storage.DapperProvider;
 using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 using Doppler.HtmlEditorApi.ApiModels;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 using Xunit.Abstractions;
 using TUD = Doppler.HtmlEditorApi.Test.Utils.TestUsersData;
+using Doppler.HtmlEditorApi.Test.Utils;
 
 namespace Doppler.HtmlEditorApi
 {
@@ -94,16 +94,9 @@ namespace Doppler.HtmlEditorApi
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
                 .ReturnsAsync(emptyContentModel);
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(repositoryMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: repositoryMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);
@@ -134,16 +127,9 @@ namespace Doppler.HtmlEditorApi
             repositoryMock.Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
                 .ReturnsAsync(contentRow);
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(repositoryMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: repositoryMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);
@@ -186,16 +172,9 @@ namespace Doppler.HtmlEditorApi
                     Meta = null
                 });
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(dbContextMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);
@@ -220,16 +199,9 @@ namespace Doppler.HtmlEditorApi
                         && x.IdCampaign == expectedIdCampaign)))
                 .ReturnsAsync((FirstOrDefaultContentWithCampaignStatusDbQuery.Result)null);
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(dbContextMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);
@@ -266,16 +238,9 @@ namespace Doppler.HtmlEditorApi
                     Meta = meta
                 });
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(dbContextMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);
@@ -312,16 +277,9 @@ namespace Doppler.HtmlEditorApi
                     Meta = meta
                 });
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(dbContextMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);
@@ -360,16 +318,9 @@ namespace Doppler.HtmlEditorApi
                     Content = html
                 });
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(dbContextMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);
@@ -410,16 +361,9 @@ namespace Doppler.HtmlEditorApi
                     Meta = meta
                 });
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(dbContextMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);
@@ -451,16 +395,9 @@ namespace Doppler.HtmlEditorApi
                     CampaignHasContent = false,
                 });
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(dbContextMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
 
             // Act
             var response = await client.GetAsync(url);

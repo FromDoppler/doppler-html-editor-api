@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -53,18 +54,8 @@ namespace Doppler.HtmlEditorApi
             weatherForecastServiceMock.Setup(x => x.GetForecasts())
                 .Throws(new Exception(exceptionMessage));
 
-            var client = _factory
-                .WithWebHostBuilder(c =>
-                {
-                    c.ConfigureServices(s =>
-                    {
-                        s.AddSingleton(weatherForecastServiceMock.Object);
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions()
-                {
-                    AllowAutoRedirect = false
-                });
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: weatherForecastServiceMock.Object);
 
             // Act
             var response = await client.GetAsync("/WeatherForecast");
