@@ -298,7 +298,6 @@ namespace Doppler.HtmlEditorApi
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
             dbContextMock.VerifyAll();
-            dbContextMock.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -352,7 +351,6 @@ namespace Doppler.HtmlEditorApi
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
             dbContextMock.VerifyAll();
-            dbContextMock.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -426,7 +424,6 @@ namespace Doppler.HtmlEditorApi
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
-            dbContextMock.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -503,7 +500,6 @@ namespace Doppler.HtmlEditorApi
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
-            dbContextMock.VerifyNoOtherCalls();
         }
     }
 }
