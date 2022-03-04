@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Storage;
 using Doppler.HtmlEditorApi.Storage.DapperProvider;
 using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+using TUD = Doppler.HtmlEditorApi.Test.Utils.TestUsersData;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -19,12 +20,6 @@ namespace Doppler.HtmlEditorApi
     public class SaveCampaignTest
         : IClassFixture<WebApplicationFactory<Startup>>
     {
-        const string TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518 = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOjEyMywidW5pcXVlX25hbWUiOiJ0ZXN0MUB0ZXN0LmNvbSIsInJvbGUiOiJVU0VSIiwiZXhwIjoyMDAwMDAwMDAwfQ.E3RHjKx9p0a-64RN2YPtlEMysGM45QBO9eATLBhtP4tUQNZnkraUr56hAWA-FuGmhiuMptnKNk_dU3VnbyL6SbHrMWUbquxWjyoqsd7stFs1K_nW6XIzsTjh8Bg6hB5hmsSV-M5_hPS24JwJaCdMQeWrh6cIEp2Sjft7I1V4HQrgzrkMh15sDFAw3i1_ZZasQsDYKyYbO9Jp7lx42ognPrz_KuvPzLjEXvBBNTFsVXUE-ur5adLNMvt-uXzcJ1rcwhjHWItUf5YvgRQbbBnd9f-LsJIhfkDgCJcvZmGDZrtlCKaU1UjHv5c3faZED-cjL59MbibofhPjv87MK8hhdg";
-        const string TOKEN_EXPIRE_20330518 = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjIwMDAwMDAwMDB9.mll33c0kstVIN9Moo4HSw0CwRjn0IuDc2h1wkRrv2ahQtIG1KV5KIxYw-H3oRfd-PiCWHhIVIYDP3mWDZbsOHTlnpRGpHp4f26LAu1Xp1hDJfOfxKYEGEE62Xt_0qp7jSGQjrx-vQey4l2mNcWkOWiE0plOws7cX-wLUvA3NLPoOvEegjM0Wx6JFcvYLdMGcTGT5tPd8Pq8pe9VYstCbhOClzI0bp81iON3f7VQP5d0n64eb_lvEPFu5OfURD4yZK2htyQK7agcNNkP1c5mLEfUi39C7Qtx96aAhOjir6Wfhzv_UEs2GQKXGTHl6_-HH-ecgOdIvvbqXGLeDmTkXUQ";
-        const string TOKEN_SUPERUSER_EXPIRE_20010908 = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1NVIjp0cnVlLCJleHAiOjEwMDAwMDAwMDB9.FYOpOxrXSHDif3lbQLPEStMllzEktWPKQ2T4vKUq5qgVjiH_ki0W0Ansvt0PMlaLHqq7OOL9XGFebtgUcyU6aXPO9cZuq6Od196TWDLMdnxZ-Ct0NxWxulyMbjTglUiI3V6g3htcM5EaurGvfu66kbNDuHO-WIQRYFfJtbm7EuOP7vYBZ26hf5Vk5KvGtCWha4zRM55i1-CKMhXvhPN_lypn6JLENzJGYHkBC9Cx2DwzaT683NWtXiVzeMJq3ohC6jvRpkezv89QRes2xUW4fRgvgRGQvaeQ4huNW_TwQKTTikH2Jg7iHbuRqqwYuPZiWuRkjqfd8_80EdlSAnO94Q";
-        const string TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20010908 = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOjEyMywidW5pcXVlX25hbWUiOiJ0ZXN0MUB0ZXN0LmNvbSIsInJvbGUiOiJVU0VSIiwiZXhwIjoxMDAwMDAwMDAwfQ.JBmiZBgKVSUtB4_NhD1kiUhBTnH2ufGSzcoCwC3-Gtx0QDvkFjy2KbxIU9asscenSdzziTOZN6IfFx6KgZ3_a3YB7vdCgfSINQwrAK0_6Owa-BQuNAIsKk-pNoIhJ-OcckV-zrp5wWai3Ak5Qzg3aZ1NKZQKZt5ICZmsFZcWu_4pzS-xsGPcj5gSr3Iybt61iBnetrkrEbjtVZg-3xzKr0nmMMqe-qqeknozIFy2YWAObmTkrN4sZ3AB_jzqyFPXN-nMw3a0NxIdJyetbESAOcNnPLymBKZEZmX2psKuXwJxxekvgK9egkfv2EjKYF9atpH5XwC0Pd4EWvraLAL2eg";
-        const string TOKEN_SUPERUSER_EXPIRE_20330518 = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1NVIjp0cnVlLCJleHAiOjIwMDAwMDAwMDB9.rUtvRqMxrnQzVHDuAjgWa2GJAJwZ-wpaxqdjwP7gmVa7XJ1pEmvdTMBdirKL5BJIE7j2_hsMvEOKUKVjWUY-IE0e0u7c82TH0l_4zsIztRyHMKtt9QE9rBRQnJf8dcT5PnLiWkV_qEkpiIKQ-wcMZ1m7vQJ0auEPZyyFBKmU2caxkZZOZ8Kw_1dx-7lGUdOsUYad-1Rt-iuETGAFijQrWggcm3kV_KmVe8utznshv2bAdLJWydbsAUEfNof0kZK5Wu9A80DJd3CRiNk8mWjQxF_qPOrGCANOIYofhB13yuYi48_8zVPYku-llDQjF77BmQIIIMrCXs8IMT3Lksdxuw";
-
         private readonly WebApplicationFactory<Startup> _factory;
         private readonly ITestOutputHelper _output;
 
@@ -35,7 +30,7 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/x@x.com/campaigns/123/content", HttpStatusCode.Unauthorized)]
+        [InlineData("/accounts/x@x.com/campaigns/456/content", HttpStatusCode.Unauthorized)]
         public async Task PUT_campaign_should_require_token(string url, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -51,8 +46,8 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/x@x.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, HttpStatusCode.Forbidden)]
-        [InlineData("/accounts/x@x.com/campaigns/123/content", TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
+        [InlineData("/accounts/x@x.com/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, HttpStatusCode.Forbidden)]
+        [InlineData("/accounts/x@x.com/campaigns/456/content", TUD.TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
         public async Task PUT_campaign_should_not_accept_the_token_of_another_account(string url, string token, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -68,8 +63,8 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
         public async Task PUT_campaign_should_not_accept_a_expired_token(string url, string token, HttpStatusCode expectedStatusCode)
         {
             // Arrange
@@ -88,9 +83,9 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "test1@test.com")]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "test1@test.com")]
-        [InlineData("/accounts/otro@test.com/campaigns/123/content", TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com")]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_SUPERUSER_EXPIRE_20330518, TUD.EMAIL_TEST1)]
+        [InlineData("/accounts/otro@test.com/campaigns/456/content", TUD.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com")]
         public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName)
         {
             // Arrange
@@ -124,7 +119,7 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518)]
         public async Task PUT_campaign_should_return_error_when_htmlContent_is_not_present(string url, string token)
         {
             // Arrange
@@ -142,7 +137,7 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518)]
         public async Task PUT_campaign_should_return_error_when_htmlContent_is_a_empty_string(string url, string token)
         {
             // Arrange
@@ -160,7 +155,7 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518)]
         public async Task PUT_campaign_should_return_error_when_type_is_unlayer_and_meta_is_not_present(string url, string token)
         {
             // Arrange
@@ -182,7 +177,7 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518)]
         public async Task PUT_campaign_should_return_error_when_type_is_unlayer_and_meta_is_empty_string(string url, string token)
         {
             // Arrange
@@ -205,7 +200,7 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518)]
         public async Task PUT_campaign_should_return_error_when_type_is_not_defined(string url, string token)
         {
             // Arrange
@@ -227,9 +222,9 @@ namespace Doppler.HtmlEditorApi
         }
 
         [Theory]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "")]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, null)]
-        [InlineData("/accounts/test1@test.com/campaigns/123/content", TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "noexisto")]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, "")]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, null)]
+        [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, "noexisto")]
         public async Task PUT_campaign_should_return_error_when_type_is_invalid(string url, string token, string type)
         {
             // Arrange
@@ -257,10 +252,10 @@ namespace Doppler.HtmlEditorApi
         public async Task PUT_campaign_should_return_500_error_when_campaign_does_not_exist(string type)
         {
             // Arrange
-            var url = "/accounts/test1@test.com/campaigns/123/content";
-            var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
-            var expectedAccountName = "test1@test.com";
-            var expectedIdCampaign = 123;
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
             var htmlContent = "My HTML Content";
 
             var dbContextMock = new Mock<IDbContext>();
@@ -312,10 +307,10 @@ namespace Doppler.HtmlEditorApi
         public async Task PUT_campaign_should_return_500_error_when_user_does_not_exist(string type)
         {
             // Arrange
-            var url = "/accounts/test1@test.com/campaigns/123/content";
-            var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
-            var expectedAccountName = "test1@test.com";
-            var expectedIdCampaign = 123;
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
             var htmlContent = "My HTML Content";
 
             var dbContextMock = new Mock<IDbContext>();
@@ -369,10 +364,10 @@ namespace Doppler.HtmlEditorApi
         public async Task PUT_campaign_should_store_html_content_and_ensure_campaign_status(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
         {
             // Arrange
-            var url = "/accounts/test1@test.com/campaigns/123/content";
-            var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
-            var expectedAccountName = "test1@test.com";
-            var expectedIdCampaign = 123;
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
             var htmlContent = "My HTML Content";
 
             var dbContextMock = new Mock<IDbContext>();
@@ -443,10 +438,10 @@ namespace Doppler.HtmlEditorApi
         public async Task PUT_campaign_should_store_unlayer_content_and_ensure_campaign_status(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
         {
             // Arrange
-            var url = "/accounts/test1@test.com/campaigns/123/content";
-            var token = TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518;
-            var expectedAccountName = "test1@test.com";
-            var expectedIdCampaign = 123;
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
             var htmlContent = "My HTML Content";
             var metaAsString = "{\"data\":\"My Meta Content\"}";
 
