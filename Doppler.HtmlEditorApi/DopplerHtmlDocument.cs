@@ -27,8 +27,8 @@ public class DopplerHtmlDocument
     private const string FIELD_NAME_TAG_END_DELIMITER = "]]]";
     private const string FIELD_ID_TAG_START_DELIMITER = "|*|";
     private const string FIELD_ID_TAG_END_DELIMITER = "*|*";
-    // % is here to accept %20
-    private static readonly Regex FIELD_NAME_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_NAME_TAG_START_DELIMITER)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%]+){Regex.Escape(FIELD_NAME_TAG_END_DELIMITER)}");
+    // &, # and ; are here to accept HTML Entities
+    private static readonly Regex FIELD_NAME_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_NAME_TAG_START_DELIMITER)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%&;#]+){Regex.Escape(FIELD_NAME_TAG_END_DELIMITER)}");
     private static readonly Regex FIELD_ID_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_ID_TAG_START_DELIMITER)}(\d+){Regex.Escape(FIELD_ID_TAG_END_DELIMITER)}");
 
     private readonly HtmlNode _headNode;
@@ -36,13 +36,13 @@ public class DopplerHtmlDocument
 
     public DopplerHtmlDocument(string inputHtml)
     {
-        var htmlDocument = LoadHtml(inputHtml);
+        var htmlDocument = HtmlAgilityPackUtils.LoadHtml(inputHtml);
 
         _headNode = htmlDocument.DocumentNode.SelectSingleNode("//head");
 
         _contentNode = _headNode == null ? htmlDocument.DocumentNode
             : htmlDocument.DocumentNode.SelectSingleNode("//body")
-            ?? LoadHtml(inputHtml.Replace(_headNode.OuterHtml, string.Empty)).DocumentNode;
+            ?? HtmlAgilityPackUtils.LoadHtml(inputHtml.Replace(_headNode.OuterHtml, string.Empty)).DocumentNode;
     }
 
     public string GetDopplerContent()
@@ -53,29 +53,26 @@ public class DopplerHtmlDocument
 
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
     {
-        // TODO: optimize it to do many replacements while traversing the HTML document
-        _contentNode.InnerHtml = FIELD_NAME_TAG_REGEX.Replace(
-            _contentNode.InnerHtml,
-            // TODO: take into account %20 and that kind of things
+        _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FIELD_NAME_TAG_REGEX.Replace(
+            text,
             match =>
             {
-                var fieldName = match.Groups[1].Value;
+                var fieldName = HtmlEntity.DeEntitize(match.Groups[1].Value.Replace("%20", " "));
                 var fieldId = getFieldIdOrNullFunc(fieldName);
                 return fieldId.HasValue
                     ? CreateFieldIdTag(fieldId.GetValueOrDefault())
                     // keep the name when field doesn't exist
                     : match.Value;
-            });
+            }));
     }
 
     public void RemoveUnknownFieldIdTags(Func<int, bool> fieldIdExistFunc)
     {
-        // TODO: optimize it to do many replacements while traversing the HTML document
-        _contentNode.InnerHtml = FIELD_ID_TAG_REGEX.Replace(
-            _contentNode.InnerHtml,
+        _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FIELD_ID_TAG_REGEX.Replace(
+            text,
             match => fieldIdExistFunc(int.Parse(match.Groups[1].ValueSpan))
                 ? match.Value
-                : string.Empty);
+                : string.Empty));
     }
 
     private static string CreateFieldIdTag(int? fieldId)
@@ -84,10 +81,4 @@ public class DopplerHtmlDocument
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
 
-    private static HtmlDocument LoadHtml(string inputHtml)
-    {
-        var htmlDocument = new HtmlDocument();
-        htmlDocument.LoadHtml(inputHtml);
-        return htmlDocument;
-    }
 }
