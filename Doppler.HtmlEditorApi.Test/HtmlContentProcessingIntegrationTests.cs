@@ -115,12 +115,6 @@ public class HtmlContentProcessingIntegrationTests
                 EditorType = null,
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                It.IsAny<string>(),
-                It.IsAny<ContentRow>()))
-            .ReturnsAsync(1);
-
         var client = _factory.CreateSutClient(
             serviceToOverride1: dbContextMock.Object,
             token: token);
@@ -187,12 +181,6 @@ public class HtmlContentProcessingIntegrationTests
                 ContentExists = true,
                 EditorType = null,
             });
-
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                It.IsAny<string>(),
-                It.IsAny<ContentRow>()))
-            .ReturnsAsync(1);
 
         var client = _factory.CreateSutClient(
             serviceToOverride1: dbContextMock.Object,
