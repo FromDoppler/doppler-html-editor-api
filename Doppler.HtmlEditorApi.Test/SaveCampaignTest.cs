@@ -109,6 +109,7 @@ namespace Doppler.HtmlEditorApi
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            repositoryMock.VerifyAll();
         }
 
         [Theory]
