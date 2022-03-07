@@ -159,13 +159,10 @@ namespace Doppler.HtmlEditorApi
         {
             var dbContextMock = new Mock<IDbContext>();
 
-            dbContextMock
-                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-                    It.IsAny<string>(),
-                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                        x.AccountName == expectedAccountName
-                        && x.IdCampaign == expectedIdCampaign)))
-                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+            dbContextMock.SetupContentWithCampaignStatus(
+                expectedAccountName,
+                expectedIdCampaign,
+                new()
                 {
                     IdCampaign = expectedIdCampaign,
                     CampaignExists = false,
@@ -195,13 +192,10 @@ namespace Doppler.HtmlEditorApi
         {
             var dbContextMock = new Mock<IDbContext>();
 
-            dbContextMock
-                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-                    It.IsAny<string>(),
-                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                        x.AccountName == expectedAccountName
-                        && x.IdCampaign == expectedIdCampaign)))
-                .ReturnsAsync((FirstOrDefaultContentWithCampaignStatusDbQuery.Result)null);
+            dbContextMock.SetupContentWithCampaignStatus(
+                expectedAccountName,
+                expectedIdCampaign,
+                null);
 
             var client = _factory.CreateSutClient(
                 serviceToOverride1: dbContextMock.Object,
@@ -227,13 +221,10 @@ namespace Doppler.HtmlEditorApi
 
             var dbContextMock = new Mock<IDbContext>();
 
-            dbContextMock
-                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-                    It.IsAny<string>(),
-                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                        x.AccountName == expectedAccountName
-                        && x.IdCampaign == expectedIdCampaign)))
-                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+            dbContextMock.SetupContentWithCampaignStatus(
+                expectedAccountName,
+                expectedIdCampaign,
+                new()
                 {
                     IdCampaign = expectedIdCampaign,
                     CampaignExists = true,
@@ -267,13 +258,10 @@ namespace Doppler.HtmlEditorApi
 
             var dbContextMock = new Mock<IDbContext>();
 
-            dbContextMock
-                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-                    It.IsAny<string>(),
-                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                        x.AccountName == expectedAccountName
-                        && x.IdCampaign == expectedIdCampaign)))
-                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+            dbContextMock.SetupContentWithCampaignStatus(
+                expectedAccountName,
+                expectedIdCampaign,
+                new()
                 {
                     IdCampaign = expectedIdCampaign,
                     CampaignExists = true,
@@ -310,13 +298,10 @@ namespace Doppler.HtmlEditorApi
 
             var dbContextMock = new Mock<IDbContext>();
 
-            dbContextMock
-                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-                    It.IsAny<string>(),
-                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                        x.AccountName == expectedAccountName
-                        && x.IdCampaign == expectedIdCampaign)))
-                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+            dbContextMock.SetupContentWithCampaignStatus(
+                expectedAccountName,
+                expectedIdCampaign,
+                new()
                 {
                     IdCampaign = expectedIdCampaign,
                     CampaignExists = true,
@@ -353,13 +338,10 @@ namespace Doppler.HtmlEditorApi
 
             var dbContextMock = new Mock<IDbContext>();
 
-            dbContextMock
-                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-                    It.IsAny<string>(),
-                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                        x.AccountName == expectedAccountName
-                        && x.IdCampaign == expectedIdCampaign)))
-                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+            dbContextMock.SetupContentWithCampaignStatus(
+                expectedAccountName,
+                expectedIdCampaign,
+                new()
                 {
                     IdCampaign = expectedIdCampaign,
                     CampaignExists = true,
@@ -391,13 +373,10 @@ namespace Doppler.HtmlEditorApi
             // Arrange
             var dbContextMock = new Mock<IDbContext>();
 
-            dbContextMock
-                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-                    It.IsAny<string>(),
-                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                        x.AccountName == expectedAccountName
-                        && x.IdCampaign == expectedIdCampaign)))
-                .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+            dbContextMock.SetupContentWithCampaignStatus(
+                expectedAccountName,
+                expectedIdCampaign,
+                new()
                 {
                     IdCampaign = expectedIdCampaign,
                     CampaignExists = true,

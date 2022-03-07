@@ -231,13 +231,10 @@ public class HtmlContentProcessingIntegrationTests
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-                It.IsAny<string>(),
-                It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                    x.AccountName == accountName
-                    && x.IdCampaign == idCampaign)))
-            .ReturnsAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery.Result()
+        dbContextMock.SetupContentWithCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 IdCampaign = idCampaign,
                 CampaignExists = true,
