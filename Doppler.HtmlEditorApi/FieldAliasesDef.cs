@@ -1,5 +1,7 @@
 namespace Doppler.HtmlEditorApi;
 
-public record FieldAliasesDef(
-    string canonicalName,
-    params string[] aliases);
+public record FieldAliasesDef
+{
+    public string canonicalName { get; init; }
+    public string[] aliases { get; init; }
+}

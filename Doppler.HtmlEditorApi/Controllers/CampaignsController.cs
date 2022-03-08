@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DopplerSecurity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using Doppler.HtmlEditorApi.ApiModels;
 using Doppler.HtmlEditorApi.Storage;
 using System.Text.Json;
@@ -18,10 +19,12 @@ namespace Doppler.HtmlEditorApi.Controllers
         private const string EMPTY_UNLAYER_CONTENT_JSON = "{\"body\":{\"rows\":[]}}";
         private const string EMPTY_UNLAYER_CONTENT_HTML = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional //EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\"><head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <meta name=\"x-apple-disable-message-reformatting\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <title></title></head><body></body></html>";
         private readonly IRepository _repository;
+        private readonly IOptions<FieldsOptions> _fieldsOptions;
 
-        public CampaignsController(IRepository Repository)
+        public CampaignsController(IRepository Repository, IOptions<FieldsOptions> fieldsOptions)
         {
             _repository = Repository;
+            _fieldsOptions = fieldsOptions;
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
@@ -64,16 +67,7 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
-            // TODO: get this information from the configuration
-            var fieldAliases = new[]
-            {
-                new FieldAliasesDef("BIRTHDAY", new[] { "CUMPLEANOS", "CUMPLEAÑOS", "DATE OF BIRTH", "DOB", "FECHA DE NACIMIENTO", "NACIMIENTO" }),
-                new FieldAliasesDef("COUNTRY", new[] { "PAIS", "PAÍS" }),
-                new FieldAliasesDef("EMAIL", new[] { "CORREO", "CORREO ELECTRONICO", "CORREO ELECTRÓNICO", "CORREO_ELECTRONICO", "CORREO_ELECTRÓNICO", "E-MAIL", "MAIL" }),
-                new FieldAliasesDef("FIRST_NAME", new[] { "FIRST NAME", "FIRST-NAME", "FIRSTNAME", "NAME", "NOMBRE" }),
-                new FieldAliasesDef("GENDER", new[] { "GENERO", "GÉNERO", "SEXO" }),
-                new FieldAliasesDef("LAST_NAME", new[] { "LAST NAME", "LAST-NAME", "LASTNAME", "SURNAME", "APELLIDO" }),
-            };
+            var fieldAliases = _fieldsOptions.Value.aliases;
 
             // TODO: get this information from a repository
             var fields = new[]
