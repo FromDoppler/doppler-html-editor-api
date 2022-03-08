@@ -26,9 +26,9 @@ public static class IDbContextMockExtensions
     public static void SetupBasicFields(
         this Mock<IDbContext> dbContextMock)
     {
-        dbContextMock.Setup(x => x.QueryAsync<QueryActiveBasicFieldsDbQuery.Result>(
-            It.IsAny<string>()))
-        .ReturnsAsync(new QueryActiveBasicFieldsDbQuery.Result[]
+        dbContextMock.Setup(x => x.QueryAsync<DbField>(
+            It.Is<string>(y => y.Contains("IsBasicField = 1"))))
+        .ReturnsAsync(new DbField[]
         {
             new() { IdField = 319, Name = "FIRST_NAME" },
             new() { IdField = 320, Name = "LAST_NAME" },

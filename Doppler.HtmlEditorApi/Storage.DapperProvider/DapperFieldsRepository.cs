@@ -20,7 +20,7 @@ public class DapperFieldsRepository : IFieldsRepository
             .Select(x => new Field(
                 id: x.IdField,
                 name: x.Name,
-                isBasic: true));
+                isBasic: x.IsBasicField));
 
     public Task<IEnumerable<Field>> GetCustomFields(string accountname)
         => Task.FromResult(new Field[0].AsEnumerable());
