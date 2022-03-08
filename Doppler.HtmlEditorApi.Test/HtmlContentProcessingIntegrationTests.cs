@@ -182,6 +182,8 @@ public class HtmlContentProcessingIntegrationTests
                 EditorType = null,
             });
 
+        dbContextMock.SetupBasicFields();
+
         var client = _factory.CreateSutClient(
             serviceToOverride1: dbContextMock.Object,
             token: token);

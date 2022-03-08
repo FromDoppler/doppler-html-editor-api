@@ -15,20 +15,12 @@ public class DapperFieldsRepository : IFieldsRepository
         _dbContext = dbContext;
     }
 
-    public Task<IEnumerable<Field>> GetActiveBasicFields()
-        => Task.FromResult(new[]
-        {
-            new Field(319, "FIRST_NAME", true),
-            new Field(320, "LAST_NAME", true),
-            new Field(321, "EMAIL", true),
-            new Field(322, "GENDER", true),
-            new Field(323, "BIRTHDAY", true),
-            new Field(324, "COUNTRY", true),
-            new Field(325, "CONSENT", true),
-            new Field(326, "ORIGIN", true),
-            new Field(327, "SCORE", true),
-            new Field(106667, "GDPR", true),
-        }.AsEnumerable());
+    public async Task<IEnumerable<Field>> GetActiveBasicFields()
+        => (await new QueryActiveBasicFieldsDbQuery(_dbContext).ExecuteAsync())
+            .Select(x => new Field(
+                id: x.IdField,
+                name: x.Name,
+                isBasic: true));
 
     public Task<IEnumerable<Field>> GetCustomFields(string accountname)
         => Task.FromResult(new Field[0].AsEnumerable());

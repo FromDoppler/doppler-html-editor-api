@@ -9,3 +9,11 @@ public abstract class DbQuery<TParametes, TResult>
     abstract protected string SqlQuery { get; }
     public abstract Task<TResult> ExecuteAsync(TParametes parameters);
 }
+
+public abstract class DbQuery<TResult>
+{
+    protected IDbContext DbContext { get; }
+    public DbQuery(IDbContext dbContext) => DbContext = dbContext;
+    abstract protected string SqlQuery { get; }
+    public abstract Task<TResult> ExecuteAsync();
+}
