@@ -22,6 +22,13 @@ public class DapperFieldsRepository : IFieldsRepository
                 name: x.Name,
                 isBasic: x.IsBasicField));
 
-    public Task<IEnumerable<Field>> GetCustomFields(string accountname)
-        => Task.FromResult(new Field[0].AsEnumerable());
+    public async Task<IEnumerable<Field>> GetCustomFields(string accountName)
+        => (await new QueryCustomFieldsDbQueryByAccountNameDbQuery(_dbContext)
+            .ExecuteAsync(new()
+            {
+                AccountName = accountName
+            })).Select(x => new Field(
+                id: x.IdField,
+                name: x.Name,
+                isBasic: x.IsBasicField));
 }
