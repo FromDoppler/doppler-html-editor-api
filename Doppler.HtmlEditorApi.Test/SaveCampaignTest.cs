@@ -93,8 +93,9 @@ namespace Doppler.HtmlEditorApi
                 .Returns(Task.CompletedTask);
 
             var client = _factory.CreateSutClient(
-                serviceToOverride1: repositoryMock.Object,
-                token: token);
+                repositoryMock.Object,
+                Mock.Of<IFieldsRepository>(),
+                token);
 
             // Act
             var response = await client.PutAsync(url, JsonContent.Create(new
@@ -274,7 +275,7 @@ namespace Doppler.HtmlEditorApi
                 });
 
             var client = _factory.CreateSutClient(
-                serviceToOverride1: dbContextMock.Object,
+                dbContextMock.Object,
                 token: token);
 
             // Act

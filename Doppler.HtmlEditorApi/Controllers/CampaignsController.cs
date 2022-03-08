@@ -19,11 +19,13 @@ namespace Doppler.HtmlEditorApi.Controllers
         private const string EMPTY_UNLAYER_CONTENT_JSON = "{\"body\":{\"rows\":[]}}";
         private const string EMPTY_UNLAYER_CONTENT_HTML = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional //EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\"><head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <meta name=\"x-apple-disable-message-reformatting\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <title></title></head><body></body></html>";
         private readonly IRepository _repository;
+        private readonly IFieldsRepository _fieldsRepository;
         private readonly IOptions<FieldsOptions> _fieldsOptions;
 
-        public CampaignsController(IRepository Repository, IOptions<FieldsOptions> fieldsOptions)
+        public CampaignsController(IRepository Repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
         {
             _repository = Repository;
+            _fieldsRepository = fieldsRepository;
             _fieldsOptions = fieldsOptions;
         }
 
@@ -69,20 +71,9 @@ namespace Doppler.HtmlEditorApi.Controllers
         {
             var fieldAliases = _fieldsOptions.Value.aliases;
 
-            // TODO: get this information from a repository
-            var fields = new[]
-            {
-                new Field(319, "FIRST_NAME", true),
-                new Field(320, "LAST_NAME", true),
-                new Field(321, "EMAIL", true),
-                new Field(322, "GENDER", true),
-                new Field(323, "BIRTHDAY", true),
-                new Field(324, "COUNTRY", true),
-                new Field(325, "CONSENT", true),
-                new Field(326, "ORIGIN", true),
-                new Field(327, "SCORE", true),
-                new Field(106667, "GDPR", true),
-            };
+            var basicFields = await _fieldsRepository.GetActiveBasicFields();
+            var customFields = await _fieldsRepository.GetCustomFields(accountName);
+            var fields = basicFields.Union(customFields);
 
             var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields, fieldAliases);
 
