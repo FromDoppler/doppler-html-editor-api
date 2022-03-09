@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Doppler.HtmlEditorApi.Storage.DapperProvider;
@@ -26,9 +27,10 @@ public static class IDbContextMockExtensions
     public static void SetupBasicFields(
         this Mock<IDbContext> dbContextMock)
     {
-        dbContextMock.Setup(x => x.QueryAsync<QueryActiveBasicFieldsDbQuery.Result>(
-            It.IsAny<string>()))
-        .ReturnsAsync(new QueryActiveBasicFieldsDbQuery.Result[]
+        dbContextMock.Setup(x => x.QueryAsync<DbField>(
+            It.Is<string>(y => y.Contains("IsBasicField = 1")),
+            null))
+        .ReturnsAsync(new DbField[]
         {
             new() { IdField = 319, Name = "FIRST_NAME" },
             new() { IdField = 320, Name = "LAST_NAME" },
@@ -41,5 +43,16 @@ public static class IDbContextMockExtensions
             new() { IdField = 327, Name = "SCORE" },
             new() { IdField = 106667, Name = "GDPR" }
         });
+    }
+
+    public static void SetupCustomFields(
+        this Mock<IDbContext> dbContextMock,
+        string expectedAccountName,
+        IEnumerable<DbField> result)
+    {
+        dbContextMock.Setup(x => x.QueryAsync<DbField>(
+            It.Is<string>(y => y.Contains("IsBasicField = 0") && y.Contains("Email = @accountName")),
+            It.Is<ByAccountNameParameters>(y => y.AccountName == expectedAccountName)))
+        .ReturnsAsync(result);
     }
 }

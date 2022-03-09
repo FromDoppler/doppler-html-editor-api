@@ -161,7 +161,8 @@ public class HtmlContentProcessingIntegrationTests
         "unlayer",
         "<p>Hola <b><a href=\"https://www.google.com/search?q=[[[first%20name]]]%20[[[cumplea&#241;os]]]\">[[[first%20name]]]</a> [[[cumplea&ntilde;os]]]</b></p>",
         "<p>Hola <b><a href=\"https://www.google.com/search?q=|*|319*|*%20|*|323*|*\">|*|319*|*</a> |*|323*|*</b></p>")]
-    public async Task PUT_campaign_should_remove_unknown_fieldIds(string type, string htmlInput, string expectedContent)
+    [InlineData("html", "[[[custom1]]] [[[Custom2]]] [[[UNKNOWN_FIELD]]]", "|*|12345*|* |*|456789*|* [[[UNKNOWN_FIELD]]]")]
+    public async Task PUT_campaign_should_replace_fields_and_remove_unknown_fieldIds(string type, string htmlInput, string expectedContent)
     {
         // Arrange
         var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
@@ -183,6 +184,22 @@ public class HtmlContentProcessingIntegrationTests
             });
 
         dbContextMock.SetupBasicFields();
+        dbContextMock.SetupCustomFields(
+            expectedAccountName: accountName,
+            result: new DbField[] {
+                new()
+                {
+                    IdField = 12345,
+                    IsBasicField = false,
+                    Name = "CUSTOM1"
+                },
+                new()
+                {
+                    IdField = 456789,
+                    IsBasicField = false,
+                    Name = "custom2"
+                }
+            });
 
         var client = _factory.CreateSutClient(
             serviceToOverride1: dbContextMock.Object,
