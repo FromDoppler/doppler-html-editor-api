@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 
@@ -50,6 +52,11 @@ public class DopplerHtmlDocument
 
     public string GetHeadContent()
         => _headNode?.InnerHtml;
+
+    public IEnumerable<int> GetFieldsId()
+        => FIELD_ID_TAG_REGEX.Matches(_contentNode.InnerHtml)
+            .Select(x => int.Parse(x.Groups[1].ValueSpan))
+            .Distinct();
 
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
     {
