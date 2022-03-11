@@ -6,6 +6,92 @@ namespace Doppler.HtmlEditorApi;
 
 public class DopplerHtmlDocumentTest
 {
+    #region Content examples
+    const string HTML_SOCIALSHARE_TABLE_WITH_ERRORS = $@"
+<table>
+    <tr>
+        <td id=""facebook"" valign=""middle"">
+            <a
+                socialshare=""4""
+                ondragstart=""return false;""
+                href=""    http://www.facebook.com/share.php?u=https%3a%2f%2fvp.mydplr.com%2f123&amp;t=Prueba+MSEditor""
+                target=""_blank""
+            >
+                <img
+                ondragstart=""return false;""
+                src=""https://app2.dopplerfiles.com/MSEditor/images/color_small_facebook.png""
+                alt=""Facebook""
+                width=""40""
+                />
+            </a>
+        </td>
+        <td id=""linkedin"" valign=""middle"">
+            <a
+                socialshare=""3""
+                ondragstart=""return false;""
+                href=""
+http://www.linkedin.com/
+shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueba+MSEditor&amp;summary=&amp;source=Add%20to%20Any
+""
+                target=""_blank""
+            >
+                <img
+                ondragstart=""return false;""
+                src=""https://app2.dopplerfiles.com/MSEditor/images/color_small_linkedin.png""
+                alt=""Linkedin""
+                width=""40""
+                />
+            </a>
+        </td>
+        <td id=""pinterest"" valign=""middle"">
+            <a
+                socialshare=""20""
+                ondragstart=""return false;""
+                href=""WRONG URL""
+                target=""_blank""
+            >
+                <img
+                ondragstart=""return false;""
+                src=""https://app2.dopplerfiles.com/MSEditor/images/color_small_pinterest.png""
+                alt=""Pinterest""
+                width=""40""
+                />
+            </a>
+        </td>
+        <td id=""whatsapp"" class=""dplr-mobile-only"" valign=""middle"">
+            <a
+                socialshare=""24""
+                ondragstart=""return false;""
+                href=""whatsapp://send?text=https%3a%2f%2fvp.mydplr.com%2f123""
+                target=""_blank""
+            >
+                <img
+                ondragstart=""return false;""
+                src=""https://app2.dopplerfiles.com/MSEditor/images/color_small_whatsapp.png""
+                alt=""Whatsapp""
+                width=""40""
+                />
+            </a>
+        </td>
+        <td id=""twitter"" valign=""middle"">
+            <a
+                socialshare=""2""
+                ondragstart=""return false;""
+                href=""http://twitter.com/share?related=fromdoppler&amp;text=Prueba+MSEditor&amp;url=https%3a%2f%2fvp.mydplr.com%2f123""
+                target=""_blank""
+            >
+                <img
+                ondragstart=""return false;""
+                src=""https://app2.dopplerfiles.com/MSEditor/images/color_small_twitter.png""
+                alt=""Twitter""
+                width=""40""
+                />
+            </a>
+        </td>
+    </tr>
+</table>";
+    #endregion
+
     private readonly ITestOutputHelper _output;
 
     public DopplerHtmlDocumentTest(ITestOutputHelper output)
@@ -114,6 +200,22 @@ public class DopplerHtmlDocumentTest
 
         // Assert
         Assert.Equal(expected, output);
+    }
+
+    [Fact]
+    public void SanitizeTrackableLinks_should_not_modify_socialshare_links()
+    {
+        // Arrange
+        var input = HTML_SOCIALSHARE_TABLE_WITH_ERRORS;
+        var htmlDocument = new DopplerHtmlDocument(input);
+        var contentWithoutSanitization = htmlDocument.GetDopplerContent();
+
+        // Act
+        htmlDocument.SanitizeTrackableLinks();
+        var output = htmlDocument.GetDopplerContent();
+
+        // Assert
+        Assert.Equal(contentWithoutSanitization, output);
     }
 
     private string CreateTestContentWithLink(string href)

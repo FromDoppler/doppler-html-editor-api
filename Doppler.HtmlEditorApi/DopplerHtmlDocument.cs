@@ -66,6 +66,7 @@ public class DopplerHtmlDocument
         var trackableLinksNodes = _contentNode
             .GetLinkNodes()
             .Where(x => !string.IsNullOrWhiteSpace(x.Attributes["href"]?.Value))
+            .Where(x => !x.Attributes.Contains("socialshare"))
             .Where(x => TRACKABLE_URL_ACCEPTANCE_REGEX.IsMatch(x.Attributes["href"].Value));
 
         foreach (var node in trackableLinksNodes)
