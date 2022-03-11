@@ -32,6 +32,8 @@ public class DopplerHtmlDocument
     // &, # and ; are here to accept HTML Entities
     private static readonly Regex FIELD_NAME_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_NAME_TAG_START_DELIMITER)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%&;#]+){Regex.Escape(FIELD_NAME_TAG_END_DELIMITER)}");
     private static readonly Regex FIELD_ID_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_ID_TAG_START_DELIMITER)}(\d+){Regex.Escape(FIELD_ID_TAG_END_DELIMITER)}");
+    private static readonly Regex CLEANUP_URL_REGEX = new Regex(@"\s");
+    private static readonly Regex TRACKABLE_URL_ACCEPTANCE_REGEX = new Regex(@"^(?:https?|ftp):\/\/");
 
     private readonly HtmlNode _headNode;
     private readonly HtmlNode _contentNode;
@@ -63,9 +65,7 @@ public class DopplerHtmlDocument
         var trackableLinksNodes = _contentNode
             .GetLinkNodes()
             .Where(x => !string.IsNullOrWhiteSpace(x.Attributes["href"]?.Value))
-            .Where(x => x.Attributes["href"].Value.ToLowerInvariant().StartsWith("http://")
-                || x.Attributes["href"].Value.ToLowerInvariant().StartsWith("https://")
-                || x.Attributes["href"].Value.ToLowerInvariant().StartsWith("ftp://"));
+            .Where(x => TRACKABLE_URL_ACCEPTANCE_REGEX.IsMatch(x.Attributes["href"].Value));
 
         foreach (var node in trackableLinksNodes)
         {
@@ -110,11 +110,7 @@ public class DopplerHtmlDocument
 
     private string SanitizedUrl(string url)
     {
-        var withoutSpaces = url
-            .Replace("\r", string.Empty)
-            .Replace("\n", string.Empty)
-            .Replace("\t", string.Empty)
-            .Replace(" ", string.Empty);
+        var withoutSpaces = CLEANUP_URL_REGEX.Replace(url, string.Empty);
 
         return withoutSpaces;
     }
