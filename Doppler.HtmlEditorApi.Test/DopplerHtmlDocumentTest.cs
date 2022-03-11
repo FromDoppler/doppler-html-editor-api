@@ -50,4 +50,20 @@ public class DopplerHtmlDocumentTest
         // Assert
         Assert.Equal(expectedCount, result.Count());
     }
+
+    [Fact]
+    public void SanitizeTrackableLinks_should_not_modify_html_when_there_are_no_links()
+    {
+        // Arrange
+        var input = $@"<p>Hello!</p>";
+        var htmlDocument = new DopplerHtmlDocument(input);
+        var contentWithoutSanitization = htmlDocument.GetDopplerContent();
+
+        // Act
+        htmlDocument.SanitizeTrackableLinks();
+        var output = htmlDocument.GetDopplerContent();
+
+        // Assert
+        Assert.Equal(contentWithoutSanitization, output);
+    }
 }

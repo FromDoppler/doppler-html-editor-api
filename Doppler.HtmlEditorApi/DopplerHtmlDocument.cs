@@ -58,6 +58,11 @@ public class DopplerHtmlDocument
             .Select(x => int.Parse(x.Groups[1].ValueSpan))
             .Distinct();
 
+    public void SanitizeTrackableLinks()
+    {
+        // TODO: implement me
+    }
+
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
     {
         _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FIELD_NAME_TAG_REGEX.Replace(

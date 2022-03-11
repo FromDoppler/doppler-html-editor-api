@@ -230,6 +230,63 @@ public class HtmlContentProcessingIntegrationTests
     }
 
     [Theory]
+    [InlineData(
+        1,
+        "html",
+        // Sanitization not required
+        "<p>Hola <b><a href=\"https://www.google.com/search?q=[[[first name]]]|*|12345678*|*\">[[[first name]]]</a> [[[cumpleaños]]]</b></p>",
+        "<p>Hola <b><a href=\"https://www.google.com/search?q=|*|319*|*\">|*|319*|*</a> |*|323*|*</b></p>")]
+    public async Task PUT_campaign_should_sanitize_links(int idCampaign, string type, string htmlInput, string expectedContent)
+    {
+        // Arrange
+        var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+        var accountName = TUD.EMAIL_TEST1;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content";
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
+                It.IsAny<string>(),
+                It.IsAny<ByCampaignIdAndAccountNameParameters>()))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = true,
+                EditorType = null,
+            });
+
+        dbContextMock.SetupBasicFields();
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = type,
+            htmlContent = htmlInput,
+            meta = "true" // it does not care
+        }));
+
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        ContentRow contentRow = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.IsAny<string>(),
+            It.Is<ContentRow>(x => AssertHelper.GetValueAndContinue(x, out contentRow))));
+
+        Assert.Equal(idCampaign, contentRow.IdCampaign);
+        Assert.Equal(expectedContent, contentRow.Content);
+    }
+
+    [Theory]
     [InlineData(BODY_CONTENT, HEAD_CONTENT, BODY_CONTENT, null, null)]
     [InlineData(BODY_CONTENT, HEAD_CONTENT, BODY_CONTENT, META_CONTENT, 5)]
     [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, null, null)]
