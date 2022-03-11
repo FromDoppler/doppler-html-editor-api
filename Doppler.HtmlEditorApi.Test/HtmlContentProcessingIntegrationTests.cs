@@ -236,6 +236,11 @@ public class HtmlContentProcessingIntegrationTests
         // Sanitization not required
         "<p>Hola <b><a href=\"https://www.google.com/search?q=[[[first name]]]|*|12345678*|*\">[[[first name]]]</a> [[[cumpleaños]]]</b></p>",
         "<p>Hola <b><a href=\"https://www.google.com/search?q=|*|319*|*\">|*|319*|*</a> |*|323*|*</b></p>")]
+    [InlineData(
+        2,
+        "unlayer",
+        "<a href=\"https://\tgoo gle1\n.com    \r\n  \">Link</a>",
+        "<a href=\"https://google1.com\">Link</a>")]
     public async Task PUT_campaign_should_sanitize_links(int idCampaign, string type, string htmlInput, string expectedContent)
     {
         // Arrange

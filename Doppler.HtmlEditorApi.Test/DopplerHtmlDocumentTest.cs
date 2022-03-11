@@ -66,4 +66,32 @@ public class DopplerHtmlDocumentTest
         // Assert
         Assert.Equal(contentWithoutSanitization, output);
     }
+
+    [Theory]
+    [InlineData(
+        "https://\tgoo gle1\n.com    \r\n  ",
+        "https://google1.com"
+    )]
+    public void SanitizeTrackableLinks_should_sanitize_trackable_links(string inputHref, string expectedHref)
+    {
+        // Arrange
+        var input = CreateTestContentWithLink(inputHref);
+        var expected = CreateTestContentWithLink(expectedHref);
+
+        var htmlDocument = new DopplerHtmlDocument(input);
+
+        // Act
+        htmlDocument.SanitizeTrackableLinks();
+        var output = htmlDocument.GetDopplerContent();
+
+        // Assert
+        Assert.Equal(expected, output);
+    }
+
+    private string CreateTestContentWithLink(string href)
+        => $@"<div>
+    <a href=""{href}"">Link</a>
+</div>
+";
+
 }

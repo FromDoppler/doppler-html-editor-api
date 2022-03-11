@@ -60,7 +60,22 @@ public class DopplerHtmlDocument
 
     public void SanitizeTrackableLinks()
     {
-        // TODO: implement me
+        var trackableLinksNodes = _contentNode
+            .GetLinkNodes()
+            .Where(x => !string.IsNullOrWhiteSpace(x.Attributes["href"]?.Value))
+            .Where(x => x.Attributes["href"].Value.ToLowerInvariant().StartsWith("http://")
+                || x.Attributes["href"].Value.ToLowerInvariant().StartsWith("https://")
+                || x.Attributes["href"].Value.ToLowerInvariant().StartsWith("ftp://"));
+
+        foreach (var node in trackableLinksNodes)
+        {
+            var originalHref = node.Attributes["href"].Value;
+            var sanitizedUrl = SanitizedUrl(originalHref);
+            if (sanitizedUrl != originalHref)
+            {
+                node.Attributes["href"].Value = sanitizedUrl;
+            }
+        }
     }
 
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
@@ -93,4 +108,14 @@ public class DopplerHtmlDocument
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
 
+    private string SanitizedUrl(string url)
+    {
+        var withoutSpaces = url
+            .Replace("\r", string.Empty)
+            .Replace("\n", string.Empty)
+            .Replace("\t", string.Empty)
+            .Replace(" ", string.Empty);
+
+        return withoutSpaces;
+    }
 }

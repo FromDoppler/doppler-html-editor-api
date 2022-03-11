@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Doppler.HtmlEditorApi;
 
 namespace HtmlAgilityPack;
 
@@ -53,6 +56,10 @@ public static class HtmlAgilityPackUtils
             textNode.InnerHtml = newText;
         }
     }
+
+    public static IEnumerable<HtmlNode> GetLinkNodes(this HtmlNode node)
+        => node.SelectNodes(@"//a").EmptyIfNull()
+            .Union(node.SelectNodes(@"//area").EmptyIfNull());
 
     public static HtmlDocument LoadHtml(string inputHtml)
     {
