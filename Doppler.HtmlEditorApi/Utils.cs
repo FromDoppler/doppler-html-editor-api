@@ -14,4 +14,7 @@ public static class Utils
 
     public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> source)
         => source ?? Enumerable.Empty<T>();
+
+    public static string FallbackIfNullOrEmpty(this string source, string fallback)
+        => string.IsNullOrEmpty(source) ? fallback : source;
 }

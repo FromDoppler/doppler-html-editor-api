@@ -88,6 +88,18 @@ public class DopplerHtmlDocumentTest
         "%20\n%20  HTTP://GOOGLE4.com/TEST%20space%20\n %20  ",
         "http://google4.com/TEST%20space"
     )]
+    [InlineData(
+        "%20\n%20  www.google5.com%20\n %20  ",
+        "http://www.google5.com"
+    )]
+    [InlineData(
+        "%20\n%20  google6.com%20\n %20  ",
+        "%20\n%20  google6.com%20\n %20  "
+    )]
+    [InlineData(
+        "%20\n%20  WWW.GOOGLE7.com/TEST%20space%20\n %20  ",
+        "http://www.google7.com/TEST%20space"
+    )]
     public void SanitizeTrackableLinks_should_sanitize_trackable_links(string inputHref, string expectedHref)
     {
         // Arrange
