@@ -68,6 +68,11 @@ public class DopplerHtmlDocument
             .Distinct();
     }
 
+    public IEnumerable<string> GetTrackableUrls()
+        => GetTrackableLinkNodes()
+            .Select(x => x.Attributes["href"].Value)
+            .Distinct();
+
     public void SanitizeTrackableLinks()
     {
         var trackableLinksNodes = GetTrackableLinkNodes();
