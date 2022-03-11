@@ -76,6 +76,10 @@ public class DopplerHtmlDocumentTest
         "HTTPS://GOOGLE.com/   SEGMENT",
         "https://google.com/SEGMENT"
     )]
+    [InlineData(
+        "\n  https://google2.com\n   ",
+        "https://google2.com"
+    )]
     public void SanitizeTrackableLinks_should_sanitize_trackable_links(string inputHref, string expectedHref)
     {
         // Arrange
