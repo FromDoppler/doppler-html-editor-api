@@ -82,6 +82,9 @@ namespace Doppler.HtmlEditorApi.Controllers
             htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
             htmlDocument.SanitizeTrackableLinks();
 
+            // TODO: use and test it
+            var trackableUrls = htmlDocument.GetTrackableUrls(dopplerFieldsProcessor.GetFieldNameOrNull);
+
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
             var fieldIds = htmlDocument.GetFieldsIdOrNull();
