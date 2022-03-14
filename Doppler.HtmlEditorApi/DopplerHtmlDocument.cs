@@ -32,6 +32,9 @@ public class DopplerHtmlDocument
     // &, # and ; are here to accept HTML Entities
     private static readonly Regex FIELD_NAME_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_NAME_TAG_START_DELIMITER)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%&;#]+){Regex.Escape(FIELD_NAME_TAG_END_DELIMITER)}");
     private static readonly Regex FIELD_ID_TAG_REGEX = new Regex($@"{Regex.Escape(FIELD_ID_TAG_START_DELIMITER)}(\d+){Regex.Escape(FIELD_ID_TAG_END_DELIMITER)}");
+    private static readonly Regex CLEANUP_URL_REGEX = new Regex(@"^(?:\s?(?:%20)?)*|(?:\s?(?:%20)?)*$|\s");
+    private static readonly Regex TRACKABLE_URL_ACCEPTANCE_REGEX = new Regex(@"^(?:\s?(?:%20)?)*(?:(?:https?|ftp):\/\/|www\.)", RegexOptions.IgnoreCase);
+    private static readonly Regex TRACKABLE_URL_PARTS_REGEX = new Regex(@"^(?:(?<scheme>(?:https?|ftp):\/\/)(?<domain>[^\/]+)|(?<domainWithoutScheme>www\.[^\/]+))(?<rest>\/.*)?$", RegexOptions.IgnoreCase);
 
     private readonly HtmlNode _headNode;
     private readonly HtmlNode _contentNode;
@@ -57,6 +60,25 @@ public class DopplerHtmlDocument
         => FIELD_ID_TAG_REGEX.Matches(_contentNode.InnerHtml)
             .Select(x => int.Parse(x.Groups[1].ValueSpan))
             .Distinct();
+
+    public void SanitizeTrackableLinks()
+    {
+        var trackableLinksNodes = _contentNode
+            .GetLinkNodes()
+            .Where(x => !string.IsNullOrWhiteSpace(x.Attributes["href"]?.Value))
+            .Where(x => !x.Attributes.Contains("socialshare"))
+            .Where(x => TRACKABLE_URL_ACCEPTANCE_REGEX.IsMatch(x.Attributes["href"].Value));
+
+        foreach (var node in trackableLinksNodes)
+        {
+            var originalHref = node.Attributes["href"].Value;
+            var sanitizedUrl = SanitizedUrl(originalHref);
+            if (sanitizedUrl != originalHref)
+            {
+                node.Attributes["href"].Value = sanitizedUrl;
+            }
+        }
+    }
 
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
     {
@@ -88,4 +110,20 @@ public class DopplerHtmlDocument
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
 
+    private string SanitizedUrl(string url)
+    {
+        var withoutSpaces = CLEANUP_URL_REGEX.Replace(url, string.Empty);
+
+        var match = TRACKABLE_URL_PARTS_REGEX.Match(withoutSpaces);
+        var scheme = match.Groups["scheme"].Value
+            .FallbackIfNullOrEmpty("http://")
+            .ToLowerInvariant();
+        var domain = match.Groups["domain"].Value
+            .FallbackIfNullOrEmpty(match.Groups["domainWithoutScheme"].Value)
+            .ToLowerInvariant();
+        var rest = match.Groups["rest"].Value;
+        var sanitizedUrl = $"{scheme}{domain}{rest}";
+
+        return sanitizedUrl;
+    }
 }

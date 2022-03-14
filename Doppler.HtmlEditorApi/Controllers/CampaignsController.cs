@@ -80,6 +80,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
             htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
             htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
+            htmlDocument.SanitizeTrackableLinks();
 
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
