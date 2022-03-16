@@ -9,16 +9,6 @@ public class SaveFieldsId : DbQuery<SaveFieldsId.Parameters, int>
 {
     public SaveFieldsId(IDbContext dbContext) : base(dbContext) { }
 
-    /* TODO: Query suggestion --> @"
-    DECLARE @T TABLE (IdField INT)
-    INSERT INTO @T (IdField) VALUES @FieldsId
-
-    INSERT INTO ContentXField (IdContent, IdField)
-    SELECT @IdContent, t.IdField
-    From @T t
-    LEFT JOIN dbo.ContentXFIeld CxF ON CxF.IdField = t.IdField AND CxF.IdContent = @IdContent
-    WHERE CxF.IdContent IS NULL"
-    */
     protected override string SqlQuery => @"
     DECLARE @T TABLE (IdField INT)
     INSERT INTO @T (IdField) VALUES {{FieldIds}}
