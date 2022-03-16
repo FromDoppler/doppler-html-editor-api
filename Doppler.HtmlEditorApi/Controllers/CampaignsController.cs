@@ -84,6 +84,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
+            var fieldIds = htmlDocument.GetFieldsIdOrNull();
 
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
@@ -100,6 +101,10 @@ namespace Doppler.HtmlEditorApi.Controllers
             };
 
             await _repository.SaveCampaignContent(accountName, contentRow);
+            if (fieldIds != null)
+            {
+                await _fieldsRepository.SaveFieldsId(campaignId, fieldIds);
+            }
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
 

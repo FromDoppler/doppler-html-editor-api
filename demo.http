@@ -11,7 +11,7 @@ GET {{base}}/accounts/amoschini@makingsense.com/campaigns/33882793/content
 Authorization: Bearer {{Token}}
 
 ###
-PUT {{base}}/accounts/amoschini@makingsense.com/campaigns/33882793/content
+PUT {{base}}/accounts/amoschini@makingsense.com/campaigns/33888017/content
 Content-Type: application/json
 Authorization: Bearer {{Token}}
 
@@ -340,6 +340,7 @@ Authorization: Bearer {{Token}}
         },
         "schemaVersion": 6
     },
+    "Type": "unlayer",
     "htmlContent": "<html></html>"
 }
 
