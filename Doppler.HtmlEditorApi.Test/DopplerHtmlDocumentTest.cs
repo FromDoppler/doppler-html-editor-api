@@ -114,7 +114,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         var htmlDocument = new DopplerHtmlDocument(html);
 
         // Act
-        var result = htmlDocument.GetFieldsId();
+        var result = htmlDocument.GetFieldsIdOrNull();
 
         // Assert
         Assert.Equal(2, result.Count());
@@ -124,17 +124,31 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
 
     [Theory]
     [InlineData("EMAIL: |*|*|*\ncorreo: |*|321*|*\nBIRTHDAY |*|*|*", 1)]
-    [InlineData("EMAIL: |*|*|*", 0)]
     public void GetFieldsId_with_fields_equals_zero_or_empty_should_omitted_into_return(string html, int expectedCount)
     {
         // Arrange
         var htmlDocument = new DopplerHtmlDocument(html);
 
         // Act
-        var result = htmlDocument.GetFieldsId();
+        var result = htmlDocument.GetFieldsIdOrNull();
 
         // Assert
         Assert.Equal(expectedCount, result.Count());
+    }
+
+    [Theory]
+    [InlineData("EMAIL: |*|*|*")]
+    [InlineData("No field ids")]
+    public void GetFieldsId_without_field_ids_or_one_empty_field_id_should_be_return_null(string html)
+    {
+        // Arrange
+        var htmlDocument = new DopplerHtmlDocument(html);
+
+        // Act
+        var result = htmlDocument.GetFieldsIdOrNull();
+
+        // Assert
+        Assert.Equal(null, result);
     }
 
     [Fact]
