@@ -29,6 +29,11 @@ public class DopplerFieldsProcessor
             ? fieldId
             : null;
 
+    public string GetFieldNameOrNull(int fieldId)
+        => _fieldNamesById.TryGetValue(fieldId, out var fieldName)
+            ? fieldName
+            : null;
+
     public bool FieldIdExist(int fieldId)
         => _fieldNamesById.ContainsKey(fieldId);
 

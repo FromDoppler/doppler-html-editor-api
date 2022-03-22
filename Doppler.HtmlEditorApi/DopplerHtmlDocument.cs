@@ -68,13 +68,23 @@ public class DopplerHtmlDocument
             .Distinct();
     }
 
+    public IEnumerable<string> GetTrackableUrls(Func<int, string> getFieldNameOrNullFunc)
+        => GetTrackableLinkNodes()
+            .Select(x => x.Attributes["href"].Value)
+            .Select(x => FIELD_ID_TAG_REGEX.Replace(x, match =>
+            {
+                var fieldId = int.Parse(match.Groups[1].ValueSpan);
+                var fieldName = getFieldNameOrNullFunc(fieldId);
+                return fieldName != null
+                    ? CreateFieldNameTag(fieldName)
+                    // keep the original code when field doesn't exist
+                    : match.Value;
+            }))
+            .Distinct();
+
     public void SanitizeTrackableLinks()
     {
-        var trackableLinksNodes = _contentNode
-            .GetLinkNodes()
-            .Where(x => !string.IsNullOrWhiteSpace(x.Attributes["href"]?.Value))
-            .Where(x => !x.Attributes.Contains("socialshare"))
-            .Where(x => TRACKABLE_URL_ACCEPTANCE_REGEX.IsMatch(x.Attributes["href"].Value));
+        var trackableLinksNodes = GetTrackableLinkNodes();
 
         foreach (var node in trackableLinksNodes)
         {
@@ -114,6 +124,9 @@ public class DopplerHtmlDocument
     private static string CreateFieldIdTag(int? fieldId)
         => $"{FIELD_ID_TAG_START_DELIMITER}{fieldId}{FIELD_ID_TAG_END_DELIMITER}";
 
+    private static string CreateFieldNameTag(string fieldName)
+        => $"{FIELD_NAME_TAG_START_DELIMITER}{fieldName}{FIELD_NAME_TAG_END_DELIMITER}";
+
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
 
@@ -133,4 +146,11 @@ public class DopplerHtmlDocument
 
         return sanitizedUrl;
     }
+
+    private IEnumerable<HtmlNode> GetTrackableLinkNodes()
+        => _contentNode
+            .GetLinkNodes()
+            .Where(x => !string.IsNullOrWhiteSpace(x.Attributes["href"]?.Value))
+            .Where(x => !x.Attributes.Contains("socialshare"))
+            .Where(x => TRACKABLE_URL_ACCEPTANCE_REGEX.IsMatch(x.Attributes["href"].Value));
 }

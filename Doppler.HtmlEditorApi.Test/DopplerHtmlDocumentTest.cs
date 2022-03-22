@@ -232,6 +232,111 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         Assert.Equal(contentWithoutSanitization, output);
     }
 
+    [Fact]
+    public void GetTrackableUrls_should_return_empty_list_when_there_are_not_links()
+    {
+        // Arrange
+        var input = "<p>Hello!</p>";
+        var htmlDocument = new DopplerHtmlDocument(input);
+        htmlDocument.GetDopplerContent();
+
+        // Act
+        var links = htmlDocument.GetTrackableUrls(_ => null);
+
+        // Assert
+        Assert.Empty(links);
+    }
+
+    [Fact]
+    public void GetTrackableUrls_should_return_empty_list_when_there_are_only_socialshare_links()
+    {
+        // Arrange
+        var input = HTML_SOCIALSHARE_TABLE_WITH_ERRORS;
+        var htmlDocument = new DopplerHtmlDocument(input);
+        htmlDocument.GetDopplerContent();
+
+        // Act
+        var links = htmlDocument.GetTrackableUrls(_ => null);
+
+        // Assert
+        Assert.Empty(links);
+    }
+
+    [Fact]
+    public void GetTrackableUrls_should_return_list_of_trackable_urls()
+    {
+        // Arrange
+        var input = @"<ul>
+    <li><a href=""https://www.google.com/search?q=search%20term"">Result 1 (HTTPS)</a></li>
+    <li><a href=""HTTP://www.GOOGLE.com/search?q=SEARCH%20term"">Result 2 (HTTP, with uppercase)</a></li>
+    <li><a href=""www.GOOGLE.com/search?q=SEARCH%20term"">Result 3 (with www without scheme)</a></li>
+    <li><a href=""GOOGLE.com/search?q=SEARCH%20term"">No Result (without www without scheme)</a></li>
+    <li><a href=""ftp://GOOGLE.com/search?q=SEARCH%20term"">Result 4 (ftp)</a></li>
+    <li><a href=""www.GOOGLE.com/search?q=SEARCH%20term"">No Result (duplicated)</a></li>
+</ul>";
+        var htmlDocument = new DopplerHtmlDocument(input);
+        htmlDocument.GetDopplerContent();
+
+        // Act
+        var links = htmlDocument.GetTrackableUrls(_ => null);
+
+        // Assert
+        Assert.Equal(4, links.Count());
+    }
+
+    [Fact]
+    public void GetTrackableUrls_should_map_fieldnames()
+    {
+        // Arrange
+        var input = @"<ul>
+    <li><a href=""https://www.|*|123*|*.com/search?q=|*|456*|*"">Result 1 (HTTPS)</a></li>
+    <li><a href=""HTTP://|*|1*|*/search?q=SEARCH%20term"">Result 2 (HTTP, with uppercase)</a></li>
+    <li><a href=""www.GOOGLE.com/|*|2*|*"">Result 3 (with www without scheme)</a></li>
+    <li><a href=""ftp://|*|3*|*"">Result 4 (ftp)</a></li>
+</ul>";
+        var htmlDocument = new DopplerHtmlDocument(input);
+        htmlDocument.GetDopplerContent();
+
+        // Act
+        var links = htmlDocument.GetTrackableUrls(fieldId => $"FIELD_{fieldId}");
+
+        // Assert
+        Assert.Collection(
+            links,
+            link => Assert.Equal("https://www.[[[FIELD_123]]].com/search?q=[[[FIELD_456]]]", link),
+            link => Assert.Equal("HTTP://[[[FIELD_1]]]/search?q=SEARCH%20term", link),
+            link => Assert.Equal("www.GOOGLE.com/[[[FIELD_2]]]", link),
+            link => Assert.Equal("ftp://[[[FIELD_3]]]", link));
+    }
+
+    [Fact]
+    public void GetTrackableUrls_should_keep_original_code_when_fieldname_does_not_exist()
+    {
+        // Arrange
+        var input = @"<ul>
+    <li><a href=""https://www.|*|123*|*.com/search?q=|*|456*|*"">Result 1 (HTTPS)</a></li>
+    <li><a href=""HTTP://|*|1*|*/search?q=SEARCH%20term"">Result 2 (HTTP, with uppercase)</a></li>
+    <li><a href=""www.GOOGLE.com/|*|2*|*"">Result 3 (with www without scheme)</a></li>
+    <li><a href=""ftp://|*|3*|*"">Result 4 (ftp)</a></li>
+</ul>";
+        var htmlDocument = new DopplerHtmlDocument(input);
+        htmlDocument.GetDopplerContent();
+
+        // Act
+        var links = htmlDocument.GetTrackableUrls(_ => null);
+
+        // Assert
+        Assert.Collection(
+            links,
+            link => Assert.Equal("https://www.|*|123*|*.com/search?q=|*|456*|*", link),
+            link => Assert.Equal("HTTP://|*|1*|*/search?q=SEARCH%20term", link),
+            link => Assert.Equal("www.GOOGLE.com/|*|2*|*", link),
+            link => Assert.Equal("ftp://|*|3*|*", link));
+    }
+
+    // private string DummyGetFieldNameOrNullFunc(int fieldId)
+    //     => $"FIELD_{fieldId}";
+
     private string CreateTestContentWithLink(string href)
         => $@"<div>
     <a href=""{href}"">Link</a>
