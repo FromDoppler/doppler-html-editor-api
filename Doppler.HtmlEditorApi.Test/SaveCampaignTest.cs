@@ -479,5 +479,109 @@ namespace Doppler.HtmlEditorApi
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
         }
+
+        [Theory]
+        [InlineData("[[[firstname]]]", "VALUES (319)")]
+        [InlineData("[[[firstname]]] [[[lastname]]]", "VALUES (319),(320)")]
+        [InlineData("[[[firstname]]] [[[lastname]]] [[[noexist]]]", "VALUES (319),(320)")]
+        public async Task PUT_campaign_should_store_field_relations(string htmlContent, string expectedSubQuery)
+        {
+            // Arrange
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
+
+            var dbContextMock = new Mock<IDbContext>();
+
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+                {
+                    OwnCampaignExists = true,
+                    ContentExists = true,
+                    EditorType = 5,
+                });
+
+            dbContextMock.SetupBasicFields();
+
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent,
+                meta = Utils.ParseAsJsonElement("{}")
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dbContextMock.VerifyAll();
+            dbContextMock.Verify(x => x.ExecuteAsync(
+                It.Is<string>(y => y.Contains(expectedSubQuery)),
+                It.Is<SaveFieldsId.Parameters>(y => y.IdContent == expectedIdCampaign)
+            ), Times.Once);
+        }
+
+        [Fact]
+        public async Task PUT_campaign_should_no_store_field_relations_when_no_fields()
+        {
+            // Arrange
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
+            var htmlContent = "<html>No content</html>";
+
+            var dbContextMock = new Mock<IDbContext>();
+
+            dbContextMock
+                .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
+                    It.IsAny<string>(),
+                    It.Is<ByCampaignIdAndAccountNameParameters>(x =>
+                        x.AccountName == expectedAccountName
+                        && x.IdCampaign == expectedIdCampaign)))
+                .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+                {
+                    OwnCampaignExists = true,
+                    ContentExists = true,
+                    EditorType = 5,
+                });
+
+            dbContextMock.SetupBasicFields();
+
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent,
+                meta = Utils.ParseAsJsonElement("{}")
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dbContextMock.VerifyAll();
+            dbContextMock.Verify(x => x.ExecuteAsync(
+                It.Is<string>(y => y.Contains("INSERT INTO ContentXField")),
+                It.IsAny<object>()
+            ), Times.Never);
+        }
     }
 }
