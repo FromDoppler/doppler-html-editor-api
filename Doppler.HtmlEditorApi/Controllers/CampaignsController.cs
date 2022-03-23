@@ -87,7 +87,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
-            var fieldIds = htmlDocument.GetFieldsIdOrNull();
+            var fieldIds = htmlDocument.GetFieldIds();
 
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
@@ -104,7 +104,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             };
 
             await _repository.SaveCampaignContent(accountName, contentRow);
-            if (fieldIds != null)
+            if (!fieldIds.Any())
             {
                 await _fieldsRepository.SaveFieldsId(campaignId, fieldIds);
             }

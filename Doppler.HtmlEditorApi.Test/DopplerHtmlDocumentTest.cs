@@ -114,7 +114,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         var htmlDocument = new DopplerHtmlDocument(html);
 
         // Act
-        var result = htmlDocument.GetFieldsIdOrNull();
+        var result = htmlDocument.GetFieldIds();
 
         // Assert
         Assert.Equal(2, result.Count());
@@ -130,7 +130,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         var htmlDocument = new DopplerHtmlDocument(html);
 
         // Act
-        var result = htmlDocument.GetFieldsIdOrNull();
+        var result = htmlDocument.GetFieldIds();
 
         // Assert
         Assert.Equal(expectedCount, result.Count());
@@ -145,10 +145,10 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         var htmlDocument = new DopplerHtmlDocument(html);
 
         // Act
-        var result = htmlDocument.GetFieldsIdOrNull();
+        var result = htmlDocument.GetFieldIds();
 
         // Assert
-        Assert.Equal(null, result);
+        Assert.Empty(result);
     }
 
     [Fact]
