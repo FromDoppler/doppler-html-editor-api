@@ -56,17 +56,10 @@ public class DopplerHtmlDocument
     public string GetHeadContent()
         => _headNode?.InnerHtml;
 
-    public IEnumerable<int> GetFieldsIdOrNull()
-    {
-        var matches = FIELD_ID_TAG_REGEX.Matches(_contentNode.InnerHtml).ToList();
-        if (matches.Count < 1)
-        {
-            return null;
-        }
-        return matches
+    public IEnumerable<int> GetFieldIds()
+        => FIELD_ID_TAG_REGEX.Matches(_contentNode.InnerHtml)
             .Select(x => int.Parse(x.Groups[1].ValueSpan))
             .Distinct();
-    }
 
     public IEnumerable<string> GetTrackableUrls(Func<int, string> getFieldNameOrNullFunc)
         => GetTrackableLinkNodes()

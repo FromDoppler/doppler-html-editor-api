@@ -529,7 +529,7 @@ namespace Doppler.HtmlEditorApi
             dbContextMock.VerifyAll();
             dbContextMock.Verify(x => x.ExecuteAsync(
                 It.Is<string>(y => y.Contains(expectedSubQuery)),
-                It.Is<SaveFieldsId.Parameters>(y => y.IdContent == expectedIdCampaign)
+                It.Is<SaveNewFieldIds.Parameters>(y => y.IdContent == expectedIdCampaign)
             ), Times.Once);
         }
 

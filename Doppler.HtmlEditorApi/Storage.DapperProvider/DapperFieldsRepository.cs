@@ -32,9 +32,14 @@ public class DapperFieldsRepository : IFieldsRepository
                 name: x.Name,
                 isBasic: x.IsBasicField));
 
-    public async Task SaveFieldsId(int ContentId, IEnumerable<int> fieldsId)
-    => await new SaveFieldsId(_dbContext)
-            .ExecuteAsync(
-                new SaveFieldsId.Parameters(ContentId, fieldsId)
-            );
+    public async Task SaveNewFieldIds(int ContentId, IEnumerable<int> fieldsId)
+    {
+        if (!fieldsId.Any())
+        {
+            return;
+        }
+
+        await new SaveNewFieldIds(_dbContext)
+            .ExecuteAsync(new SaveNewFieldIds.Parameters(ContentId, fieldsId));
+    }
 }

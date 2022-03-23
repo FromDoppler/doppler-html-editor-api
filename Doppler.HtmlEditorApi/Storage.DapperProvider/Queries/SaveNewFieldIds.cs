@@ -5,9 +5,12 @@ using System.Threading.Tasks;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
-public class SaveFieldsId : DbQuery<SaveFieldsId.Parameters, int>
+/// <summary>
+/// It keeps existing DB entries and only adds new ones without deleting anything.
+/// </summary>
+public class SaveNewFieldIds : DbQuery<SaveNewFieldIds.Parameters, int>
 {
-    public SaveFieldsId(IDbContext dbContext) : base(dbContext) { }
+    public SaveNewFieldIds(IDbContext dbContext) : base(dbContext) { }
 
     protected override string SqlQuery => @"
     DECLARE @T TABLE (IdField INT)
