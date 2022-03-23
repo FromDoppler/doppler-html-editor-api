@@ -83,7 +83,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             htmlDocument.SanitizeTrackableLinks();
 
             // TODO: use and test it
-            var trackableUrls = htmlDocument.GetTrackableUrls(dopplerFieldsProcessor.GetFieldNameOrNull);
+            var trackableUrls = htmlDocument.GetTrackableUrls();
 
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();

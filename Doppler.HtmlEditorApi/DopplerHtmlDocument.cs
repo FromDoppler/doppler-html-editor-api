@@ -61,18 +61,9 @@ public class DopplerHtmlDocument
             .Select(x => int.Parse(x.Groups[1].ValueSpan))
             .Distinct();
 
-    public IEnumerable<string> GetTrackableUrls(Func<int, string> getFieldNameOrNullFunc)
+    public IEnumerable<string> GetTrackableUrls()
         => GetTrackableLinkNodes()
             .Select(x => x.Attributes["href"].Value)
-            .Select(x => FIELD_ID_TAG_REGEX.Replace(x, match =>
-            {
-                var fieldId = int.Parse(match.Groups[1].ValueSpan);
-                var fieldName = getFieldNameOrNullFunc(fieldId);
-                return fieldName != null
-                    ? CreateFieldNameTag(fieldName)
-                    // keep the original code when field doesn't exist
-                    : match.Value;
-            }))
             .Distinct();
 
     public void SanitizeTrackableLinks()
@@ -116,9 +107,6 @@ public class DopplerHtmlDocument
 
     private static string CreateFieldIdTag(int? fieldId)
         => $"{FIELD_ID_TAG_START_DELIMITER}{fieldId}{FIELD_ID_TAG_END_DELIMITER}";
-
-    private static string CreateFieldNameTag(string fieldName)
-        => $"{FIELD_NAME_TAG_START_DELIMITER}{fieldName}{FIELD_NAME_TAG_END_DELIMITER}";
 
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
