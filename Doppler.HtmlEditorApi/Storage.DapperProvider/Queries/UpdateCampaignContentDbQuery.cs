@@ -1,13 +1,10 @@
-
 using System.Threading.Tasks;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
-public class UpdateCampaignContentDbQuery : DbQuery<ContentRow, int>
+public record UpdateCampaignContentDbQuery(ContentRow contentRow) : IExecutableDbQuery
 {
-    public UpdateCampaignContentDbQuery(IDbContext dbContext) : base(dbContext) { }
-
-    protected override string SqlQuery => @"
+    public string GenerateSqlQuery() => @"
 UPDATE Content
 SET
     Content = @Content,
@@ -16,6 +13,6 @@ SET
     EditorType = @EditorType
 WHERE IdCampaign = @IdCampaign";
 
-    public override Task<int> ExecuteAsync(ContentRow parameters)
-        => DbContext.ExecuteAsync(SqlQuery, parameters);
+    public object GenerateSqlParameters()
+        => contentRow;
 }
