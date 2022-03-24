@@ -35,4 +35,25 @@ public class SaveNewFieldIdsTest
         // Assert
         Assert.Equal(expectedQuery, sqlQuery);
     }
+
+
+    [Theory]
+    [InlineData(1231, new int[0], "")]
+    [InlineData(1232, new[] { 456 }, "(456)")]
+    [InlineData(1233, new[] { 123, 456, 234 }, "(123),(456),(234)")]
+    [InlineData(1234, new[] { 123, 456, 234, 123 }, "(123),(456),(234),(123)")]
+    public void GenerateSqlParameters_should_generate_an_object_with_only_IdContent(int idContent, int[] fieldIds, string expectedFieldIdValues)
+    {
+        // Arrange
+        var dbQuery = new SaveNewFieldIds(
+            IdContent: idContent,
+            FieldIds: fieldIds
+        );
+
+        // Act
+        var sqlParameters = dbQuery.GenerateSqlParameters();
+
+        // Assert
+        Assert.Equal($"{{ IdContent = {idContent} }}", sqlParameters.ToString());
+    }
 }

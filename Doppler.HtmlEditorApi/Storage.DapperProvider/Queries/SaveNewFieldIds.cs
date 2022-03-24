@@ -28,4 +28,7 @@ public record SaveNewFieldIds(
         var serializedFieldsId = string.Join(",", FieldIds.Select(x => $"({x})"));
         return BASE_QUERY.Replace("{{FieldIds}}", serializedFieldsId);
     }
+
+    public object GenerateSqlParameters()
+        => new { IdContent };
 }
