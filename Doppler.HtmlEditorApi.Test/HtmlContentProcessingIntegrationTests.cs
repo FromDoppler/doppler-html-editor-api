@@ -105,10 +105,7 @@ public class HtmlContentProcessingIntegrationTests
 
         dbContextMock
             .Setup(x => x.ExecuteAsync(
-                It.Is<FirstOrDefaultCampaignStatusDbQuery>(q =>
-                    q.AccountName == accountName
-                    && q.IdCampaign == idCampaign
-            )))
+                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
             .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
             {
                 OwnCampaignExists = true,
@@ -136,14 +133,13 @@ public class HtmlContentProcessingIntegrationTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
 
-        object sqlParameters = null;
+        ContentRow contentRow = null;
 
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<IExecutableDbQuery>(q =>
             q.GetType() == queryType
-            && AssertHelper.GetValueAndContinue(q.GenerateSqlParameters(), out sqlParameters))));
+            && q.SqlParametersIsTypeGetValueAndContinue<ContentRow>(out contentRow))));
 
-        var contentRow = Assert.IsType<ContentRow>(sqlParameters);
         Assert.Equal(idCampaign, contentRow.IdCampaign);
         AssertHelper.EqualIgnoringSpaces(expectedContent, contentRow.Content);
         AssertHelper.EqualIgnoringSpaces(expectedHead, contentRow.Head);
@@ -178,7 +174,7 @@ public class HtmlContentProcessingIntegrationTests
 
         dbContextMock
             .Setup(x => x.ExecuteAsync(
-                It.IsAny<FirstOrDefaultCampaignStatusDbQuery>()))
+                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
             .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
             {
                 OwnCampaignExists = true,
@@ -254,7 +250,7 @@ public class HtmlContentProcessingIntegrationTests
 
         dbContextMock
             .Setup(x => x.ExecuteAsync(
-                It.IsAny<FirstOrDefaultCampaignStatusDbQuery>()))
+                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
             .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
             {
                 OwnCampaignExists = true,

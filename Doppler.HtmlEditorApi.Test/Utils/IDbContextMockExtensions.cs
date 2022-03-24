@@ -19,9 +19,9 @@ public static class IDbContextMockExtensions
         FirstOrDefaultContentWithCampaignStatusDbQuery.Result result)
     {
         var setup = dbContextMock.Setup(x => x.ExecuteAsync(
-            It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery>(q =>
-                q.AccountName == expectedAccountName
-                && q.IdCampaign == expectedIdCampaign
+            new FirstOrDefaultContentWithCampaignStatusDbQuery(
+                expectedIdCampaign,
+                expectedAccountName
             )));
 
         setup.ReturnsAsync(result);
@@ -31,8 +31,7 @@ public static class IDbContextMockExtensions
         this Mock<IDbContext> dbContextMock)
     {
         dbContextMock.Setup(x => x.ExecuteAsync(
-            It.IsAny<QueryActiveBasicFieldsDbQuery>()
-        ))
+            new QueryActiveBasicFieldsDbQuery()))
         .ReturnsAsync(new DbField[]
         {
             new() { IdField = 319, Name = "FIRST_NAME" },
@@ -54,12 +53,51 @@ public static class IDbContextMockExtensions
         IEnumerable<DbField> result)
     {
         dbContextMock.Setup(x => x.ExecuteAsync(
-            It.Is<QueryCustomFieldsDbQueryByAccountNameDbQuery>(q =>
-                q.GenerateSqlQuery().Contains("IsBasicField = 0")
-                && q.GenerateSqlQuery().Contains("Email = @accountName")
-                && q.AccountName == expectedAccountName
-        )))
+            new QueryCustomFieldsDbQueryByAccountNameDbQuery(expectedAccountName)
+        ))
         .ReturnsAsync(result);
+    }
+
+    public static void SetupInsertOrUpdateContentRow(
+        this Mock<IDbContext> dbContextMock,
+        string sqlQueryStartsWith,
+        int idCampaign,
+        string htmlContent,
+        string meta,
+        int result)
+    {
+        dbContextMock.Setup(x => x.ExecuteAsync(
+            It.Is<IExecutableDbQuery>(q =>
+                q.SqlQueryStartsWith(sqlQueryStartsWith)
+                && q.SqlParametersMatch<ContentRow>(x =>
+                    x.IdCampaign == idCampaign
+                    && x.Content == htmlContent
+                    && x.Meta == meta
+                ))))
+        .ReturnsAsync(result);
+    }
+
+    public static bool SqlQueryStartsWith(this IDbQuery q, string sqlQueryStartsWith)
+        => q.GenerateSqlQuery().Trim().StartsWith(sqlQueryStartsWith);
+
+    public static bool SqlQueryContains(this IDbQuery q, string sqlQueryContains)
+        => q.GenerateSqlQuery().Contains(sqlQueryContains);
+
+    public static bool SqlParametersMatch<T>(this IDbQuery q, Func<T, bool> match)
+        => q.GenerateSqlParameters() is T casted && match(casted);
+
+    public static bool SqlParametersIsTypeGetValueAndContinue<T>(this IDbQuery q, out T output)
+    {
+        if (q.GenerateSqlParameters() is T casted)
+        {
+            output = casted;
+            return true;
+        }
+        else
+        {
+            output = default;
+            return false;
+        }
     }
 
     // TODO: should I use it?
