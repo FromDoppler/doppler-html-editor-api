@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
-public class SaveNewFieldIdsTest
+public class SaveNewCampaignFieldsTest
 {
     [Theory]
     [InlineData(1231, new int[0], "")]
@@ -15,7 +15,7 @@ public class SaveNewFieldIdsTest
     public void GenerateSqlQuery_should_insert_the_ids_in_sql_query(int idContent, int[] fieldIds, string expectedFieldIdValues)
     {
         // Arrange
-        var dbQuery = new SaveNewFieldIds(
+        var dbQuery = new SaveNewCampaignFields(
             IdContent: idContent,
             FieldIds: fieldIds
         );
@@ -45,7 +45,7 @@ public class SaveNewFieldIdsTest
     public void GenerateSqlParameters_should_generate_an_object_with_only_IdContent(int idContent, int[] fieldIds, string expectedFieldIdValues)
     {
         // Arrange
-        var dbQuery = new SaveNewFieldIds(
+        var dbQuery = new SaveNewCampaignFields(
             IdContent: idContent,
             FieldIds: fieldIds
         );

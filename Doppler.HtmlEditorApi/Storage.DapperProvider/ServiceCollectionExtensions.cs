@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
 {
     static public IServiceCollection AddDapperProvider(this IServiceCollection services, IConfiguration configuration)
         => services
-            .AddScoped<IRepository, Repository>()
+            .AddScoped<ICampaignContentRepository, DapperCampaignContentRepository>()
             .AddScoped<IFieldsRepository, DapperFieldsRepository>()
             .AddSingleton<IDatabaseConnectionFactory, DatabaseConnectionFactory>()
             .AddScoped<IDbContext, DapperWrapperDbContext>()

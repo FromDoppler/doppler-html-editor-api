@@ -86,7 +86,7 @@ namespace Doppler.HtmlEditorApi
         public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName)
         {
             // Arrange
-            var repositoryMock = new Mock<IRepository>();
+            var repositoryMock = new Mock<ICampaignContentRepository>();
 
             repositoryMock
                 .Setup(x => x.SaveCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
@@ -517,7 +517,7 @@ namespace Doppler.HtmlEditorApi
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
             dbContextMock.Verify(x => x.ExecuteAsync(
-                It.Is<SaveNewFieldIds>(q =>
+                It.Is<SaveNewCampaignFields>(q =>
                     q.IdContent == expectedIdCampaign
                     && q.SqlQueryContains(expectedSubQuery))
             ), Times.Once);
@@ -566,7 +566,7 @@ namespace Doppler.HtmlEditorApi
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
             dbContextMock.Verify(x => x.ExecuteAsync(
-                It.IsAny<SaveNewFieldIds>()
+                It.IsAny<SaveNewCampaignFields>()
             ), Times.Never);
         }
     }

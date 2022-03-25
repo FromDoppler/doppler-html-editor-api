@@ -1,17 +1,19 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 
-public class Repository : IRepository
+public class DapperCampaignContentRepository : ICampaignContentRepository
 {
     private const int EDITOR_TYPE_MSEDITOR = 4;
     private const int EDITOR_TYPE_UNLAYER = 5;
 
     private readonly IDbContext _dbContext;
-    public Repository(IDbContext dbContext)
+    public DapperCampaignContentRepository(IDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -123,5 +125,15 @@ public class Repository : IRepository
         );
 
         await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
+    }
+
+    public async Task SaveNewFieldIds(int ContentId, IEnumerable<int> fieldsId)
+    {
+        if (!fieldsId.Any())
+        {
+            return;
+        }
+
+        await _dbContext.ExecuteAsync(new SaveNewCampaignFields(ContentId, fieldsId));
     }
 }
