@@ -78,7 +78,7 @@ public class Repository : IRepository
 
         var queryParams = contentRow switch
         {
-            UnlayerContentData unlayerContentData => new ContentRow()
+            UnlayerContentData unlayerContentData => new
             {
                 IdCampaign = unlayerContentData.campaignId,
                 Content = unlayerContentData.htmlContent,
@@ -86,7 +86,7 @@ public class Repository : IRepository
                 Meta = unlayerContentData.meta,
                 EditorType = (int?)EDITOR_TYPE_UNLAYER
             },
-            HtmlContentData htmlContentData => new ContentRow()
+            HtmlContentData htmlContentData => new
             {
                 IdCampaign = htmlContentData.campaignId,
                 Content = htmlContentData.htmlContent,
@@ -100,8 +100,18 @@ public class Repository : IRepository
         };
 
         IExecutableDbQuery upsertContentQuery = campaignStatus.ContentExists
-            ? new UpdateCampaignContentDbQuery(queryParams)
-            : new InsertCampaignContentDbQuery(queryParams);
+            ? new UpdateCampaignContentDbQuery(
+                IdCampaign: queryParams.IdCampaign,
+                EditorType: queryParams.EditorType,
+                Content: queryParams.Content,
+                Head: queryParams.Head,
+                Meta: queryParams.Meta)
+            : new InsertCampaignContentDbQuery(
+                IdCampaign: queryParams.IdCampaign,
+                EditorType: queryParams.EditorType,
+                Content: queryParams.Content,
+                Head: queryParams.Head,
+                Meta: queryParams.Meta);
 
         await _dbContext.ExecuteAsync(upsertContentQuery);
 

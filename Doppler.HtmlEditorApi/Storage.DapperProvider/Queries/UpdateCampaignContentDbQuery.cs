@@ -2,7 +2,13 @@ using System.Threading.Tasks;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
-public record UpdateCampaignContentDbQuery(ContentRow contentRow) : IExecutableDbQuery
+public record UpdateCampaignContentDbQuery(
+    int IdCampaign,
+    int? EditorType,
+    string Content,
+    string Head,
+    string Meta
+) : IExecutableDbQuery
 {
     public string GenerateSqlQuery() => @"
 UPDATE Content
@@ -12,7 +18,4 @@ SET
     Meta = @Meta,
     EditorType = @EditorType
 WHERE IdCampaign = @IdCampaign";
-
-    public object GenerateSqlParameters()
-        => contentRow;
 }

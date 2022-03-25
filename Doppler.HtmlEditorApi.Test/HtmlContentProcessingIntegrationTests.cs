@@ -133,16 +133,16 @@ public class HtmlContentProcessingIntegrationTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
 
-        ContentRow contentRow = null;
+        dynamic dbQuery = null;
 
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<IExecutableDbQuery>(q =>
             q.GetType() == queryType
-            && q.SqlParametersIsTypeGetValueAndContinue<ContentRow>(out contentRow))));
+            && AssertHelper.GetDynamicValueAndContinue(q, out dbQuery))));
 
-        Assert.Equal(idCampaign, contentRow.IdCampaign);
-        AssertHelper.EqualIgnoringSpaces(expectedContent, contentRow.Content);
-        AssertHelper.EqualIgnoringSpaces(expectedHead, contentRow.Head);
+        Assert.Equal(idCampaign, dbQuery.IdCampaign);
+        AssertHelper.EqualIgnoringSpaces(expectedContent, dbQuery.Content);
+        AssertHelper.EqualIgnoringSpaces(expectedHead, dbQuery.Head);
     }
 
     [Theory]
@@ -219,12 +219,12 @@ public class HtmlContentProcessingIntegrationTests
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        ContentRow contentRow = null;
+        UpdateCampaignContentDbQuery dbQuery = null;
         dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<UpdateCampaignContentDbQuery>(q => AssertHelper.GetValueAndContinue(q.contentRow, out contentRow))));
+            It.Is<UpdateCampaignContentDbQuery>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
 
-        Assert.Equal(idCampaign, contentRow.IdCampaign);
-        AssertHelper.EqualIgnoringSpaces(expectedContent, contentRow.Content);
+        Assert.Equal(idCampaign, dbQuery.IdCampaign);
+        AssertHelper.EqualIgnoringSpaces(expectedContent, dbQuery.Content);
     }
 
     [Theory]
@@ -279,12 +279,12 @@ public class HtmlContentProcessingIntegrationTests
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        ContentRow contentRow = null;
+        UpdateCampaignContentDbQuery dbQuery = null;
         dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<UpdateCampaignContentDbQuery>(q => AssertHelper.GetValueAndContinue(q.contentRow, out contentRow))));
+            It.Is<UpdateCampaignContentDbQuery>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
 
-        Assert.Equal(idCampaign, contentRow.IdCampaign);
-        Assert.Equal(expectedContent, contentRow.Content);
+        Assert.Equal(idCampaign, dbQuery.IdCampaign);
+        Assert.Equal(expectedContent, dbQuery.Content);
     }
 
     [Theory]

@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Storage.DapperProvider;
 using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 using Moq;
@@ -69,10 +65,16 @@ public static class IDbContextMockExtensions
         dbContextMock.Setup(x => x.ExecuteAsync(
             It.Is<IExecutableDbQuery>(q =>
                 q.SqlQueryStartsWith(sqlQueryStartsWith)
-                && q.SqlParametersMatch<ContentRow>(x =>
+                && (
+                    q.Is<InsertCampaignContentDbQuery>(x =>
                     x.IdCampaign == idCampaign
                     && x.Content == htmlContent
-                    && x.Meta == meta
+                    && x.Meta == meta)
+                    ||
+                    q.Is<UpdateCampaignContentDbQuery>(x =>
+                    x.IdCampaign == idCampaign
+                    && x.Content == htmlContent
+                    && x.Meta == meta)
                 ))))
         .ReturnsAsync(result);
     }
@@ -83,32 +85,6 @@ public static class IDbContextMockExtensions
     public static bool SqlQueryContains(this IDbQuery q, string sqlQueryContains)
         => q.GenerateSqlQuery().Contains(sqlQueryContains);
 
-    public static bool SqlParametersMatch<T>(this IDbQuery q, Func<T, bool> match)
-        => q.GenerateSqlParameters() is T casted && match(casted);
-
-    public static bool SqlParametersIsTypeGetValueAndContinue<T>(this IDbQuery q, out T output)
-    {
-        if (q.GenerateSqlParameters() is T casted)
-        {
-            output = casted;
-            return true;
-        }
-        else
-        {
-            output = default;
-            return false;
-        }
-    }
-
-    // TODO: should I use it?
-    public static Moq.Language.Flow.ISetup<IDbContext, Task<IEnumerable<TResult>>> SetupExecuteAsync<TdbQuery, TResult>(
-        this Mock<IDbContext> dbContextMock,
-        Expression<Func<TdbQuery, bool>> match)
-        where TdbQuery : ICollectionDbQuery<TResult>
-        => dbContextMock.Setup(x => x.ExecuteAsync(It.Is<TdbQuery>(match)));
-
-    // ISingleItemDbQuery
-    // IListDbQuery
-    // IExecutableDbQuery
-
+    public static bool Is<T>(this IDbQuery q, Func<T, bool> match)
+        => q is T casted && match(casted);
 }

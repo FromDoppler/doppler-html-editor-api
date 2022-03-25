@@ -3,7 +3,13 @@ using System.Threading.Tasks;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
-public record InsertCampaignContentDbQuery(ContentRow contentRow) : IExecutableDbQuery
+public record InsertCampaignContentDbQuery(
+    int IdCampaign,
+    int? EditorType,
+    string Content,
+    string Head,
+    string Meta
+) : IExecutableDbQuery
 {
     public string GenerateSqlQuery() => @"
 INSERT INTO Content (
@@ -19,7 +25,4 @@ INSERT INTO Content (
     @Meta,
     @EditorType
 )";
-
-    public object GenerateSqlParameters()
-        => contentRow;
 }
