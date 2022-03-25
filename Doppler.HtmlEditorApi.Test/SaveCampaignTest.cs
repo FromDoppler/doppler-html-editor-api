@@ -517,7 +517,7 @@ namespace Doppler.HtmlEditorApi
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
             dbContextMock.Verify(x => x.ExecuteAsync(
-                It.Is<SaveNewFieldIds>(q =>
+                It.Is<SaveNewCampaignFields>(q =>
                     q.IdContent == expectedIdCampaign
                     && q.SqlQueryContains(expectedSubQuery))
             ), Times.Once);
@@ -566,7 +566,7 @@ namespace Doppler.HtmlEditorApi
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
             dbContextMock.Verify(x => x.ExecuteAsync(
-                It.IsAny<SaveNewFieldIds>()
+                It.IsAny<SaveNewCampaignFields>()
             ), Times.Never);
         }
     }

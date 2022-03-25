@@ -134,6 +134,6 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             return;
         }
 
-        await _dbContext.ExecuteAsync(new SaveNewFieldIds(ContentId, fieldsId));
+        await _dbContext.ExecuteAsync(new SaveNewCampaignFields(ContentId, fieldsId));
     }
 }

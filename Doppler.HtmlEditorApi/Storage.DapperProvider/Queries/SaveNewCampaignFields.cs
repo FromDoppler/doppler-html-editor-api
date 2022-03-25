@@ -8,7 +8,7 @@ namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 /// <summary>
 /// It keeps existing DB entries and only adds new ones without deleting anything.
 /// </summary>
-public record SaveNewFieldIds(
+public record SaveNewCampaignFields(
     int IdContent,
     IEnumerable<int> FieldIds
 ) : IExecutableDbQuery
