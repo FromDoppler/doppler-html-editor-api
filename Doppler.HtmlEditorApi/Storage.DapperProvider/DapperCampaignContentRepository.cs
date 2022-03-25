@@ -136,4 +136,13 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 
         await _dbContext.ExecuteAsync(new SaveNewCampaignFields(ContentId, fieldsId));
     }
+
+    public async Task SaveLinks(int ContentId, IEnumerable<string> links)
+    {
+        if (links.Any())
+        {
+            await _dbContext.ExecuteAsync(new SaveNewCampaignLinks(ContentId, links));
+        }
+        // TODO: delete not included links
+    }
 }

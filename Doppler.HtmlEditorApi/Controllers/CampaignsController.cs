@@ -82,12 +82,10 @@ namespace Doppler.HtmlEditorApi.Controllers
             htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
             htmlDocument.SanitizeTrackableLinks();
 
-            // TODO: use and test it
-            var trackableUrls = htmlDocument.GetTrackableUrls();
-
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
             var fieldIds = htmlDocument.GetFieldIds();
+            var trackableUrls = htmlDocument.GetTrackableUrls();
 
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
@@ -105,6 +103,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             await _campaignContentRepository.SaveCampaignContent(accountName, contentRow);
             await _campaignContentRepository.SaveNewFieldIds(campaignId, fieldIds);
+            await _campaignContentRepository.SaveLinks(campaignId, trackableUrls);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }

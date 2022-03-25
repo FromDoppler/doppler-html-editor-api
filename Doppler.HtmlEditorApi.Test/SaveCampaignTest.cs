@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Xunit;
 using Xunit.Abstractions;
+using System.Linq;
 
 namespace Doppler.HtmlEditorApi
 {
@@ -567,6 +568,116 @@ namespace Doppler.HtmlEditorApi
             dbContextMock.VerifyAll();
             dbContextMock.Verify(x => x.ExecuteAsync(
                 It.IsAny<SaveNewCampaignFields>()
+            ), Times.Never);
+        }
+
+        [Theory]
+        [InlineData(
+            $@"<a href=""https://www.google.com"">Google</a><br>
+            <a href=""{"\n"} https://{"\t"}goo gle1{"\n"}.com    {"\r\n"}  "">Google1 (dirty)</a><br>
+            <a href=""https://google2.com"">Google2</a><br>
+            <a href=""{"\n"} https://{"\t"}goo gle2{"\n"}.com    {"\r\n"}  "">Google2 (dirty)</a><br>",
+            new[] { "https://www.google.com", "https://google1.com", "https://google2.com" })]
+        [InlineData(
+            @"<a href=""https://www.google.com?q=[[[firstname]]]"">Find my name!</a><br>
+            <a href=""https://www.google.com?q=[[[apellido]]]"">Find my lastname</a><br>
+            <a href=""https://www.google.com?q=[[[nombre]]]"">Find my name again!</a>",
+            new[] { "https://www.google.com?q=|*|319*|*", "https://www.google.com?q=|*|320*|*" })]
+        public async Task PUT_campaign_should_add_link_relations(string htmlContent, string[] expectedLinks)
+        {
+            // Arrange
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
+
+            var dbContextMock = new Mock<IDbContext>();
+
+            dbContextMock
+                .Setup(x => x.ExecuteAsync(
+                    new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+                .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+                {
+                    OwnCampaignExists = true,
+                    ContentExists = true,
+                    EditorType = 5,
+                });
+
+            dbContextMock.SetupBasicFields();
+
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent,
+                meta = Utils.ParseAsJsonElement("{}")
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dbContextMock.VerifyAll();
+
+            string[] storedLinks = null;
+            dbContextMock.Verify(x => x.ExecuteAsync(
+                It.Is<SaveNewCampaignLinks>(q =>
+                    q.IdContent == expectedIdCampaign
+                    && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out storedLinks))
+            ), Times.Once);
+            Assert.Equal(expectedLinks, storedLinks);
+        }
+
+        [Fact]
+        public async Task PUT_campaign_should_no_add_links_relations_when_no_links()
+        {
+            // Arrange
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
+            var htmlContent = "<html>No content</html>";
+
+            var dbContextMock = new Mock<IDbContext>();
+
+            dbContextMock
+                .Setup(x => x.ExecuteAsync(
+                    new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+                .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+                {
+                    OwnCampaignExists = true,
+                    ContentExists = true,
+                    EditorType = 5,
+                });
+
+            dbContextMock.SetupBasicFields();
+
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent,
+                meta = Utils.ParseAsJsonElement("{}")
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dbContextMock.VerifyAll();
+
+            dbContextMock.Verify(x => x.ExecuteAsync(
+                It.IsAny<SaveNewCampaignLinks>()
             ), Times.Never);
         }
     }
