@@ -88,7 +88,7 @@ namespace Doppler.HtmlEditorApi
         {
             // Arrange
             BaseHtmlContentData emptyContentModel = null;
-            var repositoryMock = new Mock<IRepository>();
+            var repositoryMock = new Mock<ICampaignContentRepository>();
 
             repositoryMock
                 .Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
@@ -123,7 +123,7 @@ namespace Doppler.HtmlEditorApi
                 htmlHead: null,
                 campaignId: expectedIdCampaign);
 
-            var repositoryMock = new Mock<IRepository>();
+            var repositoryMock = new Mock<ICampaignContentRepository>();
 
             repositoryMock
                 .Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))

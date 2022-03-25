@@ -5,13 +5,13 @@ using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
 
-public class Repository : IRepository
+public class DapperCampaignContentRepository : ICampaignContentRepository
 {
     private const int EDITOR_TYPE_MSEDITOR = 4;
     private const int EDITOR_TYPE_UNLAYER = 5;
 
     private readonly IDbContext _dbContext;
-    public Repository(IDbContext dbContext)
+    public DapperCampaignContentRepository(IDbContext dbContext)
     {
         _dbContext = dbContext;
     }

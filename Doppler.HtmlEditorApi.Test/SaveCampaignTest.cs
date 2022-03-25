@@ -86,7 +86,7 @@ namespace Doppler.HtmlEditorApi
         public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName)
         {
             // Arrange
-            var repositoryMock = new Mock<IRepository>();
+            var repositoryMock = new Mock<ICampaignContentRepository>();
 
             repositoryMock
                 .Setup(x => x.SaveCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))

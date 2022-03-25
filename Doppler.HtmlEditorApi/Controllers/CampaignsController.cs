@@ -18,13 +18,13 @@ namespace Doppler.HtmlEditorApi.Controllers
     {
         private const string EMPTY_UNLAYER_CONTENT_JSON = "{\"body\":{\"rows\":[]}}";
         private const string EMPTY_UNLAYER_CONTENT_HTML = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional //EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\"><head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <meta name=\"x-apple-disable-message-reformatting\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <title></title></head><body></body></html>";
-        private readonly IRepository _repository;
+        private readonly ICampaignContentRepository _campaignContentRepository;
         private readonly IFieldsRepository _fieldsRepository;
         private readonly IOptions<FieldsOptions> _fieldsOptions;
 
-        public CampaignsController(IRepository Repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
+        public CampaignsController(ICampaignContentRepository Repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
         {
-            _repository = Repository;
+            _campaignContentRepository = Repository;
             _fieldsRepository = fieldsRepository;
             _fieldsOptions = fieldsOptions;
         }
@@ -34,7 +34,7 @@ namespace Doppler.HtmlEditorApi.Controllers
         public async Task<ActionResult<CampaignContent>> GetCampaign(string accountName, int campaignId)
         {
             // TODO: Considere refactoring accountName validation
-            var contentRow = await _repository.GetCampaignModel(accountName, campaignId);
+            var contentRow = await _campaignContentRepository.GetCampaignModel(accountName, campaignId);
 
             ActionResult<CampaignContent> result = contentRow switch
             {
@@ -103,7 +103,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
-            await _repository.SaveCampaignContent(accountName, contentRow);
+            await _campaignContentRepository.SaveCampaignContent(accountName, contentRow);
             await _fieldsRepository.SaveNewFieldIds(campaignId, fieldIds);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
