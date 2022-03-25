@@ -28,15 +28,4 @@ public class DapperFieldsRepository : IFieldsRepository
                 id: x.IdField,
                 name: x.Name,
                 isBasic: x.IsBasicField));
-
-    public async Task SaveNewFieldIds(int ContentId, IEnumerable<int> fieldsId)
-    {
-        if (!fieldsId.Any())
-        {
-            return;
-        }
-
-        await _dbContext.ExecuteAsync(new SaveNewFieldIds(ContentId, fieldsId));
-    }
-
 }

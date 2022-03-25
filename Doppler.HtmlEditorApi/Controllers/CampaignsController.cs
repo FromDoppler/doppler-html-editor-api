@@ -104,7 +104,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             };
 
             await _campaignContentRepository.SaveCampaignContent(accountName, contentRow);
-            await _fieldsRepository.SaveNewFieldIds(campaignId, fieldIds);
+            await _campaignContentRepository.SaveNewFieldIds(campaignId, fieldIds);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }

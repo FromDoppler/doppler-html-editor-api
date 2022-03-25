@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
@@ -123,5 +125,15 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         );
 
         await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
+    }
+
+    public async Task SaveNewFieldIds(int ContentId, IEnumerable<int> fieldsId)
+    {
+        if (!fieldsId.Any())
+        {
+            return;
+        }
+
+        await _dbContext.ExecuteAsync(new SaveNewFieldIds(ContentId, fieldsId));
     }
 }
