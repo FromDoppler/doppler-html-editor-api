@@ -583,7 +583,7 @@ namespace Doppler.HtmlEditorApi
             <a href=""https://www.google.com?q=[[[apellido]]]"">Find my lastname</a><br>
             <a href=""https://www.google.com?q=[[[nombre]]]"">Find my name again!</a>",
             new[] { "https://www.google.com?q=|*|319*|*", "https://www.google.com?q=|*|320*|*" })]
-        public async Task PUT_campaign_should_add_link_relations(string htmlContent, string[] expectedLinks)
+        public async Task PUT_campaign_should_add_and_remove_link_relations(string htmlContent, string[] expectedLinks)
         {
             // Arrange
             var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
@@ -624,13 +624,21 @@ namespace Doppler.HtmlEditorApi
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
 
-            string[] storedLinks = null;
+            string[] linksSendToSaveNewCampaignLinks = null;
             dbContextMock.Verify(x => x.ExecuteAsync(
                 It.Is<SaveNewCampaignLinks>(q =>
                     q.IdContent == expectedIdCampaign
-                    && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out storedLinks))
+                    && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToSaveNewCampaignLinks))
             ), Times.Once);
-            Assert.Equal(expectedLinks, storedLinks);
+            Assert.Equal(expectedLinks, linksSendToSaveNewCampaignLinks);
+
+            string[] linksSendToDeleteRemovedCampaignLinks = null;
+            dbContextMock.Verify(x => x.ExecuteAsync(
+                It.Is<DeleteRemovedCampaignLinks>(q =>
+                    q.IdContent == expectedIdCampaign
+                    && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignLinks))
+            ), Times.Once);
+            Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignLinks);
         }
 
         [Fact]
@@ -679,6 +687,56 @@ namespace Doppler.HtmlEditorApi
             dbContextMock.Verify(x => x.ExecuteAsync(
                 It.IsAny<SaveNewCampaignLinks>()
             ), Times.Never);
+        }
+
+        [Fact]
+        public async Task PUT_campaign_should_remove_links_relations_when_no_links()
+        {
+            // Arrange
+            var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+            var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+            var expectedAccountName = TUD.EMAIL_TEST1;
+            var expectedIdCampaign = 456;
+            var htmlContent = "<html>No content</html>";
+
+            var dbContextMock = new Mock<IDbContext>();
+
+            dbContextMock
+                .Setup(x => x.ExecuteAsync(
+                    new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+                .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+                {
+                    OwnCampaignExists = true,
+                    ContentExists = true,
+                    EditorType = 5,
+                });
+
+            dbContextMock.SetupBasicFields();
+
+            var client = _factory.CreateSutClient(
+                serviceToOverride1: dbContextMock.Object,
+                token: token);
+
+            // Act
+            var response = await client.PutAsync(url, JsonContent.Create(new
+            {
+                type = "unlayer",
+                htmlContent,
+                meta = Utils.ParseAsJsonElement("{}")
+            }));
+            _output.WriteLine(response.GetHeadersAsString());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _output.WriteLine(responseContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dbContextMock.VerifyAll();
+
+            dbContextMock.Verify(x => x.ExecuteAsync(
+                It.Is<DeleteRemovedCampaignLinks>(q =>
+                    q.IdContent == expectedIdCampaign
+                    && !q.Links.Any())
+            ), Times.Once);
         }
     }
 }
