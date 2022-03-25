@@ -16,13 +16,6 @@ namespace Doppler.HtmlEditorApi.Controllers
     [ApiController]
     public class TemplatesController
     {
-        private readonly IRepository _repository;
-
-        public TemplatesController(IRepository Repository)
-        {
-            _repository = Repository;
-        }
-
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/templates/{templateId}")]
         public Task<ActionResult<Template>> GetTemplate(string accountName, int templateId)
