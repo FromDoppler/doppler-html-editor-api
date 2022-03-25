@@ -16,18 +16,15 @@ public class DapperFieldsRepository : IFieldsRepository
     }
 
     public async Task<IEnumerable<Field>> GetActiveBasicFields()
-        => (await new QueryActiveBasicFieldsDbQuery(_dbContext).ExecuteAsync())
+        => (await _dbContext.ExecuteAsync(new QueryActiveBasicFieldsDbQuery()))
             .Select(x => new Field(
                 id: x.IdField,
                 name: x.Name,
                 isBasic: x.IsBasicField));
 
     public async Task<IEnumerable<Field>> GetCustomFields(string accountName)
-        => (await new QueryCustomFieldsDbQueryByAccountNameDbQuery(_dbContext)
-            .ExecuteAsync(new()
-            {
-                AccountName = accountName
-            })).Select(x => new Field(
+        => (await _dbContext.ExecuteAsync(new QueryCustomFieldsDbQueryByAccountNameDbQuery(accountName)))
+            .Select(x => new Field(
                 id: x.IdField,
                 name: x.Name,
                 isBasic: x.IsBasicField));
@@ -39,7 +36,7 @@ public class DapperFieldsRepository : IFieldsRepository
             return;
         }
 
-        await new SaveNewFieldIds(_dbContext)
-            .ExecuteAsync(new SaveNewFieldIds.Parameters(ContentId, fieldsId));
+        await _dbContext.ExecuteAsync(new SaveNewFieldIds(ContentId, fieldsId));
     }
+
 }

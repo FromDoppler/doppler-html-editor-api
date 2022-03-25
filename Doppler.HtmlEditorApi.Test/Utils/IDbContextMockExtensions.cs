@@ -1,6 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Doppler.HtmlEditorApi.Storage.DapperProvider;
 using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 using Moq;
@@ -15,11 +14,11 @@ public static class IDbContextMockExtensions
         int expectedIdCampaign,
         FirstOrDefaultContentWithCampaignStatusDbQuery.Result result)
     {
-        var setup = dbContextMock.Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultContentWithCampaignStatusDbQuery.Result>(
-            It.IsAny<string>(),
-            It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                x.AccountName == expectedAccountName
-                && x.IdCampaign == expectedIdCampaign)));
+        var setup = dbContextMock.Setup(x => x.ExecuteAsync(
+            new FirstOrDefaultContentWithCampaignStatusDbQuery(
+                expectedIdCampaign,
+                expectedAccountName
+            )));
 
         setup.ReturnsAsync(result);
     }
@@ -27,9 +26,8 @@ public static class IDbContextMockExtensions
     public static void SetupBasicFields(
         this Mock<IDbContext> dbContextMock)
     {
-        dbContextMock.Setup(x => x.QueryAsync<DbField>(
-            It.Is<string>(y => y.Contains("IsBasicField = 1")),
-            null))
+        dbContextMock.Setup(x => x.ExecuteAsync(
+            new QueryActiveBasicFieldsDbQuery()))
         .ReturnsAsync(new DbField[]
         {
             new() { IdField = 319, Name = "FIRST_NAME" },
@@ -50,9 +48,43 @@ public static class IDbContextMockExtensions
         string expectedAccountName,
         IEnumerable<DbField> result)
     {
-        dbContextMock.Setup(x => x.QueryAsync<DbField>(
-            It.Is<string>(y => y.Contains("IsBasicField = 0") && y.Contains("Email = @accountName")),
-            It.Is<ByAccountNameParameters>(y => y.AccountName == expectedAccountName)))
+        dbContextMock.Setup(x => x.ExecuteAsync(
+            new QueryCustomFieldsDbQueryByAccountNameDbQuery(expectedAccountName)
+        ))
         .ReturnsAsync(result);
     }
+
+    public static void SetupInsertOrUpdateContentRow(
+        this Mock<IDbContext> dbContextMock,
+        string sqlQueryStartsWith,
+        int idCampaign,
+        string htmlContent,
+        string meta,
+        int result)
+    {
+        dbContextMock.Setup(x => x.ExecuteAsync(
+            It.Is<IExecutableDbQuery>(q =>
+                q.SqlQueryStartsWith(sqlQueryStartsWith)
+                && (
+                    q.Is<InsertCampaignContentDbQuery>(x =>
+                    x.IdCampaign == idCampaign
+                    && x.Content == htmlContent
+                    && x.Meta == meta)
+                    ||
+                    q.Is<UpdateCampaignContentDbQuery>(x =>
+                    x.IdCampaign == idCampaign
+                    && x.Content == htmlContent
+                    && x.Meta == meta)
+                ))))
+        .ReturnsAsync(result);
+    }
+
+    public static bool SqlQueryStartsWith(this IDbQuery q, string sqlQueryStartsWith)
+        => q.GenerateSqlQuery().Trim().StartsWith(sqlQueryStartsWith);
+
+    public static bool SqlQueryContains(this IDbQuery q, string sqlQueryContains)
+        => q.GenerateSqlQuery().Contains(sqlQueryContains);
+
+    public static bool Is<T>(this IDbQuery q, Func<T, bool> match)
+        => q is T casted && match(casted);
 }

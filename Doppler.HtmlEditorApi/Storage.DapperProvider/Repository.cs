@@ -18,12 +18,10 @@ public class Repository : IRepository
 
     public async Task<ContentData> GetCampaignModel(string accountName, int campaignId)
     {
-        var queryResult = await new FirstOrDefaultContentWithCampaignStatusDbQuery(_dbContext)
-            .ExecuteAsync(new()
-            {
-                IdCampaign = campaignId,
-                AccountName = accountName
-            });
+        var queryResult = await _dbContext.ExecuteAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery(
+            IdCampaign: campaignId,
+            AccountName: accountName
+        ));
 
         if (queryResult == null || !queryResult.CampaignExists)
         {
@@ -67,12 +65,10 @@ public class Repository : IRepository
 
     public async Task SaveCampaignContent(string accountName, ContentData contentRow)
     {
-        var campaignStatus = await new FirstOrDefaultCampaignStatusDbQuery(_dbContext)
-            .ExecuteAsync(new()
-            {
-                AccountName = accountName,
-                IdCampaign = contentRow.campaignId
-            });
+        var campaignStatus = await _dbContext.ExecuteAsync(new FirstOrDefaultCampaignStatusDbQuery(
+            AccountName: accountName,
+            IdCampaign: contentRow.campaignId
+        ));
 
         // TODO: consider returning 404 NotFound
         if (campaignStatus == null || !campaignStatus.OwnCampaignExists)
@@ -80,13 +76,9 @@ public class Repository : IRepository
             throw new ApplicationException($"CampaignId {contentRow.campaignId} does not exists or belongs to another user than {accountName}");
         }
 
-        DbQuery<ContentRow, int> upsertContentQuery = campaignStatus.ContentExists
-            ? new UpdateCampaignContentDbQuery(_dbContext)
-            : new InsertCampaignContentDbQuery(_dbContext);
-
         var queryParams = contentRow switch
         {
-            UnlayerContentData unlayerContentData => new ContentRow()
+            UnlayerContentData unlayerContentData => new
             {
                 IdCampaign = unlayerContentData.campaignId,
                 Content = unlayerContentData.htmlContent,
@@ -94,7 +86,7 @@ public class Repository : IRepository
                 Meta = unlayerContentData.meta,
                 EditorType = (int?)EDITOR_TYPE_UNLAYER
             },
-            HtmlContentData htmlContentData => new ContentRow()
+            HtmlContentData htmlContentData => new
             {
                 IdCampaign = htmlContentData.campaignId,
                 Content = htmlContentData.htmlContent,
@@ -107,14 +99,29 @@ public class Repository : IRepository
             _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
         };
 
-        await upsertContentQuery.ExecuteAsync(queryParams);
+        IExecutableDbQuery upsertContentQuery = campaignStatus.ContentExists
+            ? new UpdateCampaignContentDbQuery(
+                IdCampaign: queryParams.IdCampaign,
+                EditorType: queryParams.EditorType,
+                Content: queryParams.Content,
+                Head: queryParams.Head,
+                Meta: queryParams.Meta)
+            : new InsertCampaignContentDbQuery(
+                IdCampaign: queryParams.IdCampaign,
+                EditorType: queryParams.EditorType,
+                Content: queryParams.Content,
+                Head: queryParams.Head,
+                Meta: queryParams.Meta);
 
-        var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(_dbContext);
+        await _dbContext.ExecuteAsync(upsertContentQuery);
 
-        await updateCampaignStatusQuery.ExecuteAsync(new UpdateCampaignStatusDbQuery.Parameters(
+        var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
             setCurrentStep: 2,
             setHtmlSourceType: UpdateCampaignStatusDbQuery.TEMPLATE_HTML_SOURCE_TYPE,
             whenIdCampaignIs: contentRow.campaignId,
-            whenCurrentStepIs: 1));
+            whenCurrentStepIs: 1
+        );
+
+        await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
     }
 }

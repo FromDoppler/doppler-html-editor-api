@@ -2,11 +2,12 @@ using System.Threading.Tasks;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
-public class FirstOrDefaultCampaignStatusDbQuery : DbQuery<ByCampaignIdAndAccountNameParameters, FirstOrDefaultCampaignStatusDbQuery.Result>
+public record FirstOrDefaultCampaignStatusDbQuery(
+    int IdCampaign,
+    string AccountName
+) : ISingleItemDbQuery<FirstOrDefaultCampaignStatusDbQuery.Result>
 {
-    public FirstOrDefaultCampaignStatusDbQuery(IDbContext dbContext) : base(dbContext) { }
-
-    protected override string SqlQuery => @"
+    public string GenerateSqlQuery() => @"
 SELECT
     CAST (CASE WHEN ca.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS OwnCampaignExists,
     CAST (CASE WHEN co.IdCampaign IS NULL THEN 0 ELSE 1 END AS BIT) AS ContentExists,
@@ -18,9 +19,6 @@ LEFT JOIN [Campaign] ca ON
 LEFT JOIN [Content] co ON
     ca.IdCampaign = co.IdCampaign
 WHERE u.Email = @accountName";
-
-    public override Task<Result> ExecuteAsync(ByCampaignIdAndAccountNameParameters parameters)
-        => DbContext.QueryFirstOrDefaultAsync<Result>(SqlQuery, parameters);
 
     public class Result
     {

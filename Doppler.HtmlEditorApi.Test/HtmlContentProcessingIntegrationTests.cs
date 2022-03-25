@@ -10,6 +10,7 @@ using Moq;
 using System.Text.Json;
 using Xunit.Abstractions;
 using Xunit;
+using System;
 
 namespace Doppler.HtmlEditorApi;
 
@@ -74,25 +75,25 @@ public class HtmlContentProcessingIntegrationTests
     }
 
     [Theory]
-    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "html", true)]
-    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "html", false)]
-    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "unlayer", true)]
-    [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "html", true)]
-    [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "html", false)]
-    [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "unlayer", true)]
-    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "html", true)]
-    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "html", false)]
-    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "unlayer", true)]
-    [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "html", true)]
-    [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "html", false)]
-    [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "unlayer", true)]
-    [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "html", true)]
-    [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "html", false)]
-    [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "unlayer", true)]
-    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "html", true)]
-    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "html", false)]
-    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "unlayer", true)]
-    public async Task PUT_campaign_should_split_html_in_head_and_content(string htmlInput, string expectedHead, string expectedContent, string type, bool existingContent)
+    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "html", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "html", false, typeof(InsertCampaignContentDbQuery))]
+    [InlineData(HTML_WITH_HEAD_AND_BODY, HEAD_CONTENT, BODY_CONTENT, "unlayer", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "html", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "html", false, typeof(InsertCampaignContentDbQuery))]
+    [InlineData(ORPHAN_DIV_CONTENT, null, ORPHAN_DIV_CONTENT, "unlayer", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "html", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "html", false, typeof(InsertCampaignContentDbQuery))]
+    [InlineData(ONLY_HEAD, HEAD_CONTENT, "<BR>", "unlayer", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "html", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "html", false, typeof(InsertCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_HEAD, null, HTML_WITHOUT_HEAD, "unlayer", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "html", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "html", false, typeof(InsertCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, null, HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV, "unlayer", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "html", true, typeof(UpdateCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "html", false, typeof(InsertCampaignContentDbQuery))]
+    [InlineData(HTML_WITHOUT_BODY_WITH_ORPHAN_DIV, HEAD_CONTENT, HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD, "unlayer", true, typeof(UpdateCampaignContentDbQuery))]
+    public async Task PUT_campaign_should_split_html_in_head_and_content(string htmlInput, string expectedHead, string expectedContent, string type, bool existingContent, Type queryType)
     {
         // Arrange
         var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
@@ -103,11 +104,8 @@ public class HtmlContentProcessingIntegrationTests
         var dbContextMock = new Mock<IDbContext>();
 
         dbContextMock
-            .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
-                It.IsAny<string>(),
-                It.Is<ByCampaignIdAndAccountNameParameters>(x =>
-                    x.AccountName == accountName
-                    && x.IdCampaign == idCampaign)))
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
             .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
             {
                 OwnCampaignExists = true,
@@ -135,14 +133,16 @@ public class HtmlContentProcessingIntegrationTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
 
-        ContentRow contentRow = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.IsAny<string>(),
-            It.Is<ContentRow>(x => AssertHelper.GetValueAndContinue(x, out contentRow))));
+        dynamic dbQuery = null;
 
-        Assert.Equal(idCampaign, contentRow.IdCampaign);
-        AssertHelper.EqualIgnoringSpaces(expectedContent, contentRow.Content);
-        AssertHelper.EqualIgnoringSpaces(expectedHead, contentRow.Head);
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<IExecutableDbQuery>(q =>
+            q.GetType() == queryType
+            && AssertHelper.GetDynamicValueAndContinue(q, out dbQuery))));
+
+        Assert.Equal(idCampaign, dbQuery.IdCampaign);
+        AssertHelper.EqualIgnoringSpaces(expectedContent, dbQuery.Content);
+        AssertHelper.EqualIgnoringSpaces(expectedHead, dbQuery.Head);
     }
 
     [Theory]
@@ -173,9 +173,8 @@ public class HtmlContentProcessingIntegrationTests
         var dbContextMock = new Mock<IDbContext>();
 
         dbContextMock
-            .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
-                It.IsAny<string>(),
-                It.IsAny<ByCampaignIdAndAccountNameParameters>()))
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
             .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
             {
                 OwnCampaignExists = true,
@@ -220,13 +219,12 @@ public class HtmlContentProcessingIntegrationTests
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        ContentRow contentRow = null;
+        UpdateCampaignContentDbQuery dbQuery = null;
         dbContextMock.Verify(x => x.ExecuteAsync(
-            It.IsAny<string>(),
-            It.Is<ContentRow>(x => AssertHelper.GetValueAndContinue(x, out contentRow))));
+            It.Is<UpdateCampaignContentDbQuery>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
 
-        Assert.Equal(idCampaign, contentRow.IdCampaign);
-        AssertHelper.EqualIgnoringSpaces(expectedContent, contentRow.Content);
+        Assert.Equal(idCampaign, dbQuery.IdCampaign);
+        AssertHelper.EqualIgnoringSpaces(expectedContent, dbQuery.Content);
     }
 
     [Theory]
@@ -251,9 +249,8 @@ public class HtmlContentProcessingIntegrationTests
         var dbContextMock = new Mock<IDbContext>();
 
         dbContextMock
-            .Setup(x => x.QueryFirstOrDefaultAsync<FirstOrDefaultCampaignStatusDbQuery.Result>(
-                It.IsAny<string>(),
-                It.IsAny<ByCampaignIdAndAccountNameParameters>()))
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
             .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
             {
                 OwnCampaignExists = true,
@@ -282,13 +279,12 @@ public class HtmlContentProcessingIntegrationTests
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        ContentRow contentRow = null;
+        UpdateCampaignContentDbQuery dbQuery = null;
         dbContextMock.Verify(x => x.ExecuteAsync(
-            It.IsAny<string>(),
-            It.Is<ContentRow>(x => AssertHelper.GetValueAndContinue(x, out contentRow))));
+            It.Is<UpdateCampaignContentDbQuery>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
 
-        Assert.Equal(idCampaign, contentRow.IdCampaign);
-        Assert.Equal(expectedContent, contentRow.Content);
+        Assert.Equal(idCampaign, dbQuery.IdCampaign);
+        Assert.Equal(expectedContent, dbQuery.Content);
     }
 
     [Theory]

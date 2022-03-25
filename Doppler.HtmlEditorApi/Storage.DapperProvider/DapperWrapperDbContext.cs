@@ -16,14 +16,20 @@ public class DapperWrapperDbContext : IDbContext, IDisposable
         _lazyDbConnection = new Lazy<IDbConnection>(() => databaseConnectionFactory.GetConnection());
     }
 
-    public Task<TResult> QueryFirstOrDefaultAsync<TResult>(string query, object param)
-        => _lazyDbConnection.Value.QueryFirstOrDefaultAsync<TResult>(query, param);
+    public Task<TResult> ExecuteAsync<TResult>(ISingleItemDbQuery<TResult> query)
+        => _lazyDbConnection.Value.QuerySingleOrDefaultAsync<TResult>(
+            query.GenerateSqlQuery(),
+            query.GenerateSqlParameters());
 
-    public Task<IEnumerable<TResult>> QueryAsync<TResult>(string query, object param = null)
-        => _lazyDbConnection.Value.QueryAsync<TResult>(query, param);
+    public Task<IEnumerable<TResult>> ExecuteAsync<TResult>(ICollectionDbQuery<TResult> query)
+        => _lazyDbConnection.Value.QueryAsync<TResult>(
+            query.GenerateSqlQuery(),
+            query.GenerateSqlParameters());
 
-    public Task<int> ExecuteAsync(string query, object param)
-        => _lazyDbConnection.Value.ExecuteAsync(query, param);
+    public Task<int> ExecuteAsync(IExecutableDbQuery query)
+        => _lazyDbConnection.Value.ExecuteAsync(
+            query.GenerateSqlQuery(),
+            query.GenerateSqlParameters());
 
     public void Dispose()
     {

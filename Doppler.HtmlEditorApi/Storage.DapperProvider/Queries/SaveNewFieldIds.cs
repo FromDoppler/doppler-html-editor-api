@@ -8,11 +8,12 @@ namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 /// <summary>
 /// It keeps existing DB entries and only adds new ones without deleting anything.
 /// </summary>
-public class SaveNewFieldIds : DbQuery<SaveNewFieldIds.Parameters, int>
+public record SaveNewFieldIds(
+    int IdContent,
+    IEnumerable<int> FieldIds
+) : IExecutableDbQuery
 {
-    public SaveNewFieldIds(IDbContext dbContext) : base(dbContext) { }
-
-    protected override string SqlQuery => @"
+    const string BASE_QUERY = @"
     DECLARE @T TABLE (IdField INT)
     INSERT INTO @T (IdField) VALUES {{FieldIds}}
 
@@ -22,14 +23,12 @@ public class SaveNewFieldIds : DbQuery<SaveNewFieldIds.Parameters, int>
     LEFT JOIN dbo.ContentXFIeld CxF ON CxF.IdField = t.IdField AND CxF.IdContent = @IdContent
     WHERE CxF.IdContent IS NULL";
 
-    public override Task<int> ExecuteAsync(Parameters parameters)
+    public string GenerateSqlQuery()
     {
-        var serializedFieldsId = string.Join(",", parameters.FieldIds.Select(x => $"({x})"));
-        var query = SqlQuery.Replace("{{FieldIds}}", serializedFieldsId);
-
-        return DbContext.ExecuteAsync(query, parameters);
+        var serializedFieldsId = string.Join(",", FieldIds.Select(x => $"({x})"));
+        return BASE_QUERY.Replace("{{FieldIds}}", serializedFieldsId);
     }
 
-    public record Parameters(int IdContent, IEnumerable<int> FieldIds);
-
+    public object GenerateSqlParameters()
+        => new { IdContent };
 }
