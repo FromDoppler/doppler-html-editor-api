@@ -143,6 +143,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         {
             await _dbContext.ExecuteAsync(new SaveNewCampaignLinks(ContentId, links));
         }
-        // TODO: delete not included links
+        await _dbContext.ExecuteAsync(new DeleteAutomationConditionalsOfRemovedCampaignLinks(ContentId, links));
+        await _dbContext.ExecuteAsync(new DeleteRemovedCampaignLinks(ContentId, links));
     }
 }
