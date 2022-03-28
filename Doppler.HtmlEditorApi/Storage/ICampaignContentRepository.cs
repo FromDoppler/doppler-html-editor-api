@@ -12,4 +12,10 @@ public interface ICampaignContentRepository
     /// It keeps existing DB entries and only adds new ones without deleting anything.
     /// </summary>
     Task SaveNewFieldIds(int accountName, IEnumerable<int> fieldsId);
+
+    /// <summary>
+    /// It adds to DB the links that does not exist and removes the existing links that are not included in the payload.
+    /// It does not update the properties of existing links that are also in the payload.
+    /// </summary>
+    Task SaveLinks(int ContentId, IEnumerable<string> links);
 }
