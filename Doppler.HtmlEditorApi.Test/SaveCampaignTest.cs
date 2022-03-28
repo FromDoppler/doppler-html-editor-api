@@ -632,6 +632,14 @@ namespace Doppler.HtmlEditorApi
             ), Times.Once);
             Assert.Equal(expectedLinks, linksSendToSaveNewCampaignLinks);
 
+            string[] linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks = null;
+            dbContextMock.Verify(x => x.ExecuteAsync(
+                It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
+                    q.IdContent == expectedIdCampaign
+                    && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks))
+            ), Times.Once);
+            Assert.Equal(expectedLinks, linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks);
+
             string[] linksSendToDeleteRemovedCampaignLinks = null;
             dbContextMock.Verify(x => x.ExecuteAsync(
                 It.Is<DeleteRemovedCampaignLinks>(q =>
@@ -731,6 +739,12 @@ namespace Doppler.HtmlEditorApi
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             dbContextMock.VerifyAll();
+
+            dbContextMock.Verify(x => x.ExecuteAsync(
+                It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
+                    q.IdContent == expectedIdCampaign
+                    && !q.Links.Any())
+            ), Times.Once);
 
             dbContextMock.Verify(x => x.ExecuteAsync(
                 It.Is<DeleteRemovedCampaignLinks>(q =>

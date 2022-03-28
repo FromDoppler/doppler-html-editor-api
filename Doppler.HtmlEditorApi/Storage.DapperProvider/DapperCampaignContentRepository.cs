@@ -143,8 +143,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         {
             await _dbContext.ExecuteAsync(new SaveNewCampaignLinks(ContentId, links));
         }
-        // TODO: Delete removed links from AutomationConditional table
-        // See https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.Application.CampaignsModule/Services/Classes/CampaignContentService.cs#L2519-L2523
+        await _dbContext.ExecuteAsync(new DeleteAutomationConditionalsOfRemovedCampaignLinks(ContentId, links));
         await _dbContext.ExecuteAsync(new DeleteRemovedCampaignLinks(ContentId, links));
     }
 }
