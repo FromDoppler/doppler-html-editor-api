@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using Doppler.HtmlEditorApi.Storage;
 using System.Text.RegularExpressions;
+using Doppler.HtmlEditorApi.Domain;
 
 namespace Doppler.HtmlEditorApi;
 public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>

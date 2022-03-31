@@ -1,6 +1,6 @@
 using System;
 
-namespace Doppler.HtmlEditorApi;
+namespace Doppler.HtmlEditorApi.Domain;
 
 public enum CampaignStatus
 {
@@ -8,5 +8,3 @@ public enum CampaignStatus
     IN_WINNER_IN_AB_SELECTION_PROCESS,
     OTHER
 }
-
-

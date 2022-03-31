@@ -1,4 +1,6 @@
-namespace Doppler.HtmlEditorApi;
+using Doppler.HtmlEditorApi.Domain;
+
+namespace Doppler.HtmlEditorApi.Configuration;
 
 public record FieldsOptions
 {

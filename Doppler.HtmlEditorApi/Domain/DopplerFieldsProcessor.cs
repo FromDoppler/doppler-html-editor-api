@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace Doppler.HtmlEditorApi;
+namespace Doppler.HtmlEditorApi.Domain;
 
 /// <summary>
 /// This class deals with the conversion between Doppler field-names

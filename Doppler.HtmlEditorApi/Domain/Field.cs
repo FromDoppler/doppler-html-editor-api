@@ -1,4 +1,4 @@
-namespace Doppler.HtmlEditorApi;
+namespace Doppler.HtmlEditorApi.Domain;
 
 public record Field(
     int id,

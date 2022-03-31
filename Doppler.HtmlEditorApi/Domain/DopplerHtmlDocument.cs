@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 
-namespace Doppler.HtmlEditorApi;
+namespace Doppler.HtmlEditorApi.Domain;
 
 /// <summary>
 /// This class deals with the conversion between a standard HTML content

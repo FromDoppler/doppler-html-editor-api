@@ -1,3 +1,4 @@
+using Doppler.HtmlEditorApi.Domain;
 using Xunit;
 
 namespace Doppler.HtmlEditorApi;

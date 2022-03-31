@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 
 namespace Doppler.HtmlEditorApi.Storage.DapperProvider;

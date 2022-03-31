@@ -1,6 +1,7 @@
 using Xunit.Abstractions;
 using Xunit;
 using System.Linq;
+using Doppler.HtmlEditorApi.Domain;
 
 namespace Doppler.HtmlEditorApi;
 

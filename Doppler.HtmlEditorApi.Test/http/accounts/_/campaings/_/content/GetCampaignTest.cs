@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Doppler.HtmlEditorApi.Storage;
 using Doppler.HtmlEditorApi.ApiModels;
+using Doppler.HtmlEditorApi.Domain;
 
 namespace Doppler.HtmlEditorApi;
 public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>

@@ -1,4 +1,4 @@
-namespace Doppler.HtmlEditorApi.Storage;
+namespace Doppler.HtmlEditorApi.Domain;
 
 public abstract record ContentData(
     int campaignId);
