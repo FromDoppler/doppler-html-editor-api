@@ -1,7 +1,6 @@
-using Doppler.HtmlEditorApi.Domain;
 using Xunit;
 
-namespace Doppler.HtmlEditorApi;
+namespace Doppler.HtmlEditorApi.Domain;
 
 public class DopplerFieldsProcessorTest
 {
