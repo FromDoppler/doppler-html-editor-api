@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using TUD = Doppler.HtmlEditorApi.Test.Utils.TestUsersData;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,7 +15,7 @@ public static class WebApplicationFactoryExtensions
         IEnumerable<(Type, object)> servicesToOverride,
         string token)
     {
-        token ??= TUD.TOKEN_TEST1_EXPIRE_20330518;
+        token ??= TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var client = factory
             .WithWebHostBuilder(c =>
             {

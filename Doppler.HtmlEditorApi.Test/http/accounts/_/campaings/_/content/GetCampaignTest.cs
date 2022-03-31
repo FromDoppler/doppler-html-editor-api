@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using System.Text.Json;
 using System.Net;
-using TUD = Doppler.HtmlEditorApi.Test.Utils.TestUsersData;
 using Xunit;
 using Xunit.Abstractions;
 using System.Threading.Tasks;
@@ -59,8 +58,8 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData("/accounts/x@x.com/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, HttpStatusCode.Forbidden)]
-    [InlineData("/accounts/x@x.com/campaigns/456/content", TUD.TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
+    [InlineData("/accounts/x@x.com/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, HttpStatusCode.Forbidden)]
+    [InlineData("/accounts/x@x.com/campaigns/456/content", TestUsersData.TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
     public async Task GET_campaign_should_not_accept_the_token_of_another_account(string url, string token, HttpStatusCode expectedStatusCode)
     {
         // Arrange
@@ -76,8 +75,8 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
     public async Task GET_campaign_should_not_accept_a_expired_token(string url, string token, HttpStatusCode expectedStatusCode)
     {
         // Arrange
@@ -96,9 +95,9 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_SUPERUSER_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
-    [InlineData("/accounts/otro@test.com/campaigns/456/content", TUD.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
+    [InlineData("/accounts/otro@test.com/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 456)]
     public async Task GET_campaign_should_accept_right_tokens_and_return_404_when_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         // Arrange
@@ -122,9 +121,9 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_SUPERUSER_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
-    [InlineData("/accounts/otro@test.com/campaigns/456/content", TUD.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
+    [InlineData("/accounts/otro@test.com/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 456)]
     public async Task GET_campaign_should_accept_right_tokens_and_return_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         // Arrange
@@ -169,7 +168,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
     public async Task GET_campaign_should_return_404_error_when_campaign_does_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         var dbContextMock = new Mock<IDbContext>();
@@ -202,7 +201,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
     public async Task GET_campaign_should_return_404_error_when_user_does_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         var dbContextMock = new Mock<IDbContext>();
@@ -227,7 +226,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
     public async Task GET_campaign_should_error_when_content_is_mseditor(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         var editorType = 4;
@@ -265,7 +264,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
     public async Task GET_campaign_should_return_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         var meta = "{\"demo\":\"unlayer\"}";
@@ -306,7 +305,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
     public async Task GET_campaign_should_return_html_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         var html = "<html></html>";
@@ -344,7 +343,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
     public async Task GET_campaign_should_error_when_content_is_unknown(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         var editorType = 8; // Unknown
@@ -382,7 +381,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content", TUD.TOKEN_TEST1_EXPIRE_20330518, TUD.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
     public async Task GET_campaign_should_return_empty_content_as_unlayer_content(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         // Arrange
@@ -431,8 +430,8 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     public async Task GET_campaign_should_return_not_include_head_in_the_content(string expectedHtml, string storedHead, string storedContent, string storedMeta, int? editorType)
     {
         // Arrange
-        var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
-        var accountName = TUD.EMAIL_TEST1;
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var accountName = TestUsersData.EMAIL_TEST1;
         var idCampaign = 456;
         var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content";
 
