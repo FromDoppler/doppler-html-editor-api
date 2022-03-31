@@ -1,9 +1,5 @@
-using System;
-using System.Data;
-using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Repositories;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb;
-using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
 using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;

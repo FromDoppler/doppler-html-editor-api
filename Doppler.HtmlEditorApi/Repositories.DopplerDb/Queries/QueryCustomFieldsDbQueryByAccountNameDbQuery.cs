@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DataAccess;
 
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;

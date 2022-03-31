@@ -1,5 +1,3 @@
-using System;
-
 namespace Doppler.HtmlEditorApi.Domain;
 
 public enum CampaignStatus

@@ -1,16 +1,14 @@
-using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Doppler.HtmlEditorApi.DopplerSecurity;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
 using Doppler.HtmlEditorApi.ApiModels;
-using System.Text.Json;
-using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Configuration;
+using Doppler.HtmlEditorApi.Domain;
+using Doppler.HtmlEditorApi.DopplerSecurity;
 using Doppler.HtmlEditorApi.Repositories;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Doppler.HtmlEditorApi.Controllers
 {

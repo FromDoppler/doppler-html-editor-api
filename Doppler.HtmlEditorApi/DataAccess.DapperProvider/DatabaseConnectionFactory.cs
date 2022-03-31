@@ -1,8 +1,6 @@
-using Microsoft.Extensions.Options;
-using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace Doppler.HtmlEditorApi.DataAccess.DapperProvider;
 
