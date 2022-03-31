@@ -35,8 +35,6 @@ namespace Doppler.HtmlEditorApi
                     o.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 });
             services.AddCors();
-            services.AddSingleton<Weather.IWeatherForecastService, Weather.WeatherForecastService>();
-            services.AddSingleton<Weather.DataService>();
             services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer",
