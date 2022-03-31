@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
+namespace Doppler.HtmlEditorApi.DataAccess;
 
 public interface IDbContext
 {
@@ -11,15 +11,3 @@ public interface IDbContext
     Task<IEnumerable<TResult>> ExecuteAsync<TResult>(ICollectionDbQuery<TResult> query);
     Task<int> ExecuteAsync(IExecutableDbQuery query);
 }
-
-public interface IDbQuery
-{
-    string GenerateSqlQuery();
-    object GenerateSqlParameters() => this;
-}
-
-public interface IExecutableDbQuery : IDbQuery { }
-
-public interface ICollectionDbQuery<TResult> : IDbQuery { }
-
-public interface ISingleItemDbQuery<TResult> : IDbQuery { }

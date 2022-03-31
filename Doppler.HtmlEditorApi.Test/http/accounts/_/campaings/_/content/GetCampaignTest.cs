@@ -1,5 +1,4 @@
 using Doppler.HtmlEditorApi;
-using Doppler.HtmlEditorApi.Storage.DapperProvider;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
@@ -10,9 +9,10 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
-using Doppler.HtmlEditorApi.Storage;
 using Doppler.HtmlEditorApi.ApiModels;
 using Doppler.HtmlEditorApi.Domain;
+using Doppler.HtmlEditorApi.Repositories;
+using Doppler.HtmlEditorApi.DataAccess;
 
 namespace Doppler.HtmlEditorApi;
 public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>

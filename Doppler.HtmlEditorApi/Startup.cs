@@ -67,7 +67,8 @@ namespace Doppler.HtmlEditorApi
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
                 };
             });
-            services.AddDapperProvider(Configuration);
+            services.AddDapperDataAccessProvider(Configuration);
+            services.AddDopplerDbRepositories();
             services.Configure<FieldsOptions>(Configuration.GetSection("fields"));
         }
 

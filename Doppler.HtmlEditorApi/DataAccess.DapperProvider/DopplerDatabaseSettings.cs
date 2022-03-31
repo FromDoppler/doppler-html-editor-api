@@ -1,9 +1,9 @@
 using System;
 using System.Data.SqlClient;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
+namespace Doppler.HtmlEditorApi.DataAccess.DapperProvider;
 
-public class DopplerDatabaseSettings
+public class DatabaseSettings
 {
     public string ConnectionString { get; set; }
 

@@ -1,4 +1,4 @@
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 public class DbField
 {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 public class SaveNewCampaignLinksTest
 {

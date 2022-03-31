@@ -1,12 +1,13 @@
 using Dapper;
-using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Doppler.HtmlEditorApi.Domain;
+using Doppler.HtmlEditorApi.DataAccess;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
 public class DapperFieldsRepository : IFieldsRepository
 {

@@ -1,6 +1,7 @@
 using Doppler.HtmlEditorApi;
-using Doppler.HtmlEditorApi.Storage.DapperProvider;
-using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+using Doppler.HtmlEditorApi.DataAccess;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Xunit;

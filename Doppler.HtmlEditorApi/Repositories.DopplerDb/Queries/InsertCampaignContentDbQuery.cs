@@ -1,7 +1,8 @@
 
 using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.DataAccess;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 public record InsertCampaignContentDbQuery(
     int IdCampaign,

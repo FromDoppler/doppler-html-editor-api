@@ -1,7 +1,7 @@
 using System.Data;
 using System.Threading.Tasks;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
+namespace Doppler.HtmlEditorApi.DataAccess.DapperProvider;
 
 public interface IDatabaseConnectionFactory
 {

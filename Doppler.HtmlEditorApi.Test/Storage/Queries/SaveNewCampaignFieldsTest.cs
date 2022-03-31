@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 public class SaveNewCampaignFieldsTest
 {

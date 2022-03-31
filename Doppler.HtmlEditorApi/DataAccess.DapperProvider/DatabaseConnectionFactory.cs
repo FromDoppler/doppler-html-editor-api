@@ -4,13 +4,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
+namespace Doppler.HtmlEditorApi.DataAccess.DapperProvider;
 
 public class DatabaseConnectionFactory : IDatabaseConnectionFactory
 {
     private readonly string _connectionString;
 
-    public DatabaseConnectionFactory(IOptions<DopplerDatabaseSettings> dopplerDatabaseSettings)
+    public DatabaseConnectionFactory(IOptions<DatabaseSettings> dopplerDatabaseSettings)
     {
         _connectionString = dopplerDatabaseSettings.Value.GetSqlConnectionString();
     }

@@ -1,5 +1,4 @@
 using Doppler.HtmlEditorApi;
-using Doppler.HtmlEditorApi.Storage.DapperProvider;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
@@ -9,14 +8,15 @@ using TUD = Doppler.HtmlEditorApi.Test.Utils.TestUsersData;
 using Xunit;
 using Xunit.Abstractions;
 using System.Threading.Tasks;
-using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
 using System.Net.Http.Json;
 using System;
 using System.Linq;
 using System.Net.Http.Headers;
-using Doppler.HtmlEditorApi.Storage;
 using System.Text.RegularExpressions;
 using Doppler.HtmlEditorApi.Domain;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
+using Doppler.HtmlEditorApi.Repositories;
+using Doppler.HtmlEditorApi.DataAccess;
 
 namespace Doppler.HtmlEditorApi;
 public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>

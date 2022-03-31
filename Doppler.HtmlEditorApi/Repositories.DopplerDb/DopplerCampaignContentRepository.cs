@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
-using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
 public class DapperCampaignContentRepository : ICampaignContentRepository
 {

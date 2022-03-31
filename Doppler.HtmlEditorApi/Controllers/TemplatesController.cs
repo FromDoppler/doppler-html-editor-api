@@ -7,8 +7,6 @@ using Doppler.HtmlEditorApi.DopplerSecurity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Doppler.HtmlEditorApi.ApiModels;
-using Doppler.HtmlEditorApi.Storage;
-
 
 namespace Doppler.HtmlEditorApi.Controllers
 {

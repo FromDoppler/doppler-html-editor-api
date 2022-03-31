@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Doppler.HtmlEditorApi.Storage.DapperProvider;
-using Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+using Doppler.HtmlEditorApi.DataAccess;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Moq;
 
 namespace Doppler.HtmlEditorApi.Test.Utils;

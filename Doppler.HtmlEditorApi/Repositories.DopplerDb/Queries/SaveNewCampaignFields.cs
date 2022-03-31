@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.DataAccess;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 /// <summary>
 /// It keeps existing DB entries and only adds new ones without deleting anything.

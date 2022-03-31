@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.Domain;
 
-namespace Doppler.HtmlEditorApi.Storage;
+namespace Doppler.HtmlEditorApi.Repositories;
 
 public interface ICampaignContentRepository
 {

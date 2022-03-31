@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using Doppler.HtmlEditorApi.DataAccess;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider.Queries;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 /// <summary>
 /// It deletes AutomationConditional link entries that are not present in the payload.
