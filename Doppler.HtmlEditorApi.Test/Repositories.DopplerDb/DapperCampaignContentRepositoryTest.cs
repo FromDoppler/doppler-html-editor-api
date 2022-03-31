@@ -1,12 +1,10 @@
-using Doppler.HtmlEditorApi;
 using Doppler.HtmlEditorApi.DataAccess;
-using Doppler.HtmlEditorApi.Repositories.DopplerDb;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Xunit;
 
-namespace Doppler.HtmlEditorApi.Storage.DapperProvider;
+namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
 public class DapperCampaignContentRepositoryTest : IClassFixture<WebApplicationFactory<Startup>>
 {
