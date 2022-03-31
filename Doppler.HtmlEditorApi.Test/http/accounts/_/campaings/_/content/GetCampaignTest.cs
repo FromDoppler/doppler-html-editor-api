@@ -1,19 +1,19 @@
-using Doppler.HtmlEditorApi;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.ApiModels;
+using Doppler.HtmlEditorApi.DataAccess;
+using Doppler.HtmlEditorApi.Domain;
+using Doppler.HtmlEditorApi.Repositories;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
-using System.Text.Json;
-using System.Net;
-using Xunit;
 using Xunit.Abstractions;
-using System.Threading.Tasks;
-using System.Net.Http.Headers;
-using Doppler.HtmlEditorApi.ApiModels;
-using Doppler.HtmlEditorApi.Domain;
-using Doppler.HtmlEditorApi.Repositories;
-using Doppler.HtmlEditorApi.DataAccess;
+using Xunit;
 
 namespace Doppler.HtmlEditorApi;
+
 public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 {
     #region Content examples

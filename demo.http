@@ -349,4 +349,3 @@ GET {{base}}/swagger/index.html
 
 ###
 GET {{base}}/version.txt
-

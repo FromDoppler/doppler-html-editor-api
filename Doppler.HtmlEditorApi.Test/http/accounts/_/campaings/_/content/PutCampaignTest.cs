@@ -1,23 +1,22 @@
-using Doppler.HtmlEditorApi;
-using Doppler.HtmlEditorApi.Test.Utils;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Moq;
-using System.Text.Json;
-using System.Net;
-using Xunit;
-using Xunit.Abstractions;
-using System.Threading.Tasks;
-using System.Net.Http.Json;
 using System;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Doppler.HtmlEditorApi.Repositories;
-using Doppler.HtmlEditorApi.DataAccess;
+using Doppler.HtmlEditorApi.Test.Utils;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Moq;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Doppler.HtmlEditorApi;
+
 public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 {
     #region Content examples
@@ -390,9 +389,9 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     {
         // Arrange
         var repositoryMock = new Mock<ICampaignContentRepository>();
-        var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
-        var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TUD.EMAIL_TEST1;
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var htmlContent = "My HTML Content";
         Regex matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign content is read only\"");
         Regex matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is OTHER\"");
