@@ -11,6 +11,9 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 {
     private const int EDITOR_TYPE_MSEDITOR = 4;
     private const int EDITOR_TYPE_UNLAYER = 5;
+    private const int DOPPLER_CAMPAIGN_STATUS_DRAFT = 1;
+    private const int DOPPLER_CAMPAIGN_STATUS_AB_DRAFT = 11;
+    private const int DOPPLER_CAMPAIGN_STATUS_IN_WINNER_IN_AB_SELECTION_PROCESS = 18;
 
     private readonly IDbContext _dbContext;
     public DapperCampaignContentRepository(IDbContext dbContext)
@@ -65,8 +68,36 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             editorType: queryResult.EditorType);
     }
 
+    public async Task<CampaignState> GetCampaignState(string accountName, int campaignId)
+    {
+        var campaignStateData = await _dbContext.ExecuteAsync(new FirstOrDefaultCampaignStatusDbQuery(
+            AccountName: accountName,
+            IdCampaign: campaignId
+        ));
+
+        if (campaignStateData == null || !campaignStateData.OwnCampaignExists)
+        {
+            return new NoExistCampaignState();
+        }
+
+        // For information about Doppler's status code, check out here
+        // https://github.com/MakingSense/Doppler/blob/develop/Doppler.Transversal/Classes/CampaignStatusEnum.cs
+        var campaignStatus = campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_DRAFT ||
+            campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_AB_DRAFT ? CampaignStatus.DRAFT
+            : campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_IN_WINNER_IN_AB_SELECTION_PROCESS ? CampaignStatus.IN_WINNER_IN_AB_SELECTION_PROCESS
+            : CampaignStatus.OTHER;
+
+        return new CampaignState(
+                campaignStateData.OwnCampaignExists,
+                campaignStateData.ContentExists,
+                campaignStateData.EditorType,
+                campaignStatus
+            );
+    }
+
     public async Task SaveCampaignContent(string accountName, ContentData contentRow)
     {
+        // TODO: consider to avoid this request since we already ask for this status before
         var campaignStatus = await _dbContext.ExecuteAsync(new FirstOrDefaultCampaignStatusDbQuery(
             AccountName: accountName,
             IdCampaign: contentRow.campaignId
