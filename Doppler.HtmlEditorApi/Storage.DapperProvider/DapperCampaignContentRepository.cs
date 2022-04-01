@@ -103,12 +103,6 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             IdCampaign: contentRow.campaignId
         ));
 
-        // TODO: consider returning 404 NotFound
-        if (campaignStatus == null || !campaignStatus.OwnCampaignExists)
-        {
-            throw new ApplicationException($"CampaignId {contentRow.campaignId} does not exists or belongs to another user than {accountName}");
-        }
-
         var queryParams = contentRow switch
         {
             UnlayerContentData unlayerContentData => new
