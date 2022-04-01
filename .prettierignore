@@ -27,3 +27,5 @@ package-lock.json
 [eE]ncrypted.[sS]ecret.*
 *.csproj.user
 *.key
+*.monopic
+*.svg
