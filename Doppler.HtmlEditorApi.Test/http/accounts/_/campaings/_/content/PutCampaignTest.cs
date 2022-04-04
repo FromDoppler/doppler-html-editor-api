@@ -15,6 +15,7 @@ using System;
 using System.Linq;
 using System.Net.Http.Headers;
 using Doppler.HtmlEditorApi.Storage;
+using System.Text.RegularExpressions;
 
 namespace Doppler.HtmlEditorApi;
 public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
@@ -129,6 +130,9 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Arrange
         var repositoryMock = new Mock<ICampaignContentRepository>();
 
+        repositoryMock
+            .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
+            .ReturnsAsync(new CampaignState(true, true, null, CampaignStatus.DRAFT));
         repositoryMock
             .Setup(x => x.SaveCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
             .Returns(Task.CompletedTask);
@@ -291,7 +295,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     [Theory]
     [InlineData("html")]
     [InlineData("unlayer")]
-    public async Task PUT_campaign_should_return_500_error_when_campaign_does_not_exist(string type)
+    public async Task PUT_campaign_should_return_404_error_when_campaign_does_not_exist(string type)
     {
         // Arrange
         var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
@@ -310,6 +314,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = false,
                 ContentExists = false,
                 EditorType = null,
+                Status = null
             });
 
         var client = _factory.CreateSutClient(
@@ -329,14 +334,14 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         _output.WriteLine(responseContent);
 
         // Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         dbContextMock.VerifyAll();
     }
 
     [Theory]
     [InlineData("html")]
     [InlineData("unlayer")]
-    public async Task PUT_campaign_should_return_500_error_when_user_does_not_exist(string type)
+    public async Task PUT_campaign_should_return_404_error_when_user_does_not_exist(string type)
     {
         // Arrange
         var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
@@ -355,6 +360,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = false,
                 ContentExists = false,
                 EditorType = null,
+                Status = null
             });
 
         var client = _factory.CreateSutClient(
@@ -373,8 +379,51 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         _output.WriteLine(responseContent);
 
         // Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         dbContextMock.VerifyAll();
+    }
+
+    [Theory]
+    [InlineData("html", CampaignStatus.OTHER)]
+    [InlineData("unlayer", CampaignStatus.OTHER)]
+    public async Task PUT_campaign_should_return_bad_request_error_when_campaign_is_not_writable(string type, CampaignStatus campaignStatus)
+    {
+        // Arrange
+        var repositoryMock = new Mock<ICampaignContentRepository>();
+        var url = $"/accounts/{TUD.EMAIL_TEST1}/campaigns/456/content";
+        var token = TUD.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TUD.EMAIL_TEST1;
+        var htmlContent = "My HTML Content";
+        Regex matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign content is read only\"");
+        Regex matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is OTHER\"");
+
+        repositoryMock
+            .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
+            .ReturnsAsync(new CampaignState(true, true, null, campaignStatus));
+
+        var client = _factory.CreateSutClient(
+            repositoryMock.Object,
+            Mock.Of<IFieldsRepository>(),
+            token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = type,
+            htmlContent,
+            meta = new { }
+        }));
+
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Matches(matchTitle, responseContent);
+        Assert.Matches(matchDetail, responseContent);
+        repositoryMock.VerifyAll();
+        repositoryMock.VerifyNoOtherCalls();
     }
 
     [Theory]
@@ -402,6 +451,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = contentExists,
                 EditorType = currentEditorType,
+                Status = 1
             });
 
         dbContextMock
@@ -470,6 +520,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = contentExists,
                 EditorType = currentEditorType,
+                Status = 1
             });
 
         dbContextMock
@@ -535,6 +586,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = 5,
+                Status = 1
             });
 
         dbContextMock.SetupBasicFields();
@@ -584,6 +636,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = 5,
+                Status = 1
             });
 
         dbContextMock.SetupBasicFields();
@@ -641,6 +694,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = 5,
+                Status = 1
             });
 
         dbContextMock.SetupBasicFields();
@@ -709,6 +763,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = 5,
+                Status = 1
             });
 
         dbContextMock.SetupBasicFields();
@@ -757,6 +812,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = 5,
+                Status = 1
             });
 
         dbContextMock.SetupBasicFields();
@@ -830,6 +886,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = existingContent,
                 EditorType = null,
+                Status = 1
             });
 
         var client = _factory.CreateSutClient(
@@ -899,6 +956,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = null,
+                Status = 1
             });
 
         dbContextMock.SetupBasicFields();
@@ -975,6 +1033,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = null,
+                Status = 1
             });
 
         dbContextMock.SetupBasicFields();

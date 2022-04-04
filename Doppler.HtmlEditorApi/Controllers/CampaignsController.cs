@@ -69,6 +69,24 @@ namespace Doppler.HtmlEditorApi.Controllers
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
+            var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
+            if (!campaignState.OwnCampaignExists)
+            {
+                return new NotFoundObjectResult(new ProblemDetails()
+                {
+                    Title = $@"The campaign was no found",
+                    Detail = $@"The campaign with id {campaignId} does not exists or belongs to another user than {accountName}"
+                });
+            }
+
+            if (!campaignState.IsWritable)
+            {
+                return new BadRequestObjectResult(new ProblemDetails()
+                {
+                    Title = "The campaign content is read only",
+                    Detail = $@"The content cannot be edited because status campaign is {campaignState.CampaignStatus}"
+                });
+            }
             var fieldAliases = _fieldsOptions.Value.aliases;
 
             var basicFields = await _fieldsRepository.GetActiveBasicFields();
