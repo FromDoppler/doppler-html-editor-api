@@ -119,7 +119,14 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
-            await _campaignContentRepository.SaveCampaignContent(accountName, contentRow);
+            if (campaignState.ContentExists)
+            {
+                await _campaignContentRepository.UpdateCampaignContent(accountName, contentRow);
+            }
+            else
+            {
+                await _campaignContentRepository.CreateCampaignContent(accountName, contentRow);
+            }
             await _campaignContentRepository.SaveNewFieldIds(campaignId, fieldIds);
             await _campaignContentRepository.SaveLinks(campaignId, trackableUrls);
 

@@ -133,7 +133,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
             .ReturnsAsync(new CampaignState(true, true, null, CampaignStatus.DRAFT));
         repositoryMock
-            .Setup(x => x.SaveCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
+            .Setup(x => x.UpdateCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
             .Returns(Task.CompletedTask);
 
         var client = _factory.CreateSutClient(
@@ -461,6 +461,57 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 meta: null,
                 result: 1);
 
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = "html",
+            htmlContent
+        }));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.VerifyAll();
+    }
+
+    [Fact]
+    public async Task PUT_campaign_should_store_unlayer_content_and_ensure_campaign_status_when_content_no_exist()
+    {
+        // Arrange
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var expectedIdCampaign = 456;
+        var htmlContent = "My HTML Content";
+        var metaAsString = "{\"data\":\"My Meta Content\"}";
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = false,
+                EditorType = null,
+                Status = 1
+            });
+
+        dbContextMock
+            .SetupInsertOrUpdateContentRow(
+                "INSERT",
+                expectedIdCampaign,
+                htmlContent,
+                metaAsString,
+                result: 1);
+
         var setCurrentStep = 2;
         var setHtmlSourceType = 2;
         var whenCurrentStepIs = 1;
@@ -481,8 +532,9 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = "html",
-            htmlContent
+            type = "unlayer",
+            htmlContent,
+            meta = Utils.ParseAsJsonElement(metaAsString)
         }));
         _output.WriteLine(response.GetHeadersAsString());
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -498,7 +550,6 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     [InlineData(55, true, "UPDATE")]
     [InlineData(4, true, "UPDATE")]
     [InlineData(5, true, "UPDATE")]
-    [InlineData(null, false, "INSERT")]
     public async Task PUT_campaign_should_store_unlayer_content_and_ensure_campaign_status(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
     {
         // Arrange
@@ -529,19 +580,6 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 htmlContent,
                 metaAsString,
                 result: 1);
-
-        var setCurrentStep = 2;
-        var setHtmlSourceType = 2;
-        var whenCurrentStepIs = 1;
-        var whenIdCampaignIs = expectedIdCampaign;
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new UpdateCampaignStatusDbQuery(
-                    setCurrentStep,
-                    setHtmlSourceType,
-                    whenIdCampaignIs,
-                    whenCurrentStepIs)))
-            .ReturnsAsync(1);
 
         var client = _factory.CreateSutClient(
             serviceToOverride1: dbContextMock.Object,

@@ -96,61 +96,66 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             );
     }
 
-    public async Task SaveCampaignContent(string accountName, ContentData contentRow)
+    public async Task CreateCampaignContent(string accounName, ContentData content)
     {
-        // TODO: consider to avoid this request since we already ask for this status before
-        var campaignStatus = await _dbContext.ExecuteAsync(new FirstOrDefaultCampaignStatusDbQuery(
-            AccountName: accountName,
-            IdCampaign: contentRow.campaignId
-        ));
 
-        var queryParams = contentRow switch
+        IExecutableDbQuery insertContentQuery = content switch
         {
-            UnlayerContentData unlayerContentData => new
-            {
-                IdCampaign = unlayerContentData.campaignId,
-                Content = unlayerContentData.htmlContent,
-                Head = unlayerContentData.htmlHead,
-                Meta = unlayerContentData.meta,
-                EditorType = (int?)EDITOR_TYPE_UNLAYER
-            },
-            HtmlContentData htmlContentData => new
-            {
-                IdCampaign = htmlContentData.campaignId,
-                Content = htmlContentData.htmlContent,
-                Head = htmlContentData.htmlHead,
-                Meta = (string)null,
-                EditorType = (int?)null
-            },
+            UnlayerContentData unlayerContentData => new InsertCampaignContentDbQuery(
+                IdCampaign: unlayerContentData.campaignId,
+                Content: unlayerContentData.htmlContent,
+                Head: unlayerContentData.htmlHead,
+                Meta: unlayerContentData.meta,
+                EditorType: (int?)EDITOR_TYPE_UNLAYER
+            ),
+            HtmlContentData htmlContentData => new InsertCampaignContentDbQuery(
+                IdCampaign: htmlContentData.campaignId,
+                Content: htmlContentData.htmlContent,
+                Head: htmlContentData.htmlHead,
+                Meta: null,
+                EditorType: null
+            ),
             // TODO: test this scenario
             // Probably a unit test will be necessary
-            _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
+            _ => throw new NotImplementedException($"Unsupported campaign content type {content.GetType()}")
         };
 
-        IExecutableDbQuery upsertContentQuery = campaignStatus.ContentExists
-            ? new UpdateCampaignContentDbQuery(
-                IdCampaign: queryParams.IdCampaign,
-                EditorType: queryParams.EditorType,
-                Content: queryParams.Content,
-                Head: queryParams.Head,
-                Meta: queryParams.Meta)
-            : new InsertCampaignContentDbQuery(
-                IdCampaign: queryParams.IdCampaign,
-                EditorType: queryParams.EditorType,
-                Content: queryParams.Content,
-                Head: queryParams.Head,
-                Meta: queryParams.Meta);
-
-        await _dbContext.ExecuteAsync(upsertContentQuery);
+        await _dbContext.ExecuteAsync(insertContentQuery);
 
         var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
             setCurrentStep: 2,
             setHtmlSourceType: UpdateCampaignStatusDbQuery.TEMPLATE_HTML_SOURCE_TYPE,
-            whenIdCampaignIs: contentRow.campaignId,
+            whenIdCampaignIs: content.campaignId,
             whenCurrentStepIs: 1
         );
 
         await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
+    }
+
+    public async Task UpdateCampaignContent(string accounName, ContentData content)
+    {
+        IExecutableDbQuery updateContentQuery = content switch
+        {
+            UnlayerContentData unlayerContentData => new UpdateCampaignContentDbQuery(
+                IdCampaign: unlayerContentData.campaignId,
+                Content: unlayerContentData.htmlContent,
+                Head: unlayerContentData.htmlHead,
+                Meta: unlayerContentData.meta,
+                EditorType: (int?)EDITOR_TYPE_UNLAYER
+            ),
+            HtmlContentData htmlContentData => new UpdateCampaignContentDbQuery(
+                IdCampaign: htmlContentData.campaignId,
+                Content: htmlContentData.htmlContent,
+                Head: htmlContentData.htmlHead,
+                Meta: null,
+                EditorType: null
+            ),
+            // TODO: test this scenario
+            // Probably a unit test will be necessary
+            _ => throw new NotImplementedException($"Unsupported campaign content type {content.GetType()}")
+        };
+
+        await _dbContext.ExecuteAsync(updateContentQuery);
     }
 
     public async Task SaveNewFieldIds(int ContentId, IEnumerable<int> fieldsId)
