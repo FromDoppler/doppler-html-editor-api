@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Hellang.Middleware.ProblemDetails;
+using Doppler.HtmlEditorApi.Configuration;
 
 namespace Doppler.HtmlEditorApi
 {
@@ -34,8 +35,6 @@ namespace Doppler.HtmlEditorApi
                     o.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 });
             services.AddCors();
-            services.AddSingleton<Weather.IWeatherForecastService, Weather.WeatherForecastService>();
-            services.AddSingleton<Weather.DataService>();
             services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer",
@@ -66,7 +65,8 @@ namespace Doppler.HtmlEditorApi
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
                 };
             });
-            services.AddDapperProvider(Configuration);
+            services.AddDapperDataAccessProvider(Configuration);
+            services.AddDopplerDbRepositories();
             services.Configure<FieldsOptions>(Configuration.GetSection("fields"));
         }
 
