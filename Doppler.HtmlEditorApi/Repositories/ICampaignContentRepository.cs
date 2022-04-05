@@ -8,7 +8,8 @@ public interface ICampaignContentRepository
 {
     Task<CampaignState> GetCampaignState(string accountName, int campaignId);
     Task<ContentData> GetCampaignModel(string accountName, int campaignId);
-    Task SaveCampaignContent(string accountName, ContentData contentRow);
+    Task CreateCampaignContent(string accountName, ContentData contentRow);
+    Task UpdateCampaignContent(string accountName, ContentData contentRow);
 
     /// <summary>
     /// It keeps existing DB entries and only adds new ones without deleting anything.
