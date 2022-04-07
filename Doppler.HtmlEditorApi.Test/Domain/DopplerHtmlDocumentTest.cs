@@ -1,6 +1,7 @@
 using System.Linq;
 using Xunit.Abstractions;
 using Xunit;
+using Doppler.HtmlEditorApi.Test.Utils;
 
 namespace Doppler.HtmlEditorApi.Domain;
 
@@ -307,6 +308,143 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
             link => Assert.Equal("HTTP://|*|1*|*/search?q=SEARCH%20term", link),
             link => Assert.Equal("www.GOOGLE.com/[[[field]]]", link),
             link => Assert.Equal("ftp://|*|3*|*", link));
+    }
+
+    [Theory]
+    [InlineDataAttribute(
+        @"
+<article>
+    <h1>Title</h1>
+    <p>This is a paragraph</p>
+    <p>This is another paragraph <script>script</script> with a script</p>
+    <script>another script</script>
+    <embed>embed tag should not be closed</embed>
+    <iframe />
+    <iframe title=""Inline Frame Example"" src=""malicious.html""></iframe>
+</article>",
+        @"
+<article>
+    <h1>Title</h1>
+    <p>This is a paragraph</p>
+    <p>This is another paragraph  with a script</p>
+    embed tag should not be closed
+</article>")]
+    [InlineDataAttribute(
+        // Weird behavior with self-closed script
+        @"
+<article>
+    <h1>Title</h1>
+    <p>This is a paragraph <script src=""malicious.js"" /> with a not well-formed script</p>
+    <script>another script</script>
+    <p>This is another paragraph</p>
+</article>",
+        @"
+<article>
+    <h1>Title</h1>
+    <p>This is a paragraph
+    <p>This is another paragraph</p>
+</article>")]
+    [InlineDataAttribute(
+        // Weird behavior with self-closed script
+        @"
+<article>
+    <h1>Title</h1>
+    <p>This is a paragraph <script src=""malicious.js"" /> with a not well-formed script</p>
+    <p>This is another paragraph</p>
+</article>",
+        @"
+<article>
+    <h1>Title</h1>
+    <p>This is a paragraph </p></article>")]
+    [InlineDataAttribute(
+        @"
+<html>
+<head>
+    <title>Hello safety!</title>
+    <script>script in the head</script>
+</head>
+<body>
+    <h1>Title</h1>
+    <p>This is a paragraph</p>
+    <p>This is another paragraph <script>script</script> with a script</p>
+    <script>another script</script>
+</body>
+</html>",
+        @"
+<h1>Title</h1>
+<p>This is a paragraph</p>
+<p>This is another paragraph  with a script</p>
+")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p><iframe /><p>paragraph 2</p>",
+        @"<p>paragraph 1</p><p>paragraph 2</p>")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p><iframe><p>paragraph 2</p>",
+        @"<p>paragraph 1</p>")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p></iframe><p>paragraph 2</p>",
+        @"<p>paragraph 1</p><p>paragraph 2</p>")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p><script /><p>paragraph 2</p>",
+        @"<p>paragraph 1</p>")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p><script><p>paragraph 2</p>",
+        @"<p>paragraph 1</p>")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p></script><p>paragraph 2</p>",
+        @"<p>paragraph 1</p><p>paragraph 2</p>")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p><embed /><p>paragraph 2</p>",
+        @"<p>paragraph 1</p><p>paragraph 2</p>")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p><embed><p>paragraph 2</p>",
+        @"<p>paragraph 1</p><p>paragraph 2</p>")]
+    [InlineDataAttribute(
+        @"<p>paragraph 1</p></embed><p>paragraph 2</p>",
+        @"<p>paragraph 1</p><p>paragraph 2</p>")]
+    public void RemoveHarmfulTags_should_remove_harmfultags_from_body(string input, string expectedBody)
+    {
+        // Arrange
+        var htmlDocument = new DopplerHtmlDocument(input);
+
+        // Act
+        htmlDocument.RemoveHarmfulTags();
+
+        // Assert
+        var content = htmlDocument.GetDopplerContent();
+        AssertHelper.EqualIgnoringMeaninglessSpaces(expectedBody, content);
+    }
+
+    [Theory]
+    [InlineDataAttribute(
+        @"
+<html>
+<head>
+    <iframe></iframe>
+    <embed>
+    <title>Hello safety!</title>
+    <script>script in the head</script>
+</head>
+<body>
+    <h1>Title</h1>
+    <p>This is a paragraph</p>
+    <p>This is another paragraph <script>script</script> with a script</p>
+    <script>another script</script>
+</body>
+</html>",
+        @"
+<title>Hello safety!</title>")]
+    public void RemoveHarmfulTags_should_remove_harmfultags_from_head(string input, string expectedHead)
+    {
+        // Arrange
+        var htmlDocument = new DopplerHtmlDocument(input);
+
+        // Act
+        htmlDocument.RemoveHarmfulTags();
+
+        // Assert
+        var headContent = htmlDocument.GetHeadContent();
+        AssertHelper.EqualIgnoringMeaninglessSpaces(expectedHead, headContent);
     }
 
     private string CreateTestContentWithLink(string href)
