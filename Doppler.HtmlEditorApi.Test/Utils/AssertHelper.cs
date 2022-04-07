@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using System.Linq;
 using ReflectionMagic;
 using Xunit;
 
@@ -6,9 +6,6 @@ namespace Doppler.HtmlEditorApi.Test.Utils;
 
 public static class AssertHelper
 {
-    private static readonly Regex LINE_ENDINGS_REGEX = new Regex(@"[\r\n]");
-    private static readonly Regex SPACES_REGEX = new Regex(@"\s");
-
     public static bool GetValueAndContinue<T>(T input, out T output)
     {
         output = input;
@@ -21,12 +18,16 @@ public static class AssertHelper
         return true;
     }
 
-    public static void EqualIgnoringSpaces(string expected, string actual)
-        => Assert.Equal(RemoveSpaces(expected), RemoveSpaces(actual));
+    public static void EqualIgnoringMeaninglessSpaces(string expected, string actual)
+        => Assert.Equal(RemoveMeaninglessSpaces(expected), RemoveMeaninglessSpaces(actual));
 
-    public static string RemoveSpaces(string str)
+    public static string RemoveMeaninglessSpaces(string str)
         => str == null ? null
-        : SPACES_REGEX.Replace(
-            LINE_ENDINGS_REGEX.Replace(str, string.Empty),
-            string.Empty);
+        : string.Join(
+            '\n',
+            str.Replace("\r\n", "\n")
+                .Replace("\r", "\n")
+                .Split('\n')
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x)));
 }

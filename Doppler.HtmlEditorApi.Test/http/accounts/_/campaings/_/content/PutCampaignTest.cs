@@ -954,17 +954,17 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             && AssertHelper.GetDynamicValueAndContinue(q, out dbQuery))));
 
         Assert.Equal(idCampaign, dbQuery.IdCampaign);
-        AssertHelper.EqualIgnoringSpaces(expectedContent, dbQuery.Content);
-        AssertHelper.EqualIgnoringSpaces(expectedHead, dbQuery.Head);
+        AssertHelper.EqualIgnoringMeaninglessSpaces(expectedContent, dbQuery.Content);
+        AssertHelper.EqualIgnoringMeaninglessSpaces(expectedHead, dbQuery.Head);
     }
 
     [Theory]
-    [InlineData("unlayer", "<div>Hola |*|319*|* |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* , tenemos una oferta para vos</div>")]
-    [InlineData("html", "<div>Hola |*|319*|* |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* , tenemos una oferta para vos</div>")]
-    [InlineData("unlayer", "<div>Hola [[[FIRST_NAME]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
-    [InlineData("html", "<div>Hola [[[first_name]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
-    [InlineData("unlayer", "<div>Hola [[[nombre]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
-    [InlineData("unlayer", "<div>Hola [[[first name]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola  |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
+    [InlineData("unlayer", "<div>Hola |*|319*|* |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola |*|319*|* , tenemos una oferta para vos</div>")]
+    [InlineData("html", "<div>Hola |*|319*|* |*|98765*|*, tenemos una oferta para vos</div>", "<div>Hola |*|319*|* , tenemos una oferta para vos</div>")]
+    [InlineData("unlayer", "<div>Hola [[[FIRST_NAME]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
+    [InlineData("html", "<div>Hola [[[first_name]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
+    [InlineData("unlayer", "<div>Hola [[[nombre]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
+    [InlineData("unlayer", "<div>Hola [[[first name]]] [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>", "<div>Hola |*|319*|* [[[UNKNOWN_FIELD]]], tenemos una oferta para vos</div>")]
     [InlineData("html", "Hoy ([[[cumpleaños]]]) es tu cumpleaños", "Hoy (|*|323*|*) es tu cumpleaños")]
     [InlineData(
         "unlayer",
@@ -1038,7 +1038,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             It.Is<UpdateCampaignContentDbQuery>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
 
         Assert.Equal(idCampaign, dbQuery.IdCampaign);
-        AssertHelper.EqualIgnoringSpaces(expectedContent, dbQuery.Content);
+        AssertHelper.EqualIgnoringMeaninglessSpaces(expectedContent, dbQuery.Content);
     }
 
     [Theory]
