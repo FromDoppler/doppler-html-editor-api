@@ -402,6 +402,14 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
     [InlineDataAttribute(
         @"<p>paragraph 1</p></embed><p>paragraph 2</p>",
         @"<p>paragraph 1</p><p>paragraph 2</p>")]
+    [InlineDataAttribute(
+        @"
+<meta name=""copyright"" content=""© 2022 FromDoppler"">
+<meta http-equiv=""  refresh  "" content=""5;url=https://malisious.site"">
+<meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">",
+        @"
+<meta name=""copyright"" content=""© 2022 FromDoppler"">
+<meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">")]
     public void RemoveHarmfulTags_should_remove_harmfultags_from_body(string input, string expectedBody)
     {
         // Arrange
@@ -434,6 +442,23 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
 </html>",
         @"
 <title>Hello safety!</title>")]
+    [InlineDataAttribute(
+        @"
+<html>
+<head>
+    <title>Hello safety!</title>
+    <meta name=""copyright"" content=""© 2022 FromDoppler"">
+    <meta http-equiv=""  refresh  "" content=""5;url=https://malisious.site"">
+    <meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">
+</head>
+<body>
+    <p>This is a paragraph</p>
+</body>
+</html>",
+        @"
+<title>Hello safety!</title>
+<meta name=""copyright"" content=""© 2022 FromDoppler"">
+<meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">")]
     public void RemoveHarmfulTags_should_remove_harmfultags_from_head(string input, string expectedHead)
     {
         // Arrange
