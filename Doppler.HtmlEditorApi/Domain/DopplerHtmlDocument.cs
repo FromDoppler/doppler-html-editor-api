@@ -81,6 +81,15 @@ public class DopplerHtmlDocument
         }
     }
 
+    public void RemoveHarmfulTags()
+    {
+        var harmfulTags = _contentNode.SelectNodes(@"//script|//embed|//iframe").EmptyIfNull();
+        foreach (var tag in harmfulTags)
+        {
+            tag.Remove();
+        }
+    }
+
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
     {
         _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FIELD_NAME_TAG_REGEX.Replace(
