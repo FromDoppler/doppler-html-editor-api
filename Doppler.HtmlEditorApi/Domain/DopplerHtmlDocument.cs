@@ -83,7 +83,7 @@ public class DopplerHtmlDocument
 
     public void RemoveHarmfulTags()
     {
-        var harmfulTags = _contentNode.SelectNodes(@"//script|//embed|//iframe").EmptyIfNull();
+        var harmfulTags = _contentNode.SelectNodes(@"//script|//embed|//iframe|//meta[contains(@http-equiv,'refresh')]").EmptyIfNull();
         foreach (var tag in harmfulTags)
         {
             tag.Remove();
