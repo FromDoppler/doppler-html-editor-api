@@ -96,7 +96,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             );
     }
 
-    public async Task CreateCampaignContent(string accounName, ContentData content)
+    public async Task CreateCampaignContent(string accountName, ContentData content)
     {
 
         IExecutableDbQuery insertContentQuery = content switch
@@ -132,7 +132,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
     }
 
-    public async Task UpdateCampaignContent(string accounName, ContentData content)
+    public async Task UpdateCampaignContent(string accountName, ContentData content)
     {
         IExecutableDbQuery updateContentQuery = content switch
         {
