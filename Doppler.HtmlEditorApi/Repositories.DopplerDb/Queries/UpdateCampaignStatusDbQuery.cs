@@ -3,10 +3,10 @@ using Doppler.HtmlEditorApi.DataAccess;
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 public record UpdateCampaignStatusDbQuery(
-    int setCurrentStep,
-    int? setHtmlSourceType,
-    int whenIdCampaignIs,
-    int whenCurrentStepIs
+    int SetCurrentStep,
+    int? SetHtmlSourceType,
+    int WhenIdCampaignIs,
+    int WhenCurrentStepIs
 ) : IExecutableDbQuery
 {
     // See https://github.com/MakingSense/Doppler/blob/48cf637bb1f8b4d81837fff904d8736fe889ff1c/Doppler.Transversal/Classes/CampaignHTMLContentTypeEnum.cs#L12-L17

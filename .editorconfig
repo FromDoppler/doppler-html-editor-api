@@ -211,6 +211,10 @@ dotnet_naming_rule.methods_should_be_pascalcase.severity = error
 dotnet_naming_rule.methods_should_be_pascalcase.symbols = methods
 dotnet_naming_rule.methods_should_be_pascalcase.style = pascalcase
 
+dotnet_naming_rule.properties_should_be_pascalcase.severity = error
+dotnet_naming_rule.properties_should_be_pascalcase.symbols = properties
+dotnet_naming_rule.properties_should_be_pascalcase.style = pascalcase
+
 dotnet_naming_rule.events_should_be_pascalcase.severity = error
 dotnet_naming_rule.events_should_be_pascalcase.symbols = events
 dotnet_naming_rule.events_should_be_pascalcase.style = pascalcase

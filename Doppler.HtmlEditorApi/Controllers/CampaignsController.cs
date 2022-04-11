@@ -45,7 +45,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                     htmlContent: EMPTY_UNLAYER_CONTENT_HTML),
                 UnlayerContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
-                    meta: Utils.ParseAsJsonElement(unlayerContent.meta),
+                    meta: Utils.ParseAsJsonElement(unlayerContent.Meta),
                     htmlContent: GenerateHtmlContent(unlayerContent)),
                 BaseHtmlContentData htmlContent => new CampaignContent(
                     type: ContentType.html,
@@ -87,7 +87,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                     Detail = $@"The content cannot be edited because status campaign is {campaignState.CampaignStatus}"
                 });
             }
-            var fieldAliases = _fieldsOptions.Value.aliases;
+            var fieldAliases = _fieldsOptions.Value.Aliases;
 
             var basicFields = await _fieldsRepository.GetActiveBasicFields();
             var customFields = await _fieldsRepository.GetCustomFields(accountName);
@@ -110,14 +110,14 @@ namespace Doppler.HtmlEditorApi.Controllers
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
                 ContentType.unlayer => new UnlayerContentData(
-                    htmlContent: content,
-                    htmlHead: head,
-                    meta: campaignContent.meta.ToString(),
-                    campaignId: campaignId),
+                    HtmlContent: content,
+                    HtmlHead: head,
+                    Meta: campaignContent.meta.ToString(),
+                    CampaignId: campaignId),
                 ContentType.html => new HtmlContentData(
-                    htmlContent: content,
-                    htmlHead: head,
-                    campaignId: campaignId),
+                    HtmlContent: content,
+                    HtmlHead: head,
+                    CampaignId: campaignId),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
@@ -140,6 +140,6 @@ namespace Doppler.HtmlEditorApi.Controllers
             // The head is being lossed here. It is not good if we try to edit an imported content.
             // Old Doppler code:
             // https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.HypermediaAPI/ApiMappers/FromDoppler/DtoContent_To_CampaignContent.cs#L23
-            => content.htmlContent;
+            => content.HtmlContent;
     }
 }

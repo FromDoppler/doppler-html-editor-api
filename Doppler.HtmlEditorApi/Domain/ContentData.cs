@@ -1,40 +1,40 @@
 namespace Doppler.HtmlEditorApi.Domain;
 
 public abstract record ContentData(
-    int campaignId);
+    int CampaignId);
 
 public sealed record EmptyContentData(
-    int campaignId)
-    : ContentData(campaignId);
+    int CampaignId)
+    : ContentData(CampaignId);
 
 public sealed record UnknownContentData(
-    int campaignId,
-    string content,
-    string head,
-    string meta,
-    int? editorType)
-    : ContentData(campaignId);
+    int CampaignId,
+    string Content,
+    string Head,
+    string Meta,
+    int? EditorType)
+    : ContentData(CampaignId);
 
 public sealed record MSEditorContentData(
-    int campaignId,
-    string content)
-    : ContentData(campaignId);
+    int CampaignId,
+    string Content)
+    : ContentData(CampaignId);
 
 public abstract record BaseHtmlContentData(
-    int campaignId,
-    string htmlContent,
-    string htmlHead)
-    : ContentData(campaignId);
+    int CampaignId,
+    string HtmlContent,
+    string HtmlHead)
+    : ContentData(CampaignId);
 
 public sealed record HtmlContentData(
-    int campaignId,
-    string htmlContent,
-    string htmlHead)
-    : BaseHtmlContentData(campaignId, htmlContent, htmlHead);
+    int CampaignId,
+    string HtmlContent,
+    string HtmlHead)
+    : BaseHtmlContentData(CampaignId, HtmlContent, HtmlHead);
 
 public sealed record UnlayerContentData(
-    int campaignId,
-    string htmlContent,
-    string htmlHead,
-    string meta)
-    : BaseHtmlContentData(campaignId, htmlContent, htmlHead);
+    int CampaignId,
+    string HtmlContent,
+    string HtmlHead,
+    string Meta)
+    : BaseHtmlContentData(CampaignId, HtmlContent, HtmlHead);

@@ -33,20 +33,20 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             : !queryResult.CampaignHasContent ? new EmptyContentData(campaignId)
             : queryResult.EditorType == EDITOR_TYPE_MSEDITOR ? new MSEditorContentData(campaignId, queryResult.Content)
             : queryResult.EditorType == EDITOR_TYPE_UNLAYER ? new UnlayerContentData(
-                campaignId: queryResult.IdCampaign,
-                htmlContent: queryResult.Content,
-                htmlHead: queryResult.Head,
-                meta: queryResult.Meta)
+                CampaignId: queryResult.IdCampaign,
+                HtmlContent: queryResult.Content,
+                HtmlHead: queryResult.Head,
+                Meta: queryResult.Meta)
             : queryResult.EditorType == null ? new HtmlContentData(
-                campaignId: queryResult.IdCampaign,
-                htmlContent: queryResult.Content,
-                htmlHead: queryResult.Head)
+                CampaignId: queryResult.IdCampaign,
+                HtmlContent: queryResult.Content,
+                HtmlHead: queryResult.Head)
             : new UnknownContentData(
-                campaignId: queryResult.IdCampaign,
-                content: queryResult.Content,
-                head: queryResult.Head,
-                meta: queryResult.Meta,
-                editorType: queryResult.EditorType);
+                CampaignId: queryResult.IdCampaign,
+                Content: queryResult.Content,
+                Head: queryResult.Head,
+                Meta: queryResult.Meta,
+                EditorType: queryResult.EditorType);
     }
 
     public async Task<CampaignState> GetCampaignState(string accountName, int campaignId)
@@ -82,16 +82,16 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         IExecutableDbQuery insertContentQuery = content switch
         {
             UnlayerContentData unlayerContentData => new InsertCampaignContentDbQuery(
-                IdCampaign: unlayerContentData.campaignId,
-                Content: unlayerContentData.htmlContent,
-                Head: unlayerContentData.htmlHead,
-                Meta: unlayerContentData.meta,
+                IdCampaign: unlayerContentData.CampaignId,
+                Content: unlayerContentData.HtmlContent,
+                Head: unlayerContentData.HtmlHead,
+                Meta: unlayerContentData.Meta,
                 EditorType: (int?)EDITOR_TYPE_UNLAYER
             ),
             HtmlContentData htmlContentData => new InsertCampaignContentDbQuery(
-                IdCampaign: htmlContentData.campaignId,
-                Content: htmlContentData.htmlContent,
-                Head: htmlContentData.htmlHead,
+                IdCampaign: htmlContentData.CampaignId,
+                Content: htmlContentData.HtmlContent,
+                Head: htmlContentData.HtmlHead,
                 Meta: null,
                 EditorType: null
             ),
@@ -103,10 +103,10 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         await _dbContext.ExecuteAsync(insertContentQuery);
 
         var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
-            setCurrentStep: 2,
-            setHtmlSourceType: UpdateCampaignStatusDbQuery.TEMPLATE_HTML_SOURCE_TYPE,
-            whenIdCampaignIs: content.campaignId,
-            whenCurrentStepIs: 1
+            SetCurrentStep: 2,
+            SetHtmlSourceType: UpdateCampaignStatusDbQuery.TEMPLATE_HTML_SOURCE_TYPE,
+            WhenIdCampaignIs: content.CampaignId,
+            WhenCurrentStepIs: 1
         );
 
         await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
@@ -117,16 +117,16 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         IExecutableDbQuery updateContentQuery = content switch
         {
             UnlayerContentData unlayerContentData => new UpdateCampaignContentDbQuery(
-                IdCampaign: unlayerContentData.campaignId,
-                Content: unlayerContentData.htmlContent,
-                Head: unlayerContentData.htmlHead,
-                Meta: unlayerContentData.meta,
+                IdCampaign: unlayerContentData.CampaignId,
+                Content: unlayerContentData.HtmlContent,
+                Head: unlayerContentData.HtmlHead,
+                Meta: unlayerContentData.Meta,
                 EditorType: (int?)EDITOR_TYPE_UNLAYER
             ),
             HtmlContentData htmlContentData => new UpdateCampaignContentDbQuery(
-                IdCampaign: htmlContentData.campaignId,
-                Content: htmlContentData.htmlContent,
-                Head: htmlContentData.htmlHead,
+                IdCampaign: htmlContentData.CampaignId,
+                Content: htmlContentData.HtmlContent,
+                Head: htmlContentData.HtmlHead,
                 Meta: null,
                 EditorType: null
             ),

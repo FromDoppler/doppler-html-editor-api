@@ -129,13 +129,13 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Arrange
         var expectedSchemaVersion = 999;
         var contentRow = new UnlayerContentData(
-            meta: JsonSerializer.Serialize(new
+            Meta: JsonSerializer.Serialize(new
             {
                 schemaVersion = expectedSchemaVersion
             }),
-            htmlContent: "<html></html>",
-            htmlHead: null,
-            campaignId: expectedIdCampaign);
+            HtmlContent: "<html></html>",
+            HtmlHead: null,
+            CampaignId: expectedIdCampaign);
 
         var repositoryMock = new Mock<ICampaignContentRepository>();
 

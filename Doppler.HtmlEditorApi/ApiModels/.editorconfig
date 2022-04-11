@@ -1,0 +1,4 @@
+# This folder has special rules because the models aremapped directly to HTTP API resources
+
+[*.cs]
+dotnet_naming_rule.properties_should_be_pascalcase.severity = silent

@@ -67,7 +67,7 @@ namespace Doppler.HtmlEditorApi
             });
             services.AddDapperDataAccessProvider(Configuration);
             services.AddDopplerDbRepositories();
-            services.Configure<FieldsOptions>(Configuration.GetSection("fields"));
+            services.Configure<FieldsOptions>(Configuration.GetSection("Fields"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
