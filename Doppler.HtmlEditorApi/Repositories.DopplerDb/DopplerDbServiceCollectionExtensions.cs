@@ -5,7 +5,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DopplerDbServiceCollectionExtensions
 {
-    static public IServiceCollection AddDopplerDbRepositories(this IServiceCollection services)
+    public static IServiceCollection AddDopplerDbRepositories(this IServiceCollection services)
         => services
             .AddScoped<ICampaignContentRepository, DapperCampaignContentRepository>()
             .AddScoped<IFieldsRepository, DapperFieldsRepository>();
