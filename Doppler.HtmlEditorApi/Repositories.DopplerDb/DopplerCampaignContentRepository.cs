@@ -138,23 +138,23 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         await _dbContext.ExecuteAsync(updateContentQuery);
     }
 
-    public async Task SaveNewFieldIds(int ContentId, IEnumerable<int> fieldsId)
+    public async Task SaveNewFieldIds(int contentId, IEnumerable<int> fieldsId)
     {
         if (!fieldsId.Any())
         {
             return;
         }
 
-        await _dbContext.ExecuteAsync(new SaveNewCampaignFields(ContentId, fieldsId));
+        await _dbContext.ExecuteAsync(new SaveNewCampaignFields(contentId, fieldsId));
     }
 
-    public async Task SaveLinks(int ContentId, IEnumerable<string> links)
+    public async Task SaveLinks(int contentId, IEnumerable<string> links)
     {
         if (links.Any())
         {
-            await _dbContext.ExecuteAsync(new SaveNewCampaignLinks(ContentId, links));
+            await _dbContext.ExecuteAsync(new SaveNewCampaignLinks(contentId, links));
         }
-        await _dbContext.ExecuteAsync(new DeleteAutomationConditionalsOfRemovedCampaignLinks(ContentId, links));
-        await _dbContext.ExecuteAsync(new DeleteRemovedCampaignLinks(ContentId, links));
+        await _dbContext.ExecuteAsync(new DeleteAutomationConditionalsOfRemovedCampaignLinks(contentId, links));
+        await _dbContext.ExecuteAsync(new DeleteRemovedCampaignLinks(contentId, links));
     }
 }

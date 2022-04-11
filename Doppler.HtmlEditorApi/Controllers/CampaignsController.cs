@@ -22,9 +22,9 @@ namespace Doppler.HtmlEditorApi.Controllers
         private readonly IFieldsRepository _fieldsRepository;
         private readonly IOptions<FieldsOptions> _fieldsOptions;
 
-        public CampaignsController(ICampaignContentRepository Repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
+        public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
         {
-            _campaignContentRepository = Repository;
+            _campaignContentRepository = repository;
             _fieldsRepository = fieldsRepository;
             _fieldsOptions = fieldsOptions;
         }
