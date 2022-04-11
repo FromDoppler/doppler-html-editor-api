@@ -29,44 +29,24 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             AccountName: accountName
         ));
 
-        if (queryResult == null || !queryResult.CampaignExists)
-        {
-            return null;
-        }
-
-        if (!queryResult.CampaignHasContent)
-        {
-            return new EmptyContentData(campaignId);
-        };
-
-        if (queryResult.EditorType == EDITOR_TYPE_MSEDITOR)
-        {
-            return new MSEditorContentData(campaignId, queryResult.Content);
-        }
-
-        if (queryResult.EditorType == EDITOR_TYPE_UNLAYER)
-        {
-            return new UnlayerContentData(
+        return queryResult == null || !queryResult.CampaignExists ? null
+            : !queryResult.CampaignHasContent ? new EmptyContentData(campaignId)
+            : queryResult.EditorType == EDITOR_TYPE_MSEDITOR ? new MSEditorContentData(campaignId, queryResult.Content)
+            : queryResult.EditorType == EDITOR_TYPE_UNLAYER ? new UnlayerContentData(
                 campaignId: queryResult.IdCampaign,
                 htmlContent: queryResult.Content,
                 htmlHead: queryResult.Head,
-                meta: queryResult.Meta);
-        }
-
-        if (queryResult.EditorType == null)
-        {
-            return new HtmlContentData(
+                meta: queryResult.Meta)
+            : queryResult.EditorType == null ? new HtmlContentData(
                 campaignId: queryResult.IdCampaign,
                 htmlContent: queryResult.Content,
-                htmlHead: queryResult.Head);
-        }
-
-        return new UnknownContentData(
-            campaignId: queryResult.IdCampaign,
-            content: queryResult.Content,
-            head: queryResult.Head,
-            meta: queryResult.Meta,
-            editorType: queryResult.EditorType);
+                htmlHead: queryResult.Head)
+            : new UnknownContentData(
+                campaignId: queryResult.IdCampaign,
+                content: queryResult.Content,
+                head: queryResult.Head,
+                meta: queryResult.Meta,
+                editorType: queryResult.EditorType);
     }
 
     public async Task<CampaignState> GetCampaignState(string accountName, int campaignId)

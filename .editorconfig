@@ -73,6 +73,7 @@ dotnet_style_operator_placement_when_wrapping = beginning_of_line:error
 dotnet_style_prefer_auto_properties = true:error
 dotnet_style_prefer_compound_assignment = true:error
 dotnet_style_prefer_conditional_expression_over_assignment = true:error
+dotnet_style_prefer_conditional_expression_over_return = true:error
 dotnet_style_prefer_inferred_tuple_names = true:error
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:error
 dotnet_style_prefer_simplified_boolean_expressions = true:error
