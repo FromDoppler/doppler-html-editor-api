@@ -9,8 +9,8 @@ using Doppler.HtmlEditorApi.Repositories;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
-using Xunit.Abstractions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Doppler.HtmlEditorApi;
 

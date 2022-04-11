@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.DataAccess;
+using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;

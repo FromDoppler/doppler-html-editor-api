@@ -42,5 +42,13 @@ indent_size = unset
 
 [*.cs]
 
+
+# #### .NET Coding Conventions ####
+
+# Organize usings
+dotnet_separate_import_directive_groups = false:error
+dotnet_sort_system_directives_first = true:error
+file_header_template = unset:error
+
 # Field preferences
 dotnet_style_readonly_field = true:error
