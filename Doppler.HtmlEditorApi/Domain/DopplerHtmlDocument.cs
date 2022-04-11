@@ -93,6 +93,18 @@ public class DopplerHtmlDocument
         }
     }
 
+    public void RemoveEventAttributes()
+    {
+        var eventAttributes = _rootNode.Descendants()
+            .SelectMany(x => x.Attributes.Where(x => x.Name.StartsWith("on", StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        foreach (var attribute in eventAttributes)
+        {
+            attribute.Remove();
+        }
+    }
+
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
     {
         _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FIELD_NAME_TAG_REGEX.Replace(

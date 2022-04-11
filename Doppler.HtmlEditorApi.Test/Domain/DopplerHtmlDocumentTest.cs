@@ -472,6 +472,69 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         AssertHelper.EqualIgnoringMeaninglessSpaces(expectedHead, headContent);
     }
 
+    [Theory]
+    [InlineDataAttribute(
+        @"
+<article>
+    <h1>Title</h1>
+    <p onclick=""alert('malicious message')"">This is a paragraph.</p>
+    <p OnMouseOver=""window.href='https://malicious.site'"">This is another paragraph.</p>
+    <button onclick=""alert('malicious message')"">This is a button.</button>
+</article>",
+        @"
+<article>
+    <h1>Title</h1>
+    <p>This is a paragraph.</p>
+    <p>This is another paragraph.</p>
+    <button>This is a button.</button>
+</article>")]
+    public void RemoveEventAttributes_should_remove_eventAttributes_from_body(string input, string expectedBody)
+    {
+        // Arrange
+        var htmlDocument = new DopplerHtmlDocument(input);
+
+        // Act
+        htmlDocument.RemoveEventAttributes();
+
+        // Assert
+        var content = htmlDocument.GetDopplerContent();
+        AssertHelper.EqualIgnoringMeaninglessSpaces(expectedBody, content);
+    }
+
+    [Theory]
+    [InlineDataAttribute(
+        @"
+<html>
+<head>
+    <title>Hello safety!</title>
+    <meta name=""copyright"" content=""© 2022 FromDoppler"">
+    <p onclick=""alert('malicious message')"">This is a paragraph.</p>
+    <p OnMouseOver=""window.href='https://malicious.site'"">This is another paragraph.</p>
+    <meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">
+</head>
+<body>
+    <p>This is a paragraph</p>
+</body>
+</html>",
+        @"
+<title>Hello safety!</title>
+<meta name=""copyright"" content=""© 2022 FromDoppler"">
+<p>This is a paragraph.</p>
+<p>This is another paragraph.</p>
+<meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">")]
+    public void RemoveEventAttributes_should_remove_eventAttributes_from_head(string input, string expectedHead)
+    {
+        // Arrange
+        var htmlDocument = new DopplerHtmlDocument(input);
+
+        // Act
+        htmlDocument.RemoveEventAttributes();
+
+        // Assert
+        var headContent = htmlDocument.GetHeadContent();
+        AssertHelper.EqualIgnoringMeaninglessSpaces(expectedHead, headContent);
+    }
+
     private string CreateTestContentWithLink(string href)
         => $@"<div>
     <a href=""{href}"">Link</a>

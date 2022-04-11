@@ -97,6 +97,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
             htmlDocument.RemoveHarmfulTags();
+            htmlDocument.RemoveEventAttributes();
             htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
             htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
             htmlDocument.SanitizeTrackableLinks();
