@@ -20,11 +20,11 @@ namespace Doppler.HtmlEditorApi;
 public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 {
     #region Content examples
-    const string HEAD_CONTENT = "<title>Hello head!</title>";
-    const string BODY_CONTENT = "<div>Hello body!</div>";
-    const string ORPHAN_DIV_CONTENT = "<div>Hello orphan div!</div>";
-    const string ONLY_HEAD = $"<head>{HEAD_CONTENT}</head>";
-    const string HTML_WITH_HEAD_AND_BODY = $@"<!doctype html>
+    private const string HEAD_CONTENT = "<title>Hello head!</title>";
+    private const string BODY_CONTENT = "<div>Hello body!</div>";
+    private const string ORPHAN_DIV_CONTENT = "<div>Hello orphan div!</div>";
+    private const string ONLY_HEAD = $"<head>{HEAD_CONTENT}</head>";
+    private const string HTML_WITH_HEAD_AND_BODY = $@"<!doctype html>
         <html>
         <head>
             {HEAD_CONTENT}
@@ -33,17 +33,17 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             {BODY_CONTENT}
         </body>
         </html>";
-    const string HTML_WITHOUT_HEAD = $@"<!doctype html>
+    private const string HTML_WITHOUT_HEAD = $@"<!doctype html>
         <html>
         <body>
         {BODY_CONTENT}
         </body>
         </html>";
-    const string HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV = $@"<!doctype html>
+    private const string HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV = $@"<!doctype html>
         <html>
         {ORPHAN_DIV_CONTENT}
         </html>";
-    const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV = $@"<!doctype html>
+    private const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV = $@"<!doctype html>
         <html>
             <head>
                 {HEAD_CONTENT}
@@ -52,7 +52,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 {ORPHAN_DIV_CONTENT}
             </div>
         </html>";
-    const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD = $@"<!doctype html>
+    private const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD = $@"<!doctype html>
         <html>
             <div>
                 {ORPHAN_DIV_CONTENT}

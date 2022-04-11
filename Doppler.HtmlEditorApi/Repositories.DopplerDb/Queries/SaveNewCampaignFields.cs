@@ -13,7 +13,7 @@ public record SaveNewCampaignFields(
     IEnumerable<int> FieldIds
 ) : IExecutableDbQuery
 {
-    const string BASE_QUERY = @"
+    private const string BASE_QUERY = @"
     DECLARE @T TABLE (IdField INT)
     INSERT INTO @T (IdField) VALUES {{FieldIds}}
 

@@ -8,7 +8,7 @@ namespace Doppler.HtmlEditorApi.Domain;
 public class DopplerHtmlDocumentTest
 {
     #region Content examples
-    const string HTML_SOCIALSHARE_TABLE_WITH_ERRORS = $@"
+    private const string HTML_SOCIALSHARE_TABLE_WITH_ERRORS = $@"
 <table>
     <tr>
         <td id=""facebook"" valign=""middle"">

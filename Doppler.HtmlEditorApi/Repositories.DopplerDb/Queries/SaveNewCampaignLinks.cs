@@ -13,7 +13,7 @@ public record SaveNewCampaignLinks(
     IEnumerable<string> Links
 ) : IExecutableDbQuery
 {
-    const string BASE_QUERY = @"
+    private const string BASE_QUERY = @"
 INSERT INTO [Link] (IdCampaign, UrlLink, IsActiveForTracking, IsDynamic)
 SELECT rest.IdCampaign, newLinks.UrlLink, rest.IsActiveForTracking, rest.IsDynamic
 FROM

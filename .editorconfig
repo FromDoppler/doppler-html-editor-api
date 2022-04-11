@@ -60,5 +60,8 @@ dotnet_style_qualification_for_property = false:error
 dotnet_style_predefined_type_for_locals_parameters_members = true:error
 dotnet_style_predefined_type_for_member_access = true:error
 
+# Modifier preferences
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:error
+
 # Field preferences
 dotnet_style_readonly_field = true:error
