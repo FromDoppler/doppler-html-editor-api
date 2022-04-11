@@ -63,8 +63,8 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 
         // For information about Doppler's status code, check out here
         // https://github.com/MakingSense/Doppler/blob/develop/Doppler.Transversal/Classes/CampaignStatusEnum.cs
-        var campaignStatus = campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_DRAFT ||
-            campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_AB_DRAFT ? CampaignStatus.DRAFT
+        var campaignStatus = campaignStateData.Status is DOPPLER_CAMPAIGN_STATUS_DRAFT or
+            DOPPLER_CAMPAIGN_STATUS_AB_DRAFT ? CampaignStatus.DRAFT
             : campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_IN_WINNER_IN_AB_SELECTION_PROCESS ? CampaignStatus.IN_WINNER_IN_AB_SELECTION_PROCESS
             : CampaignStatus.OTHER;
 
