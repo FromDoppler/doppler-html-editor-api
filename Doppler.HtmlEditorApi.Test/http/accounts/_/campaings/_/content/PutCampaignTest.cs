@@ -323,7 +323,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent,
             meta = "true" // it does not care
         }));
@@ -369,7 +369,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent,
             meta = "true" // it does not care
         }));
@@ -408,7 +408,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent,
             meta = new { }
         }));
@@ -933,7 +933,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent = htmlInput,
             meta = "true" // it does not care
         }));
@@ -1021,7 +1021,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent = htmlInput,
             meta = "true" // it does not care
         }));
@@ -1082,7 +1082,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent = htmlInput,
             meta = "true" // it does not care
         }));
