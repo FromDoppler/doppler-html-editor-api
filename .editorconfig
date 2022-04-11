@@ -85,3 +85,6 @@ dotnet_style_readonly_field = true:error
 
 # Parameter preferences
 dotnet_code_quality_unused_parameters = non_public:error
+
+# Suppression preferences
+dotnet_remove_unnecessary_suppression_exclusions = none:error
