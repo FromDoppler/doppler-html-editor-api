@@ -12,7 +12,7 @@ public record CampaignContent(
     [Required]
     string htmlContent) : Content(type, meta, htmlContent), IValidatableObject
 {
-    private static HashSet<ContentType> _validContentTypes = new HashSet<ContentType>(Enum.GetValues<ContentType>());
+    private static readonly HashSet<ContentType> _validContentTypes = new HashSet<ContentType>(Enum.GetValues<ContentType>());
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

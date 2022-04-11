@@ -35,3 +35,12 @@ insert_final_newline = unset
 trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
+
+#############################
+#### dotnet format rules ####
+#############################
+
+[*.cs]
+
+# Field preferences
+dotnet_style_readonly_field = true:error
