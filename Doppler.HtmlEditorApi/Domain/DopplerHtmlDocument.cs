@@ -38,6 +38,7 @@ public class DopplerHtmlDocument
 
     private readonly HtmlNode _headNode;
     private readonly HtmlNode _contentNode;
+    private readonly HtmlNode _rootNode;
 
     public DopplerHtmlDocument(string inputHtml)
     {
@@ -48,6 +49,8 @@ public class DopplerHtmlDocument
         _contentNode = _headNode == null ? htmlDocument.DocumentNode
             : htmlDocument.DocumentNode.SelectSingleNode("//body")
             ?? HtmlAgilityPackUtils.LoadHtml(inputHtml.Replace(_headNode.OuterHtml, string.Empty)).DocumentNode;
+
+        _rootNode = _contentNode.OwnerDocument.DocumentNode;
     }
 
     public string GetDopplerContent()
@@ -83,7 +86,7 @@ public class DopplerHtmlDocument
 
     public void RemoveHarmfulTags()
     {
-        var harmfulTags = _contentNode.SelectNodes(@"//script|//embed|//iframe|//meta[contains(@http-equiv,'refresh')]").EmptyIfNull();
+        var harmfulTags = _rootNode.SelectNodes(@"//script|//embed|//iframe|//meta[contains(@http-equiv,'refresh')]").EmptyIfNull();
         foreach (var tag in harmfulTags)
         {
             tag.Remove();
