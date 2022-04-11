@@ -393,8 +393,8 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var htmlContent = "My HTML Content";
-        Regex matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign content is read only\"");
-        Regex matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is OTHER\"");
+        var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign content is read only\"");
+        var matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is OTHER\"");
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
