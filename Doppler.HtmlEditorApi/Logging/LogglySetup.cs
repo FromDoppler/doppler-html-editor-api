@@ -8,8 +8,8 @@ namespace Doppler.HtmlEditorApi.Logging
 {
     public static class LogglySetup
     {
-        private const string DefaultEndpointHostname = "logs-01.loggly.com";
-        private const int DefaultEndpointPort = 443;
+        private const string DEFAULT_ENDPOINT_HOSTNAME = "logs-01.loggly.com";
+        private const int DEFAULT_ENDPOINT_PORT = 443;
 
         public static IConfiguration ConfigureLoggly(
             this IConfiguration configuration,
@@ -19,14 +19,14 @@ namespace Doppler.HtmlEditorApi.Logging
             var config = LogglyConfig.Instance;
 
             // Set default values
-            config.Transport.EndpointPort = DefaultEndpointPort;
+            config.Transport.EndpointPort = DEFAULT_ENDPOINT_PORT;
 
             // Bind values from configuration
             configuration.GetSection(appSettingsSection).Bind(config);
 
             // Configure convention values if not set in configuration
             config.ApplicationName ??= hostingEnvironment.ApplicationName;
-            config.Transport.EndpointHostname ??= DefaultEndpointHostname;
+            config.Transport.EndpointHostname ??= DEFAULT_ENDPOINT_HOSTNAME;
 
             return configuration;
         }
