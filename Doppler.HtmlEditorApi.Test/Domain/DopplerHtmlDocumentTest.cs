@@ -316,11 +316,11 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
 <article>
     <h1>Title</h1>
     <p>This is a paragraph</p>
-    <p>This is another paragraph <script>script</script> with a script</p>
-    <script>another script</script>
+    <p>This is another paragraph <SCRIPT>script</SCRIPT> with a script</p>
+    <SCRIPT>another script</SCRIPT>
     <embed>embed tag should not be closed</embed>
-    <iframe />
-    <iframe title=""Inline Frame Example"" src=""malicious.html""></iframe>
+    <IFRAME />
+    <IFRAME title=""Inline Frame Example"" src=""malicious.html""></IFRAME>
 </article>",
         @"
 <article>
@@ -385,7 +385,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         @"<p>paragraph 1</p></iframe><p>paragraph 2</p>",
         @"<p>paragraph 1</p><p>paragraph 2</p>")]
     [InlineDataAttribute(
-        @"<p>paragraph 1</p><script /><p>paragraph 2</p>",
+        @"<p>paragraph 1</p><SCRIPT /><p>paragraph 2</p>",
         @"<p>paragraph 1</p>")]
     [InlineDataAttribute(
         @"<p>paragraph 1</p><script><p>paragraph 2</p>",
@@ -397,7 +397,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         @"<p>paragraph 1</p><embed /><p>paragraph 2</p>",
         @"<p>paragraph 1</p><p>paragraph 2</p>")]
     [InlineDataAttribute(
-        @"<p>paragraph 1</p><embed><p>paragraph 2</p>",
+        @"<p>paragraph 1</p><EMBED><p>paragraph 2</p>",
         @"<p>paragraph 1</p><p>paragraph 2</p>")]
     [InlineDataAttribute(
         @"<p>paragraph 1</p></embed><p>paragraph 2</p>",
@@ -428,7 +428,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         @"
 <html>
 <head>
-    <iframe></iframe>
+    <IFRAME></IFRAME>
     <embed>
     <title>Hello safety!</title>
     <script>script in the head</script>
