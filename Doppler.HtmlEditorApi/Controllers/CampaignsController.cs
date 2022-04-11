@@ -39,7 +39,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             ActionResult<CampaignContent> result = contentRow switch
             {
                 null => new NotFoundObjectResult("Campaign not found or belongs to a different account"),
-                EmptyContentData emptyContentData => new CampaignContent(
+                EmptyContentData => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(EMPTY_UNLAYER_CONTENT_JSON),
                     htmlContent: EMPTY_UNLAYER_CONTENT_HTML),
