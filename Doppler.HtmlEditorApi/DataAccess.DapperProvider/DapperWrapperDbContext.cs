@@ -38,5 +38,6 @@ public class DapperWrapperDbContext : IDbContext, IDisposable
             _disposedValue = true;
             _lazyDbConnection.Value.Dispose();
         }
+        GC.SuppressFinalize(this);
     }
 }
