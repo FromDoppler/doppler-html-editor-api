@@ -528,7 +528,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         AssertHelper.EqualIgnoringMeaninglessSpaces(expectedHead, headContent);
     }
 
-    private string CreateTestContentWithLink(string href)
+    private static string CreateTestContentWithLink(string href)
         => $@"<div>
     <a href=""{href}"">Link</a>
 </div>

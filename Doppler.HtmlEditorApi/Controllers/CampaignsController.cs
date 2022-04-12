@@ -135,7 +135,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
 
-        private string GenerateHtmlContent(BaseHtmlContentData content)
+        private static string GenerateHtmlContent(BaseHtmlContentData content)
             // Notice that it is not symmetric with ExtractDopplerHtmlData.
             // The head is being lossed here. It is not good if we try to edit an imported content.
             // Old Doppler code:

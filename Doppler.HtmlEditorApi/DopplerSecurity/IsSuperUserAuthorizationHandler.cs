@@ -8,8 +8,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Doppler.HtmlEditorApi.DopplerSecurity
 {
-    public class IsSuperUserAuthorizationHandler : AuthorizationHandler<DopplerAuthorizationRequirement>
+    public partial class IsSuperUserAuthorizationHandler : AuthorizationHandler<DopplerAuthorizationRequirement>
     {
+        [LoggerMessage(0, LogLevel.Debug, "The token hasn't super user permissions.")]
+        partial void LogUserHasNotSuperUserPermissions();
+
+        [LoggerMessage(1, LogLevel.Debug, "The token super user permissions is false.")]
+        partial void LogTokenSuperUserPermissionsIsFalse();
+
         private readonly ILogger<IsSuperUserAuthorizationHandler> _logger;
 
         public IsSuperUserAuthorizationHandler(ILogger<IsSuperUserAuthorizationHandler> logger)
@@ -31,7 +37,7 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
         {
             if (!context.User.HasClaim(c => c.Type.Equals(DopplerSecurityDefaults.SUPERUSER_JWT_KEY, StringComparison.Ordinal)))
             {
-                _logger.LogDebug("The token hasn't super user permissions.");
+                LogUserHasNotSuperUserPermissions();
                 return false;
             }
 
@@ -41,7 +47,7 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
                 return true;
             }
 
-            _logger.LogDebug("The token super user permissions is false.");
+            LogTokenSuperUserPermissionsIsFalse();
             return false;
         }
     }

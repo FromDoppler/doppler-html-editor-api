@@ -89,7 +89,7 @@ public static class WebApplicationFactoryExtensions
         => (typeof(T1), (object)obj);
 
     private static IEnumerable<(Type, object)> ToTypeObjectPairArray()
-        => new (Type, object)[0];
+        => Array.Empty<(Type, object)>();
     private static IEnumerable<(Type, object)> ToTypeObjectPairArray<T1>(T1 obj1)
         => ToTypeObjectPairArray().Append(ToTypeObjectPair(obj1));
     private static IEnumerable<(Type, object)> ToTypeObjectPairArray<T1, T2>(T1 obj1, T2 obj2)

@@ -135,7 +135,7 @@ public class DopplerHtmlDocument
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
 
-    private string SanitizedUrl(string url)
+    private static string SanitizedUrl(string url)
     {
         var withoutSpaces = _cleanupUrlRegex.Replace(url, string.Empty);
 
