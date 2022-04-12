@@ -7,5 +7,5 @@ namespace Doppler.HtmlEditorApi.Repositories;
 public interface IFieldsRepository
 {
     Task<IEnumerable<Field>> GetActiveBasicFields();
-    Task<IEnumerable<Field>> GetCustomFields(string accountname);
+    Task<IEnumerable<Field>> GetCustomFields(string accountName);
 }
