@@ -13,7 +13,7 @@ public record SaveNewCampaignLinks(
     IEnumerable<string> Links
 ) : IExecutableDbQuery
 {
-    private const string BASE_QUERY = @"
+    private const string BaseQuery = @"
 INSERT INTO [Link] (IdCampaign, UrlLink, IsActiveForTracking, IsDynamic)
 SELECT rest.IdCampaign, newLinks.UrlLink, rest.IsActiveForTracking, rest.IsDynamic
 FROM
@@ -29,7 +29,7 @@ WHERE oldLinks.IdCampaign IS NULL";
     //    UNION SELECT @Url2 AS UrlLink
     //    UNION SELECT @Url3 AS UrlLink
     public string GenerateSqlQuery()
-        => BASE_QUERY.Replace(
+        => BaseQuery.Replace(
             "{{linksSelect}}",
             string.Join(
                 "\n    UNION ",

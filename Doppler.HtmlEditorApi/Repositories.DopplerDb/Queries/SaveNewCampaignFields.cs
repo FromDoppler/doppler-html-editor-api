@@ -13,7 +13,7 @@ public record SaveNewCampaignFields(
     IEnumerable<int> FieldIds
 ) : IExecutableDbQuery
 {
-    private const string BASE_QUERY = @"
+    private const string BaseQuery = @"
     DECLARE @T TABLE (IdField INT)
     INSERT INTO @T (IdField) VALUES {{FieldIds}}
 
@@ -26,7 +26,7 @@ public record SaveNewCampaignFields(
     public string GenerateSqlQuery()
     {
         var serializedFieldsId = string.Join(",", FieldIds.Select(x => $"({x})"));
-        return BASE_QUERY.Replace("{{FieldIds}}", serializedFieldsId);
+        return BaseQuery.Replace("{{FieldIds}}", serializedFieldsId);
     }
 
     public object GenerateSqlParameters()

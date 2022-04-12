@@ -35,13 +35,13 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
 
         private bool IsSuperUser(AuthorizationHandlerContext context)
         {
-            if (!context.User.HasClaim(c => c.Type.Equals(DopplerSecurityDefaults.SUPERUSER_JWT_KEY, StringComparison.Ordinal)))
+            if (!context.User.HasClaim(c => c.Type.Equals(DopplerSecurityDefaults.SuperUserJwtKey, StringComparison.Ordinal)))
             {
                 LogUserHasNotSuperUserPermissions();
                 return false;
             }
 
-            var isSuperUser = bool.Parse(context.User.FindFirst(c => c.Type.Equals(DopplerSecurityDefaults.SUPERUSER_JWT_KEY, StringComparison.Ordinal)).Value);
+            var isSuperUser = bool.Parse(context.User.FindFirst(c => c.Type.Equals(DopplerSecurityDefaults.SuperUserJwtKey, StringComparison.Ordinal)).Value);
             if (isSuperUser)
             {
                 return true;

@@ -1,0 +1,5 @@
+# This folder has special rules because we want to use underscore in long names
+
+[*.cs]
+# Remove the underscores from member name
+dotnet_diagnostic.CA1707.severity = none

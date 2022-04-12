@@ -10,11 +10,11 @@ namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
 public class DapperCampaignContentRepository : ICampaignContentRepository
 {
-    private const int EDITOR_TYPE_MSEDITOR = 4;
-    private const int EDITOR_TYPE_UNLAYER = 5;
-    private const int DOPPLER_CAMPAIGN_STATUS_DRAFT = 1;
-    private const int DOPPLER_CAMPAIGN_STATUS_AB_DRAFT = 11;
-    private const int DOPPLER_CAMPAIGN_STATUS_IN_WINNER_IN_AB_SELECTION_PROCESS = 18;
+    private const int EditorTypeMSEditor = 4;
+    private const int EditorTypeUnlayer = 5;
+    private const int DopplerCampaignStatusDraft = 1;
+    private const int DopplerCampaignStatusABDraft = 11;
+    private const int DopplerCampaignStatusInWinnerInABSelectionProcess = 18;
 
     private readonly IDbContext _dbContext;
     public DapperCampaignContentRepository(IDbContext dbContext)
@@ -31,8 +31,8 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 
         return queryResult == null || !queryResult.CampaignExists ? null
             : !queryResult.CampaignHasContent ? new EmptyContentData(campaignId)
-            : queryResult.EditorType == EDITOR_TYPE_MSEDITOR ? new MSEditorContentData(campaignId, queryResult.Content)
-            : queryResult.EditorType == EDITOR_TYPE_UNLAYER ? new UnlayerContentData(
+            : queryResult.EditorType == EditorTypeMSEditor ? new MSEditorContentData(campaignId, queryResult.Content)
+            : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerContentData(
                 CampaignId: queryResult.IdCampaign,
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
@@ -63,10 +63,10 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 
         // For information about Doppler's status code, check out here
         // https://github.com/MakingSense/Doppler/blob/develop/Doppler.Transversal/Classes/CampaignStatusEnum.cs
-        var campaignStatus = campaignStateData.Status is DOPPLER_CAMPAIGN_STATUS_DRAFT or
-            DOPPLER_CAMPAIGN_STATUS_AB_DRAFT ? CampaignStatus.DRAFT
-            : campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_IN_WINNER_IN_AB_SELECTION_PROCESS ? CampaignStatus.IN_WINNER_IN_AB_SELECTION_PROCESS
-            : CampaignStatus.OTHER;
+        var campaignStatus = campaignStateData.Status is DopplerCampaignStatusDraft or
+            DopplerCampaignStatusABDraft ? CampaignStatus.Draft
+            : campaignStateData.Status == DopplerCampaignStatusInWinnerInABSelectionProcess ? CampaignStatus.InWinnerInABSelectionProcess
+            : CampaignStatus.Other;
 
         return new CampaignState(
                 campaignStateData.OwnCampaignExists,
@@ -86,7 +86,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
                 Meta: unlayerContentData.Meta,
-                EditorType: (int?)EDITOR_TYPE_UNLAYER
+                EditorType: (int?)EditorTypeUnlayer
             ),
             HtmlContentData htmlContentData => new InsertCampaignContentDbQuery(
                 IdCampaign: htmlContentData.CampaignId,
@@ -104,7 +104,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 
         var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
             SetCurrentStep: 2,
-            SetHtmlSourceType: UpdateCampaignStatusDbQuery.TEMPLATE_HTML_SOURCE_TYPE,
+            SetHtmlSourceType: UpdateCampaignStatusDbQuery.TemplateHtmlSourceType,
             WhenIdCampaignIs: content.CampaignId,
             WhenCurrentStepIs: 1
         );
@@ -121,7 +121,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
                 Meta: unlayerContentData.Meta,
-                EditorType: (int?)EDITOR_TYPE_UNLAYER
+                EditorType: (int?)EditorTypeUnlayer
             ),
             HtmlContentData htmlContentData => new UpdateCampaignContentDbQuery(
                 IdCampaign: htmlContentData.CampaignId,

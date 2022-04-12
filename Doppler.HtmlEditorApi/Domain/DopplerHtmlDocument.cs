@@ -25,16 +25,16 @@ public class DopplerHtmlDocument
     // * https://github.com/MakingSense/Doppler/blob/e0bf2aa982ac8b9902430395fd293fdcd3c231a8/Doppler.Application.ListsModule/Utils/FieldHelper.cs#L113-L134
     // * https://github.com/MakingSense/Doppler/blob/develop/Doppler.Recursos/FieldsRes.resx
 
-    private const string FIELD_NAME_TAG_START_DELIMITER = "[[[";
-    private const string FIELD_NAME_TAG_END_DELIMITER = "]]]";
-    private const string FIELD_ID_TAG_START_DELIMITER = "|*|";
-    private const string FIELD_ID_TAG_END_DELIMITER = "*|*";
+    private const string FieldNameTagStartDelimiter = "[[[";
+    private const string FieldNameTagEndDelimiter = "]]]";
+    private const string FieldIdTagStartDelimiter = "|*|";
+    private const string FieldIdTagEndDelimiter = "*|*";
     // &, # and ; are here to accept HTML Entities
-    private static readonly Regex _fieldNameTagRegex = new Regex($@"{Regex.Escape(FIELD_NAME_TAG_START_DELIMITER)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%&;#]+){Regex.Escape(FIELD_NAME_TAG_END_DELIMITER)}");
-    private static readonly Regex _fieldIdTagRegex = new Regex($@"{Regex.Escape(FIELD_ID_TAG_START_DELIMITER)}(\d+){Regex.Escape(FIELD_ID_TAG_END_DELIMITER)}");
-    private static readonly Regex _cleanupUrlRegex = new Regex(@"^(?:\s?(?:%20)?)*|(?:\s?(?:%20)?)*$|\s");
-    private static readonly Regex _trackableUrlAcceptanceRegex = new Regex(@"^(?:\s?(?:%20)?)*(?:(?:https?|ftp):\/\/|www\.)", RegexOptions.IgnoreCase);
-    private static readonly Regex _trackableUrlPartsRegex = new Regex(@"^(?:(?<scheme>(?:https?|ftp):\/\/)(?<domain>[^\/]+)|(?<domainWithoutScheme>www\.[^\/]+))(?<rest>\/.*)?$", RegexOptions.IgnoreCase);
+    private static readonly Regex FieldNameTagRegex = new Regex($@"{Regex.Escape(FieldNameTagStartDelimiter)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%&;#]+){Regex.Escape(FieldNameTagEndDelimiter)}");
+    private static readonly Regex FieldIdTagRegex = new Regex($@"{Regex.Escape(FieldIdTagStartDelimiter)}(\d+){Regex.Escape(FieldIdTagEndDelimiter)}");
+    private static readonly Regex CleanupUrlRegex = new Regex(@"^(?:\s?(?:%20)?)*|(?:\s?(?:%20)?)*$|\s");
+    private static readonly Regex TrackableUrlAcceptanceRegex = new Regex(@"^(?:\s?(?:%20)?)*(?:(?:https?|ftp):\/\/|www\.)", RegexOptions.IgnoreCase);
+    private static readonly Regex TrackableUrlPartsRegex = new Regex(@"^(?:(?<scheme>(?:https?|ftp):\/\/)(?<domain>[^\/]+)|(?<domainWithoutScheme>www\.[^\/]+))(?<rest>\/.*)?$", RegexOptions.IgnoreCase);
 
     private readonly HtmlNode _headNode;
     private readonly HtmlNode _contentNode;
@@ -60,7 +60,7 @@ public class DopplerHtmlDocument
         => _headNode?.InnerHtml;
 
     public IEnumerable<int> GetFieldIds()
-        => _fieldIdTagRegex.Matches(_contentNode.InnerHtml)
+        => FieldIdTagRegex.Matches(_contentNode.InnerHtml)
             .Select(x => int.Parse(x.Groups[1].ValueSpan))
             .Distinct();
 
@@ -107,7 +107,7 @@ public class DopplerHtmlDocument
 
     public void ReplaceFieldNameTagsByFieldIdTags(Func<string, int?> getFieldIdOrNullFunc)
     {
-        _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => _fieldNameTagRegex.Replace(
+        _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FieldNameTagRegex.Replace(
             text,
             match =>
             {
@@ -122,7 +122,7 @@ public class DopplerHtmlDocument
 
     public void RemoveUnknownFieldIdTags(Func<int, bool> fieldIdExistFunc)
     {
-        _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => _fieldIdTagRegex.Replace(
+        _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FieldIdTagRegex.Replace(
             text,
             match => fieldIdExistFunc(int.Parse(match.Groups[1].ValueSpan))
                 ? match.Value
@@ -130,16 +130,16 @@ public class DopplerHtmlDocument
     }
 
     private static string CreateFieldIdTag(int? fieldId)
-        => $"{FIELD_ID_TAG_START_DELIMITER}{fieldId}{FIELD_ID_TAG_END_DELIMITER}";
+        => $"{FieldIdTagStartDelimiter}{fieldId}{FieldIdTagEndDelimiter}";
 
     private static string EnsureContent(string htmlContent)
         => string.IsNullOrWhiteSpace(htmlContent) ? "<BR>" : htmlContent;
 
     private static string SanitizedUrl(string url)
     {
-        var withoutSpaces = _cleanupUrlRegex.Replace(url, string.Empty);
+        var withoutSpaces = CleanupUrlRegex.Replace(url, string.Empty);
 
-        var match = _trackableUrlPartsRegex.Match(withoutSpaces);
+        var match = TrackableUrlPartsRegex.Match(withoutSpaces);
         var scheme = match.Groups["scheme"].Value
             .FallbackIfNullOrEmpty("http://")
             .ToLowerInvariant();
@@ -157,5 +157,5 @@ public class DopplerHtmlDocument
             .GetLinkNodes()
             .Where(x => !string.IsNullOrWhiteSpace(x.Attributes["href"]?.Value))
             .Where(x => !x.Attributes.Contains("socialshare"))
-            .Where(x => _trackableUrlAcceptanceRegex.IsMatch(x.Attributes["href"].Value));
+            .Where(x => TrackableUrlAcceptanceRegex.IsMatch(x.Attributes["href"].Value));
 }

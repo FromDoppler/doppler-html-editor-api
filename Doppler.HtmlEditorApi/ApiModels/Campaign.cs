@@ -12,7 +12,7 @@ public record CampaignContent(
     [Required]
     string htmlContent) : Content(type, meta, htmlContent), IValidatableObject
 {
-    private static readonly HashSet<ContentType> _validContentTypes = new HashSet<ContentType>(Enum.GetValues<ContentType>());
+    private static readonly HashSet<ContentType> ValidContentTypes = new HashSet<ContentType>(Enum.GetValues<ContentType>());
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -20,7 +20,7 @@ public record CampaignContent(
         {
             yield return new ValidationResult($"The {nameof(type)} field is required.", new[] { nameof(type) });
         }
-        else if (!_validContentTypes.Contains(type))
+        else if (!ValidContentTypes.Contains(type))
         {
             yield return new ValidationResult($"Content type '{type:G}' is not supported yet.");
         }

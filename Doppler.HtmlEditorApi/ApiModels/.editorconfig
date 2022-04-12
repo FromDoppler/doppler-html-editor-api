@@ -2,3 +2,6 @@
 
 [*.cs]
 dotnet_naming_rule.properties_should_be_pascalcase.severity = silent
+
+# Remove the underscores from member name
+dotnet_diagnostic.CA1707.severity = none

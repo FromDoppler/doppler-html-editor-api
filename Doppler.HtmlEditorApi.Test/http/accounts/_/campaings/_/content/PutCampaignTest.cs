@@ -131,7 +131,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
-            .ReturnsAsync(new CampaignState(true, true, null, CampaignStatus.DRAFT));
+            .ReturnsAsync(new CampaignState(true, true, null, CampaignStatus.Draft));
         repositoryMock
             .Setup(x => x.UpdateCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
             .Returns(Task.CompletedTask);
@@ -383,8 +383,8 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData("html", CampaignStatus.OTHER)]
-    [InlineData("unlayer", CampaignStatus.OTHER)]
+    [InlineData("html", CampaignStatus.Other)]
+    [InlineData("unlayer", CampaignStatus.Other)]
     public async Task PUT_campaign_should_return_bad_request_error_when_campaign_is_not_writable(string type, CampaignStatus campaignStatus)
     {
         // Arrange
@@ -394,7 +394,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var htmlContent = "My HTML Content";
         var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign content is read only\"");
-        var matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is OTHER\"");
+        var matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is Other\"");
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
