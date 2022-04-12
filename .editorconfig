@@ -378,3 +378,13 @@ dotnet_naming_style.camelcase.capitalization = camel_case
 
 dotnet_naming_style.uppercase_with_underscore_separator.capitalization = all_upper
 dotnet_naming_style.uppercase_with_underscore_separator.word_separator = _
+
+# Other categories
+
+dotnet_analyzer_diagnostic.category-Design.severity = error
+dotnet_analyzer_diagnostic.category-Documentation.severity = none
+dotnet_analyzer_diagnostic.category-Interoperability.severity = error
+dotnet_analyzer_diagnostic.category-Maintainability.severity = error
+dotnet_analyzer_diagnostic.category-SingleFile.severity = error
+dotnet_analyzer_diagnostic.category-Reliability.severity = error
+dotnet_analyzer_diagnostic.category-Security.severity = error
