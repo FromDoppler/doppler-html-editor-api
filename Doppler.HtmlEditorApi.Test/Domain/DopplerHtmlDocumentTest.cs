@@ -93,13 +93,6 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
 </table>";
     #endregion
 
-    private readonly ITestOutputHelper _output;
-
-    public DopplerHtmlDocumentTest(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-
     [Fact]
     public void GetFieldsId_should_return_distinct_field_ids()
     {
