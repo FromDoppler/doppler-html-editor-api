@@ -7,8 +7,8 @@ public record CampaignState(bool OwnCampaignExists, bool ContentExists, int? Edi
     private static readonly HashSet<CampaignStatus> WritableStatus = new HashSet<CampaignStatus>(
         new[]
         {
-            Domain.CampaignStatus.DRAFT,
-            Domain.CampaignStatus.IN_WINNER_IN_AB_SELECTION_PROCESS
+            Domain.CampaignStatus.Draft,
+            Domain.CampaignStatus.InWinnerInABSelectionProcess
         });
     public bool IsWritable => CampaignStatus.HasValue && WritableStatus.Contains(CampaignStatus.Value);
 }

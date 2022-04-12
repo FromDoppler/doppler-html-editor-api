@@ -81,7 +81,7 @@ WHERE oldLinks.IdCampaign IS NULL";
             IdContent: idContent,
             Links: links
         );
-        var expectedItemsCount = expectedLinkParameterNames.Count() + 1; // links U IdContent
+        var expectedItemsCount = expectedLinkParameterNames.Length + 1; // links U IdContent
 
         // Act
         var sqlParameters = dbQuery.GenerateSqlParameters();
@@ -90,7 +90,7 @@ WHERE oldLinks.IdCampaign IS NULL";
         var sqlParametersDictionary = Assert.IsAssignableFrom<Dictionary<string, object>>(sqlParameters);
         Assert.Contains("IdCampaign", sqlParametersDictionary.Keys);
         Assert.Equal(idContent, sqlParametersDictionary["IdCampaign"]);
-        Assert.Equal(expectedItemsCount, sqlParametersDictionary.Count());
+        Assert.Equal(expectedItemsCount, sqlParametersDictionary.Count);
 
         var expectedParameters = expectedLinkParameterNames.Select((x, i) => new
         {

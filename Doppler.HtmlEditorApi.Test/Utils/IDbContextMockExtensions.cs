@@ -80,7 +80,7 @@ public static class IDbContextMockExtensions
     }
 
     public static bool SqlQueryStartsWith(this IDbQuery q, string sqlQueryStartsWith)
-        => q.GenerateSqlQuery().Trim().StartsWith(sqlQueryStartsWith);
+        => q.GenerateSqlQuery().Trim().StartsWith(sqlQueryStartsWith, StringComparison.OrdinalIgnoreCase);
 
     public static bool SqlQueryContains(this IDbQuery q, string sqlQueryContains)
         => q.GenerateSqlQuery().Contains(sqlQueryContains);

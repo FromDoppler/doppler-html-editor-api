@@ -7,8 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
-using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Doppler.HtmlEditorApi.Repositories;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
@@ -20,11 +20,11 @@ namespace Doppler.HtmlEditorApi;
 public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 {
     #region Content examples
-    const string HEAD_CONTENT = "<title>Hello head!</title>";
-    const string BODY_CONTENT = "<div>Hello body!</div>";
-    const string ORPHAN_DIV_CONTENT = "<div>Hello orphan div!</div>";
-    const string ONLY_HEAD = $"<head>{HEAD_CONTENT}</head>";
-    const string HTML_WITH_HEAD_AND_BODY = $@"<!doctype html>
+    private const string HEAD_CONTENT = "<title>Hello head!</title>";
+    private const string BODY_CONTENT = "<div>Hello body!</div>";
+    private const string ORPHAN_DIV_CONTENT = "<div>Hello orphan div!</div>";
+    private const string ONLY_HEAD = $"<head>{HEAD_CONTENT}</head>";
+    private const string HTML_WITH_HEAD_AND_BODY = $@"<!doctype html>
         <html>
         <head>
             {HEAD_CONTENT}
@@ -33,17 +33,17 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             {BODY_CONTENT}
         </body>
         </html>";
-    const string HTML_WITHOUT_HEAD = $@"<!doctype html>
+    private const string HTML_WITHOUT_HEAD = $@"<!doctype html>
         <html>
         <body>
         {BODY_CONTENT}
         </body>
         </html>";
-    const string HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV = $@"<!doctype html>
+    private const string HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV = $@"<!doctype html>
         <html>
         {ORPHAN_DIV_CONTENT}
         </html>";
-    const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV = $@"<!doctype html>
+    private const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV = $@"<!doctype html>
         <html>
             <head>
                 {HEAD_CONTENT}
@@ -52,7 +52,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 {ORPHAN_DIV_CONTENT}
             </div>
         </html>";
-    const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD = $@"<!doctype html>
+    private const string HTML_WITHOUT_BODY_WITH_ORPHAN_DIV_WITHOUT_HEAD = $@"<!doctype html>
         <html>
             <div>
                 {ORPHAN_DIV_CONTENT}
@@ -131,7 +131,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
-            .ReturnsAsync(new CampaignState(true, true, null, CampaignStatus.DRAFT));
+            .ReturnsAsync(new CampaignState(true, true, null, CampaignStatus.Draft));
         repositoryMock
             .Setup(x => x.UpdateCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
             .Returns(Task.CompletedTask);
@@ -323,7 +323,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent,
             meta = "true" // it does not care
         }));
@@ -369,7 +369,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent,
             meta = "true" // it does not care
         }));
@@ -383,8 +383,8 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData("html", CampaignStatus.OTHER)]
-    [InlineData("unlayer", CampaignStatus.OTHER)]
+    [InlineData("html", CampaignStatus.Other)]
+    [InlineData("unlayer", CampaignStatus.Other)]
     public async Task PUT_campaign_should_return_bad_request_error_when_campaign_is_not_writable(string type, CampaignStatus campaignStatus)
     {
         // Arrange
@@ -393,8 +393,8 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var htmlContent = "My HTML Content";
-        Regex matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign content is read only\"");
-        Regex matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is OTHER\"");
+        var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign content is read only\"");
+        var matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is Other\"");
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
@@ -408,7 +408,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent,
             meta = new { }
         }));
@@ -933,7 +933,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent = htmlInput,
             meta = "true" // it does not care
         }));
@@ -1021,7 +1021,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent = htmlInput,
             meta = "true" // it does not care
         }));
@@ -1082,7 +1082,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Act
         var response = await client.PutAsync(url, JsonContent.Create(new
         {
-            type = type,
+            type,
             htmlContent = htmlInput,
             meta = "true" // it does not care
         }));

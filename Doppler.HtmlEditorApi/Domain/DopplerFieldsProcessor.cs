@@ -21,7 +21,7 @@ public class DopplerFieldsProcessor
 
         // Only canonical names
         _fieldNamesById = new ReadOnlyDictionary<int, string>(
-            fields.ToDictionary(x => x.id, x => x.name));
+            fields.ToDictionary(x => x.Id, x => x.Name));
     }
 
     public int? GetFieldIdOrNull(string fieldName)
@@ -39,12 +39,12 @@ public class DopplerFieldsProcessor
 
     private static ReadOnlyDictionary<string, int> CreateDictionaryOfIdsByNameOrAlias(IEnumerable<Field> fields, IEnumerable<FieldAliasesDef> aliasesByCanonical)
     {
-        var fieldIdsByNameOrAlias = fields.ToDictionary(x => x.name, x => x.id, StringComparer.OrdinalIgnoreCase);
+        var fieldIdsByNameOrAlias = fields.ToDictionary(x => x.Name, x => x.Id, StringComparer.OrdinalIgnoreCase);
 
         var idsAndAlias = aliasesByCanonical
-            .SelectMany(x => x.aliases.Select(alias => new { x.canonicalName, alias }))
-            .Where(x => fieldIdsByNameOrAlias.ContainsKey(x.canonicalName))
-            .Select(x => new { id = fieldIdsByNameOrAlias[x.canonicalName], x.alias });
+            .SelectMany(x => x.Aliases.Select(alias => new { x.CanonicalName, alias }))
+            .Where(x => fieldIdsByNameOrAlias.ContainsKey(x.CanonicalName))
+            .Select(x => new { id = fieldIdsByNameOrAlias[x.CanonicalName], x.alias });
 
         foreach (var pair in idsAndAlias)
         {

@@ -1,15 +1,21 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace Doppler.HtmlEditorApi.DopplerSecurity
 {
-    public class IsSuperUserAuthorizationHandler : AuthorizationHandler<DopplerAuthorizationRequirement>
+    public partial class IsSuperUserAuthorizationHandler : AuthorizationHandler<DopplerAuthorizationRequirement>
     {
+        [LoggerMessage(0, LogLevel.Debug, "The token hasn't super user permissions.")]
+        partial void LogUserHasNotSuperUserPermissions();
+
+        [LoggerMessage(1, LogLevel.Debug, "The token super user permissions is false.")]
+        partial void LogTokenSuperUserPermissionsIsFalse();
+
         private readonly ILogger<IsSuperUserAuthorizationHandler> _logger;
 
         public IsSuperUserAuthorizationHandler(ILogger<IsSuperUserAuthorizationHandler> logger)
@@ -29,19 +35,19 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
 
         private bool IsSuperUser(AuthorizationHandlerContext context)
         {
-            if (!context.User.HasClaim(c => c.Type.Equals(DopplerSecurityDefaults.SUPERUSER_JWT_KEY)))
+            if (!context.User.HasClaim(c => c.Type.Equals(DopplerSecurityDefaults.SuperUserJwtKey, StringComparison.Ordinal)))
             {
-                _logger.LogDebug("The token hasn't super user permissions.");
+                LogUserHasNotSuperUserPermissions();
                 return false;
             }
 
-            var isSuperUser = bool.Parse(context.User.FindFirst(c => c.Type.Equals(DopplerSecurityDefaults.SUPERUSER_JWT_KEY)).Value);
+            var isSuperUser = bool.Parse(context.User.FindFirst(c => c.Type.Equals(DopplerSecurityDefaults.SuperUserJwtKey, StringComparison.Ordinal)).Value);
             if (isSuperUser)
             {
                 return true;
             }
 
-            _logger.LogDebug("The token super user permissions is false.");
+            LogTokenSuperUserPermissionsIsFalse();
             return false;
         }
     }

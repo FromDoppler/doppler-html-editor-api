@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DapperProviderServiceCollectionExtensions
 {
-    static public IServiceCollection AddDapperDataAccessProvider(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDapperDataAccessProvider(this IServiceCollection services, IConfiguration configuration)
         => services
             .AddSingleton<IDatabaseConnectionFactory, DatabaseConnectionFactory>()
             .AddScoped<IDbContext, DapperWrapperDbContext>()

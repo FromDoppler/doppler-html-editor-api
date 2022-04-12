@@ -1,13 +1,13 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
 
 namespace Doppler.HtmlEditorApi.DopplerSecurity
 {
@@ -40,12 +40,12 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
         public void Configure(DopplerSecurityOptions options)
         {
             var path = _configuration.GetValue(
-                DopplerSecurityDefaults.PUBLIC_KEYS_FOLDER_CONFIG_KEY,
-                DopplerSecurityDefaults.PUBLIC_KEYS_FOLDER_DEFAULT_CONFIG_VALUE);
+                DopplerSecurityDefaults.PublicKeysFolderConfigKey,
+                DopplerSecurityDefaults.PublicKeysFolderDefaultConfigValue);
 
             var filenameRegex = new Regex(_configuration.GetValue(
-                DopplerSecurityDefaults.PUBLIC_KEYS_FILENAME_CONFIG_KEY,
-                DopplerSecurityDefaults.PUBLIC_KEYS_FILENAME_REGEX_DEFAULT_CONFIG_VALUE));
+                DopplerSecurityDefaults.PublicKeysFilenameConfigKey,
+                DopplerSecurityDefaults.PublicKeysFilenameRegexDefaultConfigValue));
 
             var files = _fileProvider.GetDirectoryContents(path)
                 .Where(x => !x.IsDirectory && filenameRegex.IsMatch(x.Name));

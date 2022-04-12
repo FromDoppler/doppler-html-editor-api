@@ -17,13 +17,13 @@ public class DopplerFieldsProcessorTest
             {
                 new FieldAliasesDef()
                 {
-                    canonicalName = "FIELD_1",
-                    aliases = new[] { "FIELD_A", "FIELD 1" }
+                    CanonicalName = "FIELD_1",
+                    Aliases = new[] { "FIELD_A", "FIELD 1" }
                 },
                 new FieldAliasesDef()
                 {
-                    canonicalName = "FIELD_2",
-                    aliases = new[] { "FIELD_B", "FIELD 2" }
+                    CanonicalName = "FIELD_2",
+                    Aliases = new[] { "FIELD_B", "FIELD 2" }
                 },
             }
         );

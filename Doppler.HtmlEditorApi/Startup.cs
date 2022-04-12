@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.Configuration;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Hellang.Middleware.ProblemDetails;
-using Doppler.HtmlEditorApi.Configuration;
 
 namespace Doppler.HtmlEditorApi
 {
@@ -67,7 +67,7 @@ namespace Doppler.HtmlEditorApi
             });
             services.AddDapperDataAccessProvider(Configuration);
             services.AddDopplerDbRepositories();
-            services.Configure<FieldsOptions>(Configuration.GetSection("fields"));
+            services.Configure<FieldsOptions>(Configuration.GetSection("Fields"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

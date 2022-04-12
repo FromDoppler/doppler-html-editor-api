@@ -9,7 +9,7 @@ namespace Doppler.HtmlEditorApi.DataAccess.DapperProvider;
 public class DapperWrapperDbContext : IDbContext, IDisposable
 {
     private readonly Lazy<IDbConnection> _lazyDbConnection;
-    private bool disposedValue;
+    private bool _disposedValue;
 
     public DapperWrapperDbContext(IDatabaseConnectionFactory databaseConnectionFactory)
     {
@@ -33,10 +33,11 @@ public class DapperWrapperDbContext : IDbContext, IDisposable
 
     public void Dispose()
     {
-        if (!disposedValue && _lazyDbConnection.IsValueCreated)
+        if (!_disposedValue && _lazyDbConnection.IsValueCreated)
         {
-            disposedValue = true;
+            _disposedValue = true;
             _lazyDbConnection.Value.Dispose();
         }
+        GC.SuppressFinalize(this);
     }
 }

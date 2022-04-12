@@ -1,14 +1,14 @@
 using System.Linq;
-using Xunit.Abstractions;
-using Xunit;
 using Doppler.HtmlEditorApi.Test.Utils;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Doppler.HtmlEditorApi.Domain;
 
 public class DopplerHtmlDocumentTest
 {
     #region Content examples
-    const string HTML_SOCIALSHARE_TABLE_WITH_ERRORS = $@"
+    private const string HTML_SOCIALSHARE_TABLE_WITH_ERRORS = $@"
 <table>
     <tr>
         <td id=""facebook"" valign=""middle"">
@@ -92,13 +92,6 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
     </tr>
 </table>";
     #endregion
-
-    private readonly ITestOutputHelper _output;
-
-    public DopplerHtmlDocumentTest(ITestOutputHelper output)
-    {
-        _output = output;
-    }
 
     [Fact]
     public void GetFieldsId_should_return_distinct_field_ids()
@@ -535,7 +528,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         AssertHelper.EqualIgnoringMeaninglessSpaces(expectedHead, headContent);
     }
 
-    private string CreateTestContentWithLink(string href)
+    private static string CreateTestContentWithLink(string href)
         => $@"<div>
     <a href=""{href}"">Link</a>
 </div>

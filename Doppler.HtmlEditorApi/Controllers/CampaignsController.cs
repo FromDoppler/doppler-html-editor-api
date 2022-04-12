@@ -16,20 +16,20 @@ namespace Doppler.HtmlEditorApi.Controllers
     [ApiController]
     public class CampaignsController
     {
-        private const string EMPTY_UNLAYER_CONTENT_JSON = "{\"body\":{\"rows\":[]}}";
-        private const string EMPTY_UNLAYER_CONTENT_HTML = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional //EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\"><head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <meta name=\"x-apple-disable-message-reformatting\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <title></title></head><body></body></html>";
+        private const string EmptyUnlayerContentJson = "{\"body\":{\"rows\":[]}}";
+        private const string EmptyUnlayerContentHtml = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional //EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\"><head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <meta name=\"x-apple-disable-message-reformatting\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <title></title></head><body></body></html>";
         private readonly ICampaignContentRepository _campaignContentRepository;
         private readonly IFieldsRepository _fieldsRepository;
         private readonly IOptions<FieldsOptions> _fieldsOptions;
 
-        public CampaignsController(ICampaignContentRepository Repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
+        public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
         {
-            _campaignContentRepository = Repository;
+            _campaignContentRepository = repository;
             _fieldsRepository = fieldsRepository;
             _fieldsOptions = fieldsOptions;
         }
 
-        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
+        [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<ActionResult<CampaignContent>> GetCampaign(string accountName, int campaignId)
         {
@@ -39,13 +39,13 @@ namespace Doppler.HtmlEditorApi.Controllers
             ActionResult<CampaignContent> result = contentRow switch
             {
                 null => new NotFoundObjectResult("Campaign not found or belongs to a different account"),
-                EmptyContentData emptyContentData => new CampaignContent(
+                EmptyContentData => new CampaignContent(
                     type: ContentType.unlayer,
-                    meta: Utils.ParseAsJsonElement(EMPTY_UNLAYER_CONTENT_JSON),
-                    htmlContent: EMPTY_UNLAYER_CONTENT_HTML),
+                    meta: Utils.ParseAsJsonElement(EmptyUnlayerContentJson),
+                    htmlContent: EmptyUnlayerContentHtml),
                 UnlayerContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
-                    meta: Utils.ParseAsJsonElement(unlayerContent.meta),
+                    meta: Utils.ParseAsJsonElement(unlayerContent.Meta),
                     htmlContent: GenerateHtmlContent(unlayerContent)),
                 BaseHtmlContentData htmlContent => new CampaignContent(
                     type: ContentType.html,
@@ -57,7 +57,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             return result;
         }
 
-        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
+        [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content/thumbnail")]
         public Task<ActionResult> GetCampaignThumbnail(string accountName, int campaignId)
         {
@@ -65,7 +65,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             return Task.FromResult<ActionResult>(new RedirectResult(uriCampaignThumbnail));
         }
 
-        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
+        [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
@@ -87,7 +87,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                     Detail = $@"The content cannot be edited because status campaign is {campaignState.CampaignStatus}"
                 });
             }
-            var fieldAliases = _fieldsOptions.Value.aliases;
+            var fieldAliases = _fieldsOptions.Value.Aliases;
 
             var basicFields = await _fieldsRepository.GetActiveBasicFields();
             var customFields = await _fieldsRepository.GetCustomFields(accountName);
@@ -110,14 +110,14 @@ namespace Doppler.HtmlEditorApi.Controllers
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
                 ContentType.unlayer => new UnlayerContentData(
-                    htmlContent: content,
-                    htmlHead: head,
-                    meta: campaignContent.meta.ToString(),
-                    campaignId: campaignId),
+                    HtmlContent: content,
+                    HtmlHead: head,
+                    Meta: campaignContent.meta.ToString(),
+                    CampaignId: campaignId),
                 ContentType.html => new HtmlContentData(
-                    htmlContent: content,
-                    htmlHead: head,
-                    campaignId: campaignId),
+                    HtmlContent: content,
+                    HtmlHead: head,
+                    CampaignId: campaignId),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
@@ -135,11 +135,11 @@ namespace Doppler.HtmlEditorApi.Controllers
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
 
-        private string GenerateHtmlContent(BaseHtmlContentData content)
+        private static string GenerateHtmlContent(BaseHtmlContentData content)
             // Notice that it is not symmetric with ExtractDopplerHtmlData.
             // The head is being lossed here. It is not good if we try to edit an imported content.
             // Old Doppler code:
             // https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.HypermediaAPI/ApiMappers/FromDoppler/DtoContent_To_CampaignContent.cs#L23
-            => content.htmlContent;
+            => content.HtmlContent;
     }
 }

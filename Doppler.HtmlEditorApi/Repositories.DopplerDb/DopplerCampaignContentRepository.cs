@@ -10,11 +10,11 @@ namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
 public class DapperCampaignContentRepository : ICampaignContentRepository
 {
-    private const int EDITOR_TYPE_MSEDITOR = 4;
-    private const int EDITOR_TYPE_UNLAYER = 5;
-    private const int DOPPLER_CAMPAIGN_STATUS_DRAFT = 1;
-    private const int DOPPLER_CAMPAIGN_STATUS_AB_DRAFT = 11;
-    private const int DOPPLER_CAMPAIGN_STATUS_IN_WINNER_IN_AB_SELECTION_PROCESS = 18;
+    private const int EditorTypeMSEditor = 4;
+    private const int EditorTypeUnlayer = 5;
+    private const int DopplerCampaignStatusDraft = 1;
+    private const int DopplerCampaignStatusABDraft = 11;
+    private const int DopplerCampaignStatusInWinnerInABSelectionProcess = 18;
 
     private readonly IDbContext _dbContext;
     public DapperCampaignContentRepository(IDbContext dbContext)
@@ -29,44 +29,24 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             AccountName: accountName
         ));
 
-        if (queryResult == null || !queryResult.CampaignExists)
-        {
-            return null;
-        }
-
-        if (!queryResult.CampaignHasContent)
-        {
-            return new EmptyContentData(campaignId);
-        };
-
-        if (queryResult.EditorType == EDITOR_TYPE_MSEDITOR)
-        {
-            return new MSEditorContentData(campaignId, queryResult.Content);
-        }
-
-        if (queryResult.EditorType == EDITOR_TYPE_UNLAYER)
-        {
-            return new UnlayerContentData(
-                campaignId: queryResult.IdCampaign,
-                htmlContent: queryResult.Content,
-                htmlHead: queryResult.Head,
-                meta: queryResult.Meta);
-        }
-
-        if (queryResult.EditorType == null)
-        {
-            return new HtmlContentData(
-                campaignId: queryResult.IdCampaign,
-                htmlContent: queryResult.Content,
-                htmlHead: queryResult.Head);
-        }
-
-        return new UnknownContentData(
-            campaignId: queryResult.IdCampaign,
-            content: queryResult.Content,
-            head: queryResult.Head,
-            meta: queryResult.Meta,
-            editorType: queryResult.EditorType);
+        return queryResult == null || !queryResult.CampaignExists ? null
+            : !queryResult.CampaignHasContent ? new EmptyContentData(campaignId)
+            : queryResult.EditorType == EditorTypeMSEditor ? new MSEditorContentData(campaignId, queryResult.Content)
+            : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerContentData(
+                CampaignId: queryResult.IdCampaign,
+                HtmlContent: queryResult.Content,
+                HtmlHead: queryResult.Head,
+                Meta: queryResult.Meta)
+            : queryResult.EditorType == null ? new HtmlContentData(
+                CampaignId: queryResult.IdCampaign,
+                HtmlContent: queryResult.Content,
+                HtmlHead: queryResult.Head)
+            : new UnknownContentData(
+                CampaignId: queryResult.IdCampaign,
+                Content: queryResult.Content,
+                Head: queryResult.Head,
+                Meta: queryResult.Meta,
+                EditorType: queryResult.EditorType);
     }
 
     public async Task<CampaignState> GetCampaignState(string accountName, int campaignId)
@@ -83,10 +63,10 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 
         // For information about Doppler's status code, check out here
         // https://github.com/MakingSense/Doppler/blob/develop/Doppler.Transversal/Classes/CampaignStatusEnum.cs
-        var campaignStatus = campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_DRAFT ||
-            campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_AB_DRAFT ? CampaignStatus.DRAFT
-            : campaignStateData.Status == DOPPLER_CAMPAIGN_STATUS_IN_WINNER_IN_AB_SELECTION_PROCESS ? CampaignStatus.IN_WINNER_IN_AB_SELECTION_PROCESS
-            : CampaignStatus.OTHER;
+        var campaignStatus = campaignStateData.Status is DopplerCampaignStatusDraft or
+            DopplerCampaignStatusABDraft ? CampaignStatus.Draft
+            : campaignStateData.Status == DopplerCampaignStatusInWinnerInABSelectionProcess ? CampaignStatus.InWinnerInABSelectionProcess
+            : CampaignStatus.Other;
 
         return new CampaignState(
                 campaignStateData.OwnCampaignExists,
@@ -96,22 +76,22 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             );
     }
 
-    public async Task CreateCampaignContent(string accounName, ContentData content)
+    public async Task CreateCampaignContent(string accountName, ContentData content)
     {
 
         IExecutableDbQuery insertContentQuery = content switch
         {
             UnlayerContentData unlayerContentData => new InsertCampaignContentDbQuery(
-                IdCampaign: unlayerContentData.campaignId,
-                Content: unlayerContentData.htmlContent,
-                Head: unlayerContentData.htmlHead,
-                Meta: unlayerContentData.meta,
-                EditorType: (int?)EDITOR_TYPE_UNLAYER
+                IdCampaign: unlayerContentData.CampaignId,
+                Content: unlayerContentData.HtmlContent,
+                Head: unlayerContentData.HtmlHead,
+                Meta: unlayerContentData.Meta,
+                EditorType: (int?)EditorTypeUnlayer
             ),
             HtmlContentData htmlContentData => new InsertCampaignContentDbQuery(
-                IdCampaign: htmlContentData.campaignId,
-                Content: htmlContentData.htmlContent,
-                Head: htmlContentData.htmlHead,
+                IdCampaign: htmlContentData.CampaignId,
+                Content: htmlContentData.HtmlContent,
+                Head: htmlContentData.HtmlHead,
                 Meta: null,
                 EditorType: null
             ),
@@ -123,30 +103,30 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         await _dbContext.ExecuteAsync(insertContentQuery);
 
         var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
-            setCurrentStep: 2,
-            setHtmlSourceType: UpdateCampaignStatusDbQuery.TEMPLATE_HTML_SOURCE_TYPE,
-            whenIdCampaignIs: content.campaignId,
-            whenCurrentStepIs: 1
+            SetCurrentStep: 2,
+            SetHtmlSourceType: UpdateCampaignStatusDbQuery.TemplateHtmlSourceType,
+            WhenIdCampaignIs: content.CampaignId,
+            WhenCurrentStepIs: 1
         );
 
         await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
     }
 
-    public async Task UpdateCampaignContent(string accounName, ContentData content)
+    public async Task UpdateCampaignContent(string accountName, ContentData content)
     {
         IExecutableDbQuery updateContentQuery = content switch
         {
             UnlayerContentData unlayerContentData => new UpdateCampaignContentDbQuery(
-                IdCampaign: unlayerContentData.campaignId,
-                Content: unlayerContentData.htmlContent,
-                Head: unlayerContentData.htmlHead,
-                Meta: unlayerContentData.meta,
-                EditorType: (int?)EDITOR_TYPE_UNLAYER
+                IdCampaign: unlayerContentData.CampaignId,
+                Content: unlayerContentData.HtmlContent,
+                Head: unlayerContentData.HtmlHead,
+                Meta: unlayerContentData.Meta,
+                EditorType: (int?)EditorTypeUnlayer
             ),
             HtmlContentData htmlContentData => new UpdateCampaignContentDbQuery(
-                IdCampaign: htmlContentData.campaignId,
-                Content: htmlContentData.htmlContent,
-                Head: htmlContentData.htmlHead,
+                IdCampaign: htmlContentData.CampaignId,
+                Content: htmlContentData.HtmlContent,
+                Head: htmlContentData.HtmlHead,
                 Meta: null,
                 EditorType: null
             ),
@@ -158,23 +138,23 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         await _dbContext.ExecuteAsync(updateContentQuery);
     }
 
-    public async Task SaveNewFieldIds(int ContentId, IEnumerable<int> fieldsId)
+    public async Task SaveNewFieldIds(int contentId, IEnumerable<int> fieldsId)
     {
         if (!fieldsId.Any())
         {
             return;
         }
 
-        await _dbContext.ExecuteAsync(new SaveNewCampaignFields(ContentId, fieldsId));
+        await _dbContext.ExecuteAsync(new SaveNewCampaignFields(contentId, fieldsId));
     }
 
-    public async Task SaveLinks(int ContentId, IEnumerable<string> links)
+    public async Task SaveLinks(int contentId, IEnumerable<string> links)
     {
         if (links.Any())
         {
-            await _dbContext.ExecuteAsync(new SaveNewCampaignLinks(ContentId, links));
+            await _dbContext.ExecuteAsync(new SaveNewCampaignLinks(contentId, links));
         }
-        await _dbContext.ExecuteAsync(new DeleteAutomationConditionalsOfRemovedCampaignLinks(ContentId, links));
-        await _dbContext.ExecuteAsync(new DeleteRemovedCampaignLinks(ContentId, links));
+        await _dbContext.ExecuteAsync(new DeleteAutomationConditionalsOfRemovedCampaignLinks(contentId, links));
+        await _dbContext.ExecuteAsync(new DeleteRemovedCampaignLinks(contentId, links));
     }
 }

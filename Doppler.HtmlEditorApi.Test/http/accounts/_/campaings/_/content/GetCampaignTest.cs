@@ -9,25 +9,25 @@ using Doppler.HtmlEditorApi.Repositories;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
-using Xunit.Abstractions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Doppler.HtmlEditorApi;
 
 public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 {
     #region Content examples
-    const string META_CONTENT = "{\"body\":{\"rows\":[]},\"example\":true}";
-    const string HEAD_CONTENT = "<title>Hello head!</title>";
-    const string BODY_CONTENT = "<div>Hello body!</div>";
-    const string ORPHAN_DIV_CONTENT = "<div>Hello orphan div!</div>";
-    const string HTML_WITHOUT_HEAD = $@"<!doctype html>
+    private const string META_CONTENT = "{\"body\":{\"rows\":[]},\"example\":true}";
+    private const string HEAD_CONTENT = "<title>Hello head!</title>";
+    private const string BODY_CONTENT = "<div>Hello body!</div>";
+    private const string ORPHAN_DIV_CONTENT = "<div>Hello orphan div!</div>";
+    private const string HTML_WITHOUT_HEAD = $@"<!doctype html>
         <html>
         <body>
         {BODY_CONTENT}
         </body>
         </html>";
-    const string HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV = $@"<!doctype html>
+    private const string HTML_WITHOUT_HEAD_WITH_ORPHAN_DIV = $@"<!doctype html>
         <html>
         {ORPHAN_DIV_CONTENT}
         </html>";
@@ -129,13 +129,13 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Arrange
         var expectedSchemaVersion = 999;
         var contentRow = new UnlayerContentData(
-            meta: JsonSerializer.Serialize(new
+            Meta: JsonSerializer.Serialize(new
             {
                 schemaVersion = expectedSchemaVersion
             }),
-            htmlContent: "<html></html>",
-            htmlHead: null,
-            campaignId: expectedIdCampaign);
+            HtmlContent: "<html></html>",
+            HtmlHead: null,
+            CampaignId: expectedIdCampaign);
 
         var repositoryMock = new Mock<ICampaignContentRepository>();
 
