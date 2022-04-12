@@ -30,5 +30,7 @@
         "statusBarItem.remoteBackground": "#e3613d",
         "statusBarItem.remoteForeground": "#15202b"
     },
-    "peacock.color": "#e3613d"
+    "peacock.color": "#e3613d",
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.enableEditorConfigSupport": true
 }
