@@ -11,7 +11,7 @@ public record CampaignContent(
     JsonElement? meta,
     [Required]
     string htmlContent,
-    string previewImage = null) : Content(type, meta, htmlContent, previewImage), IValidatableObject
+    string previewImage) : Content(type, meta, htmlContent, previewImage), IValidatableObject
 {
     private static readonly HashSet<ContentType> ValidContentTypes = new HashSet<ContentType>(Enum.GetValues<ContentType>());
 

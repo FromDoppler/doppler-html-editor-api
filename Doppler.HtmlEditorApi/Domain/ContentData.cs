@@ -32,7 +32,7 @@ public sealed record HtmlContentData(
     int CampaignId,
     string HtmlContent,
     string HtmlHead,
-    string PreviewImage = null)
+    string PreviewImage)
     : BaseHtmlContentData(CampaignId, HtmlContent, HtmlHead, PreviewImage);
 
 public sealed record UnlayerContentData(
@@ -40,5 +40,5 @@ public sealed record UnlayerContentData(
     string HtmlContent,
     string HtmlHead,
     string Meta,
-    string PreviewImage = null)
+    string PreviewImage)
     : BaseHtmlContentData(CampaignId, HtmlContent, HtmlHead, PreviewImage);
