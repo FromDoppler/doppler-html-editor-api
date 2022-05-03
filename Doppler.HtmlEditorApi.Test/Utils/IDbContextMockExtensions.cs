@@ -85,6 +85,21 @@ public static class IDbContextMockExtensions
     public static bool SqlQueryContains(this IDbQuery q, string sqlQueryContains)
         => q.GenerateSqlQuery().Contains(sqlQueryContains);
 
+    public static bool Is<T>(this IDbQuery q)
+        => q is T;
+
     public static bool Is<T>(this IDbQuery q, Func<T, bool> match)
         => q is T casted && match(casted);
+
+    public static bool SqlParametersContain(this IDbQuery q, string name, object value)
+    {
+        var parameters = q.GenerateSqlParameters();
+        var propInfo = q.GetType().GetProperty(name, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+        if (propInfo == null)
+        {
+            return false;
+        }
+        var propValue = propInfo.GetValue(parameters);
+        return (value == null && propValue == null) || (value != null && value.Equals(propValue));
+    }
 }

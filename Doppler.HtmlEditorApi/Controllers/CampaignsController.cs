@@ -113,11 +113,13 @@ namespace Doppler.HtmlEditorApi.Controllers
                     HtmlContent: content,
                     HtmlHead: head,
                     Meta: campaignContent.meta.ToString(),
-                    CampaignId: campaignId),
+                    CampaignId: campaignId,
+                    PreviewImage: campaignContent.previewImage),
                 ContentType.html => new HtmlContentData(
                     HtmlContent: content,
                     HtmlHead: head,
-                    CampaignId: campaignId),
+                    CampaignId: campaignId,
+                    PreviewImage: campaignContent.previewImage),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
