@@ -12,7 +12,8 @@ public sealed record UnknownContentData(
     string Content,
     string Head,
     string Meta,
-    int? EditorType)
+    int? EditorType,
+    string PreviewImage)
     : ContentData(CampaignId);
 
 public sealed record MSEditorContentData(

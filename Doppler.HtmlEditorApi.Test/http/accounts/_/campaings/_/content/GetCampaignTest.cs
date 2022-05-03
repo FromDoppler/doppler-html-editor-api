@@ -6,6 +6,7 @@ using Doppler.HtmlEditorApi.ApiModels;
 using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Repositories;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
@@ -340,6 +341,65 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.False(responseContentJson.TryGetProperty("meta", out _));
         Assert.Equal("html", responseContentJson.GetProperty("type").GetString());
         Assert.Equal(html, responseContentJson.GetProperty("htmlContent").GetString());
+    }
+
+
+    [Theory]
+    // Unlayer Content
+    [InlineData(
+        "https://1.fromdoppler.net/image1.png",
+        5,
+        "{\"demo\":\"unlayer\"}"
+    )]
+    // HTML Content
+    [InlineData(
+        "https://2.fromdoppler.net/image2.png",
+        null,
+        null
+    )]
+    public async Task GET_campaign_should_include_previewImage_in_response(string previewImage, int? editorType, string meta)
+    {
+        // Arrange
+        var idCampaign = 456;
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{idCampaign}/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+
+        var html = "<html></html>";
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock.SetupContentWithCampaignStatus(
+            TestUsersData.EMAIL_TEST1,
+            idCampaign,
+            new()
+            {
+                IdCampaign = idCampaign,
+                CampaignExists = true,
+                CampaignHasContent = true,
+                EditorType = editorType,
+                Content = html,
+                Meta = meta,
+                PreviewImage = previewImage
+            });
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.GetAsync(url);
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        using var responseContentDoc = JsonDocument.Parse(responseContent);
+        var responseContentJson = responseContentDoc.RootElement;
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(responseContentJson.TryGetProperty("previewImage", out var previewImageProperty));
+        Assert.Equal(previewImage, previewImageProperty.GetString());
+        dbContextMock.Verify(
+            x => x.ExecuteAsync(It.Is<FirstOrDefaultContentWithCampaignStatusDbQuery>(q => q.SqlQueryContains("ca.PreviewImage"))),
+            Times.Once());
     }
 
     [Theory]

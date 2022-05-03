@@ -15,7 +15,8 @@ SELECT
     co.EditorType,
     co.Content,
     co.Head,
-    co.Meta
+    co.Meta,
+    ca.PreviewImage
 FROM [User] u
 LEFT JOIN [Campaign] ca ON
     u.IdUser = ca.IdUser
@@ -34,5 +35,6 @@ WHERE
         public string Content { get; init; }
         public string Head { get; init; }
         public string Meta { get; init; }
+        public string PreviewImage { get; init; }
     }
 }
