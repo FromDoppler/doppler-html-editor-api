@@ -36,17 +36,20 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
                 CampaignId: queryResult.IdCampaign,
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
-                Meta: queryResult.Meta)
+                Meta: queryResult.Meta,
+                PreviewImage: queryResult.PreviewImage)
             : queryResult.EditorType == null ? new HtmlContentData(
                 CampaignId: queryResult.IdCampaign,
                 HtmlContent: queryResult.Content,
-                HtmlHead: queryResult.Head)
+                HtmlHead: queryResult.Head,
+                PreviewImage: queryResult.PreviewImage)
             : new UnknownContentData(
                 CampaignId: queryResult.IdCampaign,
                 Content: queryResult.Content,
                 Head: queryResult.Head,
                 Meta: queryResult.Meta,
-                EditorType: queryResult.EditorType);
+                EditorType: queryResult.EditorType,
+                PreviewImage: queryResult.PreviewImage);
     }
 
     public async Task<CampaignState> GetCampaignState(string accountName, int campaignId)
@@ -102,6 +105,14 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 
         await _dbContext.ExecuteAsync(insertContentQuery);
 
+        if (content is BaseHtmlContentData baseHtmlContentData)
+        {
+            var updatePreviewImageQuery = new UpdateCampaignPreviewImageDbQuery(
+                baseHtmlContentData.CampaignId,
+                baseHtmlContentData.PreviewImage);
+            await _dbContext.ExecuteAsync(updatePreviewImageQuery);
+        }
+
         var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
             SetCurrentStep: 2,
             SetHtmlSourceType: UpdateCampaignStatusDbQuery.TemplateHtmlSourceType,
@@ -136,6 +147,14 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         };
 
         await _dbContext.ExecuteAsync(updateContentQuery);
+
+        if (content is BaseHtmlContentData baseHtmlContentData)
+        {
+            var updatePreviewImageQuery = new UpdateCampaignPreviewImageDbQuery(
+                baseHtmlContentData.CampaignId,
+                baseHtmlContentData.PreviewImage);
+            await _dbContext.ExecuteAsync(updatePreviewImageQuery);
+        }
     }
 
     public async Task SaveNewFieldIds(int contentId, IEnumerable<int> fieldsId)

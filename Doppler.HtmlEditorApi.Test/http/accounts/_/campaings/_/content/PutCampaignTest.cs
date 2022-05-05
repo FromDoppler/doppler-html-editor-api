@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DataAccess;
@@ -543,6 +545,91 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
+    }
+
+    [Theory]
+    // Insert HTML Content
+    [InlineData(
+        "https://1.fromdoppler.net/image1.png",
+        false,
+        @"{
+    ""type"": ""html"",
+    ""htmlContent"": ""My HTML Content"",
+    ""previewImage"": ""https://1.fromdoppler.net/image1.png""
+}")]
+    // Update HTML Content
+    [InlineData(
+        "https://2.fromdoppler.net/image2.png",
+        true,
+        @"{
+    ""type"": ""html"",
+    ""htmlContent"": ""My HTML Content"",
+    ""previewImage"": ""https://2.fromdoppler.net/image2.png""
+}")]
+    // Insert Unlayer Content
+    [InlineData(
+        "https://3.fromdoppler.net/image3.png",
+        false,
+        @"{
+    ""type"": ""unlayer"",
+    ""htmlContent"": ""My HTML Content"",
+    ""meta"": ""{}"",
+    ""previewImage"": ""https://3.fromdoppler.net/image3.png""
+}")]
+    // Update Unlayer Content
+    [InlineData(
+        "https://4.fromdoppler.net/image4.png",
+        true,
+        @"{
+    ""type"": ""unlayer"",
+    ""htmlContent"": ""My HTML Content"",
+    ""meta"": ""{}"",
+    ""previewImage"": ""https://4.fromdoppler.net/image4.png""
+}")]
+    [InlineData(
+        null,
+        false,
+        @"{
+    ""type"": ""html"",
+    ""htmlContent"": ""My HTML Content""
+}")]
+    public async Task PUT_campaign_should_store_previewImage(string expectedPreviewImage, bool contentExists, string requestBody)
+    {
+        // Arrange
+        var idCampaign = 456;
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{idCampaign}/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, TestUsersData.EMAIL_TEST1)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = contentExists,
+                EditorType = null,
+                Status = 1
+            });
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, new StringContent(requestBody, Encoding.Default, "application/json"));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.Verify(x => x.ExecuteAsync(It.Is<UpdateCampaignPreviewImageDbQuery>(q =>
+            q.SqlQueryContains("PreviewImage = @PreviewImage")
+            && q.SqlQueryContains("WHERE IdCampaign = @IdCampaign")
+            && q.SqlParametersContain("PreviewImage", expectedPreviewImage)
+            && q.SqlParametersContain("IdCampaign", idCampaign))));
     }
 
     [Theory]

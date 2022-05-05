@@ -42,15 +42,18 @@ namespace Doppler.HtmlEditorApi.Controllers
                 EmptyContentData => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(EmptyUnlayerContentJson),
-                    htmlContent: EmptyUnlayerContentHtml),
+                    htmlContent: EmptyUnlayerContentHtml,
+                    previewImage: null),
                 UnlayerContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(unlayerContent.Meta),
-                    htmlContent: GenerateHtmlContent(unlayerContent)),
+                    htmlContent: GenerateHtmlContent(unlayerContent),
+                    previewImage: unlayerContent.PreviewImage),
                 BaseHtmlContentData htmlContent => new CampaignContent(
                     type: ContentType.html,
                     meta: null,
-                    htmlContent: GenerateHtmlContent(htmlContent)),
+                    htmlContent: GenerateHtmlContent(htmlContent),
+                    previewImage: htmlContent.PreviewImage),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
             };
 
@@ -113,11 +116,13 @@ namespace Doppler.HtmlEditorApi.Controllers
                     HtmlContent: content,
                     HtmlHead: head,
                     Meta: campaignContent.meta.ToString(),
-                    CampaignId: campaignId),
+                    CampaignId: campaignId,
+                    PreviewImage: campaignContent.previewImage),
                 ContentType.html => new HtmlContentData(
                     HtmlContent: content,
                     HtmlHead: head,
-                    CampaignId: campaignId),
+                    CampaignId: campaignId,
+                    PreviewImage: campaignContent.previewImage),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
