@@ -22,6 +22,10 @@ namespace Doppler.HtmlEditorApi.Controllers
         private readonly IFieldsRepository _fieldsRepository;
         private readonly IOptions<FieldsOptions> _fieldsOptions;
 
+        // We are using HTMLSourceType = 2 (Template) because Editor seems to be tied to the old HTML Editor
+        // See https://github.com/MakingSense/Doppler/blob/48cf637bb1f8b4d81837fff904d8736fe889ff1c/Doppler.Transversal/Classes/CampaignHTMLContentTypeEnum.cs#L12-L17
+        private const int TemplateHtmlSourceType = 2;
+
         public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
         {
             _campaignContentRepository = repository;
@@ -110,6 +114,9 @@ namespace Doppler.HtmlEditorApi.Controllers
             var fieldIds = htmlDocument.GetFieldIds();
             var trackableUrls = htmlDocument.GetTrackableUrls();
 
+            // TODO: Validate if it's possible to delete PreviewImage property from BaseHtmlContentData,
+            // because it's already in campaignContent
+            // See it on: https://github.com/FromDoppler/doppler-html-editor-api/pull/111#discussion_r870681998
             BaseHtmlContentData contentRow = campaignContent.type switch
             {
                 ContentType.unlayer => new UnlayerContentData(
@@ -133,7 +140,13 @@ namespace Doppler.HtmlEditorApi.Controllers
             else
             {
                 await _campaignContentRepository.CreateCampaignContent(accountName, contentRow);
+                await _campaignContentRepository.UpdateCampaignStatus(
+                    setCurrentStep: 2,
+                    setHtmlSourceType: TemplateHtmlSourceType,
+                    whenIdCampaignIs: contentRow.CampaignId,
+                    whenCurrentStepIs: 1);
             }
+            await _campaignContentRepository.UpdateCampaignPreviewImage(campaignId, contentRow.PreviewImage);
             await _campaignContentRepository.SaveNewFieldIds(campaignId, fieldIds);
             await _campaignContentRepository.SaveLinks(campaignId, trackableUrls);
 

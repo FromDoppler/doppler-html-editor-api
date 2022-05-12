@@ -104,23 +104,6 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         };
 
         await _dbContext.ExecuteAsync(insertContentQuery);
-
-        if (content is BaseHtmlContentData baseHtmlContentData)
-        {
-            var updatePreviewImageQuery = new UpdateCampaignPreviewImageDbQuery(
-                baseHtmlContentData.CampaignId,
-                baseHtmlContentData.PreviewImage);
-            await _dbContext.ExecuteAsync(updatePreviewImageQuery);
-        }
-
-        var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
-            SetCurrentStep: 2,
-            SetHtmlSourceType: UpdateCampaignStatusDbQuery.TemplateHtmlSourceType,
-            WhenIdCampaignIs: content.CampaignId,
-            WhenCurrentStepIs: 1
-        );
-
-        await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
     }
 
     public async Task UpdateCampaignContent(string accountName, ContentData content)
@@ -147,14 +130,6 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         };
 
         await _dbContext.ExecuteAsync(updateContentQuery);
-
-        if (content is BaseHtmlContentData baseHtmlContentData)
-        {
-            var updatePreviewImageQuery = new UpdateCampaignPreviewImageDbQuery(
-                baseHtmlContentData.CampaignId,
-                baseHtmlContentData.PreviewImage);
-            await _dbContext.ExecuteAsync(updatePreviewImageQuery);
-        }
     }
 
     public async Task SaveNewFieldIds(int contentId, IEnumerable<int> fieldsId)
@@ -175,5 +150,21 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         }
         await _dbContext.ExecuteAsync(new DeleteAutomationConditionalsOfRemovedCampaignLinks(contentId, links));
         await _dbContext.ExecuteAsync(new DeleteRemovedCampaignLinks(contentId, links));
+    }
+
+    public async Task UpdateCampaignStatus(int setCurrentStep, int setHtmlSourceType, int whenIdCampaignIs, int whenCurrentStepIs)
+    {
+        var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
+            setCurrentStep,
+            setHtmlSourceType,
+            whenIdCampaignIs,
+            whenCurrentStepIs);
+        await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
+    }
+
+    public async Task UpdateCampaignPreviewImage(int campaignId, string previewImage)
+    {
+        var updatePreviewImageQuery = new UpdateCampaignPreviewImageDbQuery(campaignId, previewImage);
+        await _dbContext.ExecuteAsync(updatePreviewImageQuery);
     }
 }
