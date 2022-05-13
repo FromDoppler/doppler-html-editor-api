@@ -94,6 +94,16 @@ namespace Doppler.HtmlEditorApi.Controllers
                     Detail = $@"The content cannot be edited because status campaign is {campaignState.CampaignStatus}"
                 });
             }
+
+            if (campaignState.TestABCondition != TestABCondition.TypeClassic)
+            {
+                return new BadRequestObjectResult(new ProblemDetails()
+                {
+                    Title = "The campaign is AB Test",
+                    Detail = $@"The type of campaign with id {campaignId} is AB Test"
+                });
+            }
+
             var fieldAliases = _fieldsOptions.Value.Aliases;
 
             var basicFields = await _fieldsRepository.GetActiveBasicFields();
