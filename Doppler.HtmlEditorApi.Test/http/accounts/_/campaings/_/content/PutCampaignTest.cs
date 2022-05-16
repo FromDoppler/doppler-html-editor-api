@@ -1202,4 +1202,46 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(idCampaign, dbQuery.IdCampaign);
         Assert.Equal(expectedContent, dbQuery.Content);
     }
+
+    [Fact]
+    public async Task PUT_campaign_should_return_bad_request_error_when_campaign_is_testAB_by_content()
+    {
+        // Arrange
+        var repositoryMock = new Mock<ICampaignContentRepository>();
+        var campaignId = 456;
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{campaignId}/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var htmlContent = "My HTML Content";
+        var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign is AB Test\"");
+        var matchDetail = new Regex($"\"detail\"\\s*:\\s*\"The type of campaign with id {campaignId} is AB Test\"");
+
+        repositoryMock
+            .Setup(x => x.GetCampaignState(expectedAccountName, campaignId))
+            .ReturnsAsync(new TestABCampaignState(true, null, CampaignStatus.Draft, TestABCondition.TypeTestABContent));
+
+        var client = _factory.CreateSutClient(
+            repositoryMock.Object,
+            Mock.Of<IFieldsRepository>(),
+            token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = "unlayer",
+            htmlContent,
+            meta = new { }
+        }));
+
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Matches(matchTitle, responseContent);
+        Assert.Matches(matchDetail, responseContent);
+        repositoryMock.VerifyAll();
+        repositoryMock.VerifyNoOtherCalls();
+    }
 }
