@@ -86,7 +86,10 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
                 campaignStateData.ContentExists,
                 campaignStateData.EditorType,
                 campaignStatus,
-                campaignTestABCondition
+                campaignTestABCondition,
+                campaignStateData.IdCampaignA,
+                campaignStateData.IdCampaignB,
+                campaignStateData.IdCampaignResult
             );
     }
 

@@ -14,7 +14,10 @@ public abstract record CampaignState(
     bool ContentExists,
     int? EditorType,
     CampaignStatus? CampaignStatus,
-    TestABCondition TestABCondition)
+    TestABCondition TestABCondition,
+    int? IdCampaignA,
+    int? IdCampaignB,
+    int? IdCampaignResult)
 {
     private static readonly HashSet<CampaignStatus> WritableStatus = new HashSet<CampaignStatus>(
         new[]
@@ -24,15 +27,18 @@ public abstract record CampaignState(
         });
     public bool IsWritable => CampaignStatus.HasValue && WritableStatus.Contains(CampaignStatus.Value);
 }
-public record NoExistCampaignState() : CampaignState(false, false, null, null, TestABCondition.TypeClassic);
+public record NoExistCampaignState() : CampaignState(false, false, null, null, TestABCondition.TypeClassic, null, null, null);
 public record ClassicCampaignState(
     bool ContentExists,
     int? EditorType,
     CampaignStatus?
-    CampaignStatus) : CampaignState(true, ContentExists, EditorType, CampaignStatus, TestABCondition.TypeClassic);
+    CampaignStatus) : CampaignState(true, ContentExists, EditorType, CampaignStatus, TestABCondition.TypeClassic, null, null, null);
 public record TestABCampaignState(
     bool ContentExists,
     int? EditorType,
     CampaignStatus?
     CampaignStatus,
-    TestABCondition TestABCondition) : CampaignState(true, ContentExists, EditorType, CampaignStatus, TestABCondition);
+    TestABCondition TestABCondition,
+    int? IdCampaignA,
+    int? IdCampaignB,
+    int? IdCampaignResult) : CampaignState(true, ContentExists, EditorType, CampaignStatus, TestABCondition, IdCampaignA, IdCampaignB, IdCampaignResult);

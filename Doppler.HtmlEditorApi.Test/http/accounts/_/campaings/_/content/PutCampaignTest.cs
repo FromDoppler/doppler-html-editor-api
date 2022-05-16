@@ -1209,6 +1209,9 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Arrange
         var repositoryMock = new Mock<ICampaignContentRepository>();
         var campaignId = 456;
+        var campaignIdA = 456;
+        var campaignIdB = 789;
+        var campaignIdResult = 123;
         var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{campaignId}/content";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
@@ -1218,7 +1221,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, campaignId))
-            .ReturnsAsync(new TestABCampaignState(true, null, CampaignStatus.Draft, TestABCondition.TypeTestABContent));
+            .ReturnsAsync(new TestABCampaignState(true, null, CampaignStatus.Draft, TestABCondition.TypeTestABContent, campaignIdA, campaignIdB, campaignIdResult));
 
         var client = _factory.CreateSutClient(
             repositoryMock.Object,
