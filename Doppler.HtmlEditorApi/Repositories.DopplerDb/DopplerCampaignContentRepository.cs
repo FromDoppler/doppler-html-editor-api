@@ -15,6 +15,8 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
     private const int DopplerCampaignStatusDraft = 1;
     private const int DopplerCampaignStatusABDraft = 11;
     private const int DopplerCampaignStatusInWinnerInABSelectionProcess = 18;
+    private const int DopplerCampaignTestTypeSubject = 1;
+    private const int DopplerCampaignTypeClassic = 0;
 
     private readonly IDbContext _dbContext;
     public DapperCampaignContentRepository(IDbContext dbContext)
@@ -71,11 +73,23 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             : campaignStateData.Status == DopplerCampaignStatusInWinnerInABSelectionProcess ? CampaignStatus.InWinnerInABSelectionProcess
             : CampaignStatus.Other;
 
-        return new CampaignState(
-                campaignStateData.OwnCampaignExists,
+        if (campaignStateData.TestType == DopplerCampaignTypeClassic)
+        {
+            return new ClassicCampaignState(campaignStateData.ContentExists, campaignStateData.EditorType, campaignStatus);
+        }
+
+        var campaignTestABCondition = campaignStateData.TestType == DopplerCampaignTestTypeSubject
+            ? TestABCondition.TypeTestABSubject
+            : TestABCondition.TypeTestABContent;
+
+        return new TestABCampaignState(
                 campaignStateData.ContentExists,
                 campaignStateData.EditorType,
-                campaignStatus
+                campaignStatus,
+                campaignTestABCondition,
+                campaignStateData.IdCampaignA,
+                campaignStateData.IdCampaignB,
+                campaignStateData.IdCampaignResult
             );
     }
 
