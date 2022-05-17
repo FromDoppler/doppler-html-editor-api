@@ -316,7 +316,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = false,
                 EditorType = null,
                 Status = null,
-                TestType = 0
+                TestType = null
             });
 
         var client = _factory.CreateSutClient(
@@ -363,7 +363,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = false,
                 EditorType = null,
                 Status = null,
-                TestType = 0
+                TestType = null
             });
 
         var client = _factory.CreateSutClient(
@@ -455,7 +455,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = contentExists,
                 EditorType = currentEditorType,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock
@@ -507,7 +507,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = false,
                 EditorType = null,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock
@@ -615,7 +615,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = contentExists,
                 EditorType = null,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         var client = _factory.CreateSutClient(
@@ -663,7 +663,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = contentExists,
                 EditorType = currentEditorType,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock
@@ -717,7 +717,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = true,
                 EditorType = 5,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock.SetupBasicFields();
@@ -768,7 +768,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = true,
                 EditorType = 5,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock.SetupBasicFields();
@@ -827,7 +827,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = true,
                 EditorType = 5,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock.SetupBasicFields();
@@ -897,7 +897,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = true,
                 EditorType = 5,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock.SetupBasicFields();
@@ -947,7 +947,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = true,
                 EditorType = 5,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock.SetupBasicFields();
@@ -1022,7 +1022,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = existingContent,
                 EditorType = null,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         var client = _factory.CreateSutClient(
@@ -1093,7 +1093,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = true,
                 EditorType = null,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock.SetupBasicFields();
@@ -1171,7 +1171,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = true,
                 EditorType = null,
                 Status = 1,
-                TestType = 0
+                TestType = null
             });
 
         dbContextMock.SetupBasicFields();
