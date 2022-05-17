@@ -16,7 +16,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
     private const int DopplerCampaignStatusABDraft = 11;
     private const int DopplerCampaignStatusInWinnerInABSelectionProcess = 18;
     private const int DopplerCampaignTestTypeSubject = 1;
-    private const int DopplerCampaignTypeClassic = 0;
+    private static int? DopplerCampaignTypeClassic => null;
 
     private readonly IDbContext _dbContext;
     public DapperCampaignContentRepository(IDbContext dbContext)
