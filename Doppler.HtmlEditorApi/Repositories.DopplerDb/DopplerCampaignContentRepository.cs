@@ -32,16 +32,14 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         ));
 
         return queryResult == null || !queryResult.CampaignExists ? null
-            : !queryResult.CampaignHasContent ? new EmptyContentData(campaignId)
+            : !queryResult.CampaignHasContent ? new EmptyContentData()
             : queryResult.EditorType == EditorTypeMSEditor ? new MSEditorContentData(campaignId, queryResult.Content)
             : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerContentData(
-                CampaignId: queryResult.IdCampaign,
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
                 Meta: queryResult.Meta,
                 PreviewImage: queryResult.PreviewImage)
             : queryResult.EditorType == null ? new HtmlContentData(
-                CampaignId: queryResult.IdCampaign,
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
                 PreviewImage: queryResult.PreviewImage)
@@ -93,20 +91,20 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
             );
     }
 
-    public async Task CreateCampaignContent(ContentData content)
+    public async Task CreateCampaignContent(int campaignId, ContentData content)
     {
 
         IExecutableDbQuery insertContentQuery = content switch
         {
             UnlayerContentData unlayerContentData => new InsertCampaignContentDbQuery(
-                IdCampaign: unlayerContentData.CampaignId,
+                IdCampaign: campaignId,
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
                 Meta: unlayerContentData.Meta,
                 EditorType: (int?)EditorTypeUnlayer
             ),
             HtmlContentData htmlContentData => new InsertCampaignContentDbQuery(
-                IdCampaign: htmlContentData.CampaignId,
+                IdCampaign: campaignId,
                 Content: htmlContentData.HtmlContent,
                 Head: htmlContentData.HtmlHead,
                 Meta: null,
@@ -120,19 +118,19 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
         await _dbContext.ExecuteAsync(insertContentQuery);
     }
 
-    public async Task UpdateCampaignContent(ContentData content)
+    public async Task UpdateCampaignContent(int campaignId, ContentData content)
     {
         IExecutableDbQuery updateContentQuery = content switch
         {
             UnlayerContentData unlayerContentData => new UpdateCampaignContentDbQuery(
-                IdCampaign: unlayerContentData.CampaignId,
+                IdCampaign: campaignId,
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
                 Meta: unlayerContentData.Meta,
                 EditorType: (int?)EditorTypeUnlayer
             ),
             HtmlContentData htmlContentData => new UpdateCampaignContentDbQuery(
-                IdCampaign: htmlContentData.CampaignId,
+                IdCampaign: campaignId,
                 Content: htmlContentData.HtmlContent,
                 Head: htmlContentData.HtmlHead,
                 Meta: null,
