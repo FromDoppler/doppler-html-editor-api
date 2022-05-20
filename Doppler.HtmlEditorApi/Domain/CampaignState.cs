@@ -29,10 +29,11 @@ public abstract record CampaignState(
 }
 public record NoExistCampaignState() : CampaignState(false, false, null, null, TestABCondition.TypeClassic, null, null, null);
 public record ClassicCampaignState(
+    int IdCampaign,
     bool ContentExists,
     int? EditorType,
     CampaignStatus?
-    CampaignStatus) : CampaignState(true, ContentExists, EditorType, CampaignStatus, TestABCondition.TypeClassic, null, null, null);
+    CampaignStatus) : CampaignState(true, ContentExists, EditorType, CampaignStatus, TestABCondition.TypeClassic, IdCampaign, null, null);
 public record TestABCampaignState(
     bool ContentExists,
     int? EditorType,

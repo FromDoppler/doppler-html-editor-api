@@ -95,12 +95,12 @@ namespace Doppler.HtmlEditorApi.Controllers
                 });
             }
 
-            if (campaignState.TestABCondition is not TestABCondition.TypeClassic or TestABCondition.TypeTestABSubject)
+            if (campaignState.TestABCondition == TestABCondition.TypeTestABContent)
             {
                 return new BadRequestObjectResult(new ProblemDetails()
                 {
-                    Title = "The campaign is AB Test",
-                    Detail = $@"The type of campaign with id {campaignId} is AB Test"
+                    Title = "The campaign is AB Test by content",
+                    Detail = $@"The type of campaign with id {campaignId} is AB Test by content and it's unsupported"
                 });
             }
 
@@ -141,22 +141,38 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
-            if (campaignState.ContentExists)
+            var campaignIds = new[] { campaignState.IdCampaignA, campaignState.IdCampaignB }
+                .Where(x => x != null)
+                .Select(x => x.Value);
+
+            foreach (var campaign in campaignIds)
             {
-                await _campaignContentRepository.UpdateCampaignContent(campaignId, contentRow);
+                if (campaignState.ContentExists)
+                {
+                    await _campaignContentRepository.UpdateCampaignContent(campaign, contentRow);
+                }
+                else
+                {
+                    await _campaignContentRepository.CreateCampaignContent(campaign, contentRow);
+                    await _campaignContentRepository.UpdateCampaignStatus(
+                        setCurrentStep: 2,
+                        setHtmlSourceType: TemplateHtmlSourceType,
+                        whenIdCampaignIs: campaign,
+                        whenCurrentStepIs: 1);
+                }
+                await _campaignContentRepository.UpdateCampaignPreviewImage(campaign, contentRow.PreviewImage);
+                await _campaignContentRepository.SaveNewFieldIds(campaign, fieldIds);
+                await _campaignContentRepository.SaveLinks(campaign, trackableUrls);
             }
-            else
+
+            if (campaignState.IdCampaignResult != null && !campaignState.ContentExists)
             {
-                await _campaignContentRepository.CreateCampaignContent(campaignId, contentRow);
                 await _campaignContentRepository.UpdateCampaignStatus(
                     setCurrentStep: 2,
                     setHtmlSourceType: TemplateHtmlSourceType,
-                    whenIdCampaignIs: campaignId,
+                    whenIdCampaignIs: campaignState.IdCampaignResult.Value,
                     whenCurrentStepIs: 1);
             }
-            await _campaignContentRepository.UpdateCampaignPreviewImage(campaignId, contentRow.PreviewImage);
-            await _campaignContentRepository.SaveNewFieldIds(campaignId, fieldIds);
-            await _campaignContentRepository.SaveLinks(campaignId, trackableUrls);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
