@@ -145,11 +145,11 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             if (campaignState.ContentExists)
             {
-                await _campaignContentRepository.UpdateCampaignContent(accountName, contentRow);
+                await _campaignContentRepository.UpdateCampaignContent(contentRow);
             }
             else
             {
-                await _campaignContentRepository.CreateCampaignContent(accountName, contentRow);
+                await _campaignContentRepository.CreateCampaignContent(contentRow);
                 await _campaignContentRepository.UpdateCampaignStatus(
                     setCurrentStep: 2,
                     setHtmlSourceType: TemplateHtmlSourceType,
