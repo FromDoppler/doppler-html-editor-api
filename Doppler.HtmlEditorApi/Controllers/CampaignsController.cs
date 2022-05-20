@@ -95,7 +95,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 });
             }
 
-            if (campaignState.TestABCondition != TestABCondition.TypeClassic)
+            if (campaignState.TestABCondition is not TestABCondition.TypeClassic or TestABCondition.TypeTestABSubject)
             {
                 return new BadRequestObjectResult(new ProblemDetails()
                 {
