@@ -136,8 +136,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             }),
             HtmlContent: "<html></html>",
             HtmlHead: null,
-            PreviewImage: null,
-            CampaignId: expectedIdCampaign);
+            PreviewImage: null);
 
         var repositoryMock = new Mock<ICampaignContentRepository>();
 

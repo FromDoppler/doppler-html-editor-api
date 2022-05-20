@@ -123,10 +123,10 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     }
 
     [Theory]
-    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1)]
-    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, TestUsersData.EMAIL_TEST1)]
-    [InlineData("/accounts/otro@test.com/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com")]
-    public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName)
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
+    [InlineData("/accounts/otro@test.com/campaigns/456/content", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 456)]
+    public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName, int campaignId)
     {
         // Arrange
         var repositoryMock = new Mock<ICampaignContentRepository>();
@@ -135,7 +135,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
             .ReturnsAsync(new ClassicCampaignState(true, null, CampaignStatus.Draft));
         repositoryMock
-            .Setup(x => x.UpdateCampaignContent(expectedAccountName, It.IsAny<BaseHtmlContentData>()))
+            .Setup(x => x.UpdateCampaignContent(campaignId, It.IsAny<BaseHtmlContentData>()))
             .Returns(Task.CompletedTask);
 
         var client = _factory.CreateSutClient(

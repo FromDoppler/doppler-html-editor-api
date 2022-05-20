@@ -133,27 +133,25 @@ namespace Doppler.HtmlEditorApi.Controllers
                     HtmlContent: content,
                     HtmlHead: head,
                     Meta: campaignContent.meta.ToString(),
-                    CampaignId: campaignId,
                     PreviewImage: campaignContent.previewImage),
                 ContentType.html => new HtmlContentData(
                     HtmlContent: content,
                     HtmlHead: head,
-                    CampaignId: campaignId,
                     PreviewImage: campaignContent.previewImage),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
             if (campaignState.ContentExists)
             {
-                await _campaignContentRepository.UpdateCampaignContent(accountName, contentRow);
+                await _campaignContentRepository.UpdateCampaignContent(campaignId, contentRow);
             }
             else
             {
-                await _campaignContentRepository.CreateCampaignContent(accountName, contentRow);
+                await _campaignContentRepository.CreateCampaignContent(campaignId, contentRow);
                 await _campaignContentRepository.UpdateCampaignStatus(
                     setCurrentStep: 2,
                     setHtmlSourceType: TemplateHtmlSourceType,
-                    whenIdCampaignIs: contentRow.CampaignId,
+                    whenIdCampaignIs: campaignId,
                     whenCurrentStepIs: 1);
             }
             await _campaignContentRepository.UpdateCampaignPreviewImage(campaignId, contentRow.PreviewImage);
