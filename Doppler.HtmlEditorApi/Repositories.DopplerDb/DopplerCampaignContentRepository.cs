@@ -73,7 +73,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
 
         if (campaignStateData.TestType == DopplerCampaignTypeClassic)
         {
-            return new ClassicCampaignState(campaignStateData.ContentExists, campaignStateData.EditorType, campaignStatus);
+            return new ClassicCampaignState(campaignId, campaignStateData.ContentExists, campaignStateData.EditorType, campaignStatus);
         }
 
         var campaignTestABCondition = campaignStateData.TestType == DopplerCampaignTestTypeSubject

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Moq;
+using Xunit;
 
 namespace Doppler.HtmlEditorApi.Test.Utils;
 
@@ -101,5 +103,48 @@ public static class IDbContextMockExtensions
         }
         var propValue = propInfo.GetValue(parameters);
         return (value == null && propValue == null) || (value != null && value.Equals(propValue));
+    }
+
+    public static void VerifyLinksSendToSaveNewCampaignLinks(
+        this Mock<IDbContext> dbContextMock,
+        int idCampaign,
+        string[] expectedLinks)
+    {
+        string[] linksSendToSaveNewCampaignLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<SaveNewCampaignLinks>(q =>
+                q.IdContent == idCampaign
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToSaveNewCampaignLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToSaveNewCampaignLinks);
+    }
+
+    public static void VerifyLinksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks(
+        this Mock<IDbContext> dbContextMock,
+        int idCampaign,
+        string[] expectedLinks)
+    {
+        string[] linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
+                q.IdContent == idCampaign
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks);
+    }
+
+    public static void VerifyLinksSendToDeleteRemovedCampaignLinks(
+        this Mock<IDbContext> dbContextMock,
+        int idCampaign,
+        string[] expectedLinks
+    )
+    {
+        string[] linksSendToDeleteRemovedCampaignLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteRemovedCampaignLinks>(q =>
+                q.IdContent == idCampaign
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignLinks);
     }
 }
