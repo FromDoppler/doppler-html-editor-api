@@ -133,7 +133,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
-            .ReturnsAsync(new ClassicCampaignState(true, null, CampaignStatus.Draft));
+            .ReturnsAsync(new ClassicCampaignState(campaignId, true, null, CampaignStatus.Draft));
         repositoryMock
             .Setup(x => x.UpdateCampaignContent(campaignId, It.IsAny<BaseHtmlContentData>()))
             .Returns(Task.CompletedTask);
@@ -402,7 +402,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
-            .ReturnsAsync(new ClassicCampaignState(true, null, campaignStatus));
+            .ReturnsAsync(new ClassicCampaignState(456, true, null, campaignStatus));
 
         var client = _factory.CreateSutClient(
             repositoryMock.Object,
@@ -483,6 +483,198 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
+    }
+
+    [Theory]
+    [InlineData(null, true, "UPDATE")]
+    [InlineData(55, true, "UPDATE")]
+    [InlineData(4, true, "UPDATE")]
+    [InlineData(5, true, "UPDATE")]
+    [InlineData(null, false, "INSERT")]
+    public async Task PUT_campaign_should_store_html_content_when_campaign_is_TestAB(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
+    {
+        // Arrange
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var expectedIdCampaign = 456;
+        var idCampaignB = 123;
+        var idCampaignResult = 567;
+        var htmlContent = "My HTML Content";
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = contentExists,
+                EditorType = currentEditorType,
+                Status = 1,
+                TestType = 1,
+                IdCampaignA = expectedIdCampaign,
+                IdCampaignB = idCampaignB,
+                IdCampaignResult = idCampaignResult
+            });
+
+        dbContextMock
+            .SetupInsertOrUpdateContentRow(
+                sqlQueryStartsWith,
+                expectedIdCampaign,
+                htmlContent,
+                meta: null,
+                result: 1);
+
+        dbContextMock
+            .SetupInsertOrUpdateContentRow(
+                sqlQueryStartsWith,
+                idCampaignB,
+                htmlContent,
+                meta: null,
+                result: 1);
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = "html",
+            htmlContent
+        }));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.VerifyAll();
+    }
+
+    [Fact]
+    public async Task PUT_campaign_should_update_campaign_status_when_campaign_is_TestAB_and_content_not_exist()
+    {
+        // Arrange
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var expectedIdCampaign = 456;
+        var idCampaignB = 123;
+        var idCampaignResult = 567;
+        var htmlContent = "My HTML Content";
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = false,
+                EditorType = null,
+                Status = 1,
+                TestType = 1,
+                IdCampaignA = expectedIdCampaign,
+                IdCampaignB = idCampaignB,
+                IdCampaignResult = idCampaignResult
+            });
+
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = "html",
+            htmlContent
+        }));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<UpdateCampaignStatusDbQuery>(q =>
+                q.SetCurrentStep == 2 &&
+                q.SetHtmlSourceType == 2 &&
+                q.WhenIdCampaignIs == expectedIdCampaign &&
+                q.WhenCurrentStepIs == 1
+            )));
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<UpdateCampaignStatusDbQuery>(q =>
+                q.SetCurrentStep == 2 &&
+                q.SetHtmlSourceType == 2 &&
+                q.WhenIdCampaignIs == idCampaignB &&
+                q.WhenCurrentStepIs == 1
+            )));
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<UpdateCampaignStatusDbQuery>(q =>
+                q.SetCurrentStep == 2 &&
+                q.SetHtmlSourceType == 2 &&
+                q.WhenIdCampaignIs == idCampaignResult &&
+                q.WhenCurrentStepIs == 1
+            )));
+    }
+
+    [Fact]
+    public async Task PUT_campaign_should_not_update_campaign_status_when_campaign_is_TestAB_and_content_exists()
+    {
+        // Arrange
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var expectedIdCampaign = 456;
+        var idCampaignB = 123;
+        var idCampaignResult = 567;
+        var htmlContent = "My HTML Content";
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = true,
+                EditorType = 4,
+                Status = 1,
+                TestType = 1,
+                IdCampaignA = expectedIdCampaign,
+                IdCampaignB = idCampaignB,
+                IdCampaignResult = idCampaignResult
+            });
+
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = "html",
+            htmlContent
+        }));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.IsAny<UpdateCampaignStatusDbQuery>()),Times.Never);
     }
 
     [Fact]
@@ -637,6 +829,103 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             && q.SqlParametersContain("IdCampaign", idCampaign))));
     }
 
+        [Theory]
+    // Insert HTML Content
+    [InlineData(
+        "https://1.fromdoppler.net/image1.png",
+        false,
+        @"{
+    ""type"": ""html"",
+    ""htmlContent"": ""My HTML Content"",
+    ""previewImage"": ""https://1.fromdoppler.net/image1.png""
+}")]
+    // Update HTML Content
+    [InlineData(
+        "https://2.fromdoppler.net/image2.png",
+        true,
+        @"{
+    ""type"": ""html"",
+    ""htmlContent"": ""My HTML Content"",
+    ""previewImage"": ""https://2.fromdoppler.net/image2.png""
+}")]
+    // Insert Unlayer Content
+    [InlineData(
+        "https://3.fromdoppler.net/image3.png",
+        false,
+        @"{
+    ""type"": ""unlayer"",
+    ""htmlContent"": ""My HTML Content"",
+    ""meta"": ""{}"",
+    ""previewImage"": ""https://3.fromdoppler.net/image3.png""
+}")]
+    // Update Unlayer Content
+    [InlineData(
+        "https://4.fromdoppler.net/image4.png",
+        true,
+        @"{
+    ""type"": ""unlayer"",
+    ""htmlContent"": ""My HTML Content"",
+    ""meta"": ""{}"",
+    ""previewImage"": ""https://4.fromdoppler.net/image4.png""
+}")]
+    [InlineData(
+        null,
+        false,
+        @"{
+    ""type"": ""html"",
+    ""htmlContent"": ""My HTML Content""
+}")]
+    public async Task PUT_campaign_should_store_previewImage_in_campaign_TestAB(string expectedPreviewImage, bool contentExists, string requestBody)
+    {
+        // Arrange
+        var idCampaign = 456;
+        var idCampaignB = 789;
+        var idCampaignResult = 321;
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{idCampaign}/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, TestUsersData.EMAIL_TEST1)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = contentExists,
+                EditorType = null,
+                Status = 1,
+                TestType = 1,
+                IdCampaignA = idCampaign,
+                IdCampaignB = idCampaignB,
+                IdCampaignResult = idCampaignResult
+            });
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, new StringContent(requestBody, Encoding.Default, "application/json"));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.Verify(x => x.ExecuteAsync(It.Is<UpdateCampaignPreviewImageDbQuery>(q =>
+            q.SqlQueryContains("PreviewImage = @PreviewImage")
+            && q.SqlQueryContains("WHERE IdCampaign = @IdCampaign")
+            && q.SqlParametersContain("PreviewImage", expectedPreviewImage)
+            && q.SqlParametersContain("IdCampaign", idCampaign))));
+
+        dbContextMock.Verify(x => x.ExecuteAsync(It.Is<UpdateCampaignPreviewImageDbQuery>(q =>
+            q.SqlQueryContains("PreviewImage = @PreviewImage")
+            && q.SqlQueryContains("WHERE IdCampaign = @IdCampaign")
+            && q.SqlParametersContain("PreviewImage", expectedPreviewImage)
+            && q.SqlParametersContain("IdCampaign", idCampaignB))));
+    }
+
     [Theory]
     [InlineData(null, true, "UPDATE")]
     [InlineData(55, true, "UPDATE")]
@@ -747,6 +1036,70 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         ), Times.Once);
     }
 
+    [Theory]
+    [InlineData("[[[firstname]]]", "VALUES (319)")]
+    [InlineData("[[[firstname]]] [[[lastname]]]", "VALUES (319),(320)")]
+    [InlineData("[[[firstname]]] [[[lastname]]] [[[noexist]]]", "VALUES (319),(320)")]
+    public async Task PUT_campaign_should_store_field_relations_in_campaign_TestAB(string htmlContent, string expectedSubQuery)
+    {
+        // Arrange
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var expectedIdCampaign = 456;
+        var idCampaignB = 789;
+        var idCampaignResult = 321;
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = true,
+                EditorType = 5,
+                Status = 1,
+                TestType = 1,
+                IdCampaignA = expectedIdCampaign,
+                IdCampaignB = idCampaignB,
+                IdCampaignResult = idCampaignResult
+            });
+
+        dbContextMock.SetupBasicFields();
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = "unlayer",
+            htmlContent,
+            meta = Utils.ParseAsJsonElement("{}")
+        }));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.VerifyAll();
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<SaveNewCampaignFields>(q =>
+                q.IdContent == expectedIdCampaign
+                && q.SqlQueryContains(expectedSubQuery))
+        ), Times.Once);
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<SaveNewCampaignFields>(q =>
+                q.IdContent == idCampaignB
+                && q.SqlQueryContains(expectedSubQuery))
+        ), Times.Once);
+    }
+
     [Fact]
     public async Task PUT_campaign_should_no_store_field_relations_when_no_fields()
     {
@@ -827,7 +1180,11 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 ContentExists = true,
                 EditorType = 5,
                 Status = 1,
-                TestType = null
+                TestType = null,
+                TestABCategory = null,
+                IdCampaignA = 456,
+                IdCampaignB = null,
+                IdCampaignResult = null
             });
 
         dbContextMock.SetupBasicFields();
@@ -874,6 +1231,116 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignLinks))
         ), Times.Once);
         Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignLinks);
+    }
+
+    [Theory]
+    [InlineData(
+        $@"<a href=""https://www.google.com"">Google</a><br>
+            <a href=""{"\n"} https://{"\t"}goo gle1{"\n"}.com    {"\r\n"}  "">Google1 (dirty)</a><br>
+            <a href=""https://google2.com"">Google2</a><br>
+            <a href=""{"\n"} https://{"\t"}goo gle2{"\n"}.com    {"\r\n"}  "">Google2 (dirty)</a><br>",
+        new[] { "https://www.google.com", "https://google1.com", "https://google2.com" })]
+    [InlineData(
+        @"<a href=""https://www.google.com?q=[[[firstname]]]"">Find my name!</a><br>
+            <a href=""https://www.google.com?q=[[[apellido]]]"">Find my lastname</a><br>
+            <a href=""https://www.google.com?q=[[[nombre]]]"">Find my name again!</a>",
+        new[] { "https://www.google.com?q=|*|319*|*", "https://www.google.com?q=|*|320*|*" })]
+    public async Task PUT_campaign_should_add_and_remove_link_relations_in_campaign_TestAB(string htmlContent, string[] expectedLinks)
+    {
+        // Arrange
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var expectedIdCampaign = 456;
+        var idCampaignB = 789;
+        var idCampaignResult = 321;
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = true,
+                EditorType = 5,
+                Status = 1,
+                TestType = 1,
+                TestABCategory = null,
+                IdCampaignA = expectedIdCampaign,
+                IdCampaignB = idCampaignB,
+                IdCampaignResult = idCampaignResult
+            });
+
+        dbContextMock.SetupBasicFields();
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = "unlayer",
+            htmlContent,
+            meta = Utils.ParseAsJsonElement("{}")
+        }));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.VerifyAll();
+
+        string[] linksSendToSaveNewCampaignLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<SaveNewCampaignLinks>(q =>
+                q.IdContent == expectedIdCampaign
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToSaveNewCampaignLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToSaveNewCampaignLinks);
+
+        string[] linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
+                q.IdContent == expectedIdCampaign
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks);
+
+        string[] linksSendToDeleteRemovedCampaignLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteRemovedCampaignLinks>(q =>
+                q.IdContent == expectedIdCampaign
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignLinks);
+
+        string[] linksSendToSaveNewCampaignBLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<SaveNewCampaignLinks>(q =>
+                q.IdContent == idCampaignB
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToSaveNewCampaignBLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToSaveNewCampaignBLinks);
+
+        string[] linksSendToDeleteAutomationConditionalsOfRemovedCampaignBLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
+                q.IdContent == idCampaignB
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteAutomationConditionalsOfRemovedCampaignBLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToDeleteAutomationConditionalsOfRemovedCampaignBLinks);
+
+        string[] linksSendToDeleteRemovedCampaignBLinks = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteRemovedCampaignLinks>(q =>
+                q.IdContent == idCampaignB
+                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignBLinks))
+        ), Times.Once);
+        Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignBLinks);
     }
 
     [Fact]
@@ -980,6 +1447,81 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<DeleteRemovedCampaignLinks>(q =>
                 q.IdContent == expectedIdCampaign
+                && !q.Links.Any())
+        ), Times.Once);
+    }
+
+    [Fact]
+    public async Task PUT_campaign_should_remove_links_relations_when_no_links_in_campaign_TestAB()
+    {
+        // Arrange
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var expectedIdCampaign = 456;
+        var idCampaignB = 789;
+        var idCampaignResult = 321;
+        var htmlContent = "<html>No content</html>";
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = true,
+                EditorType = 5,
+                Status = 1,
+                TestType = 1,
+                IdCampaignA = expectedIdCampaign,
+                IdCampaignB = idCampaignB,
+                IdCampaignResult = idCampaignResult
+            });
+
+        dbContextMock.SetupBasicFields();
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PutAsync(url, JsonContent.Create(new
+        {
+            type = "unlayer",
+            htmlContent,
+            meta = Utils.ParseAsJsonElement("{}")
+        }));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.VerifyAll();
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
+                q.IdContent == expectedIdCampaign
+                && !q.Links.Any())
+        ), Times.Once);
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteRemovedCampaignLinks>(q =>
+                q.IdContent == expectedIdCampaign
+                && !q.Links.Any())
+        ), Times.Once);
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
+                q.IdContent == idCampaignB
+                && !q.Links.Any())
+        ), Times.Once);
+
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<DeleteRemovedCampaignLinks>(q =>
+                q.IdContent == idCampaignB
                 && !q.Links.Any())
         ), Times.Once);
     }
@@ -1216,8 +1758,8 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var htmlContent = "My HTML Content";
-        var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign is AB Test\"");
-        var matchDetail = new Regex($"\"detail\"\\s*:\\s*\"The type of campaign with id {campaignId} is AB Test\"");
+        var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign is AB Test by content\"");
+        var matchDetail = new Regex($"\"detail\"\\s*:\\s*\"The type of campaign with id {campaignId} is AB Test by content and it's unsupported\"");
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, campaignId))
