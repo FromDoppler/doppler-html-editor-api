@@ -674,7 +674,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         dbContextMock.Verify(x => x.ExecuteAsync(
-            It.IsAny<UpdateCampaignStatusDbQuery>()),Times.Never);
+            It.IsAny<UpdateCampaignStatusDbQuery>()), Times.Never);
     }
 
     [Fact]
@@ -829,30 +829,30 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             && q.SqlParametersContain("IdCampaign", idCampaign))));
     }
 
-        [Theory]
+    [Theory]
     // Insert HTML Content
     [InlineData(
-        "https://1.fromdoppler.net/image1.png",
-        false,
-        @"{
+    "https://1.fromdoppler.net/image1.png",
+    false,
+    @"{
     ""type"": ""html"",
     ""htmlContent"": ""My HTML Content"",
     ""previewImage"": ""https://1.fromdoppler.net/image1.png""
 }")]
     // Update HTML Content
     [InlineData(
-        "https://2.fromdoppler.net/image2.png",
-        true,
-        @"{
+    "https://2.fromdoppler.net/image2.png",
+    true,
+    @"{
     ""type"": ""html"",
     ""htmlContent"": ""My HTML Content"",
     ""previewImage"": ""https://2.fromdoppler.net/image2.png""
 }")]
     // Insert Unlayer Content
     [InlineData(
-        "https://3.fromdoppler.net/image3.png",
-        false,
-        @"{
+    "https://3.fromdoppler.net/image3.png",
+    false,
+    @"{
     ""type"": ""unlayer"",
     ""htmlContent"": ""My HTML Content"",
     ""meta"": ""{}"",
@@ -860,18 +860,18 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 }")]
     // Update Unlayer Content
     [InlineData(
-        "https://4.fromdoppler.net/image4.png",
-        true,
-        @"{
+    "https://4.fromdoppler.net/image4.png",
+    true,
+    @"{
     ""type"": ""unlayer"",
     ""htmlContent"": ""My HTML Content"",
     ""meta"": ""{}"",
     ""previewImage"": ""https://4.fromdoppler.net/image4.png""
 }")]
     [InlineData(
-        null,
-        false,
-        @"{
+    null,
+    false,
+    @"{
     ""type"": ""html"",
     ""htmlContent"": ""My HTML Content""
 }")]
@@ -1208,29 +1208,11 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
 
-        string[] linksSendToSaveNewCampaignLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<SaveNewCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToSaveNewCampaignLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToSaveNewCampaignLinks);
+        dbContextMock.VerifyLinksSendToSaveNewCampaignLinks(expectedIdCampaign, expectedLinks);
 
-        string[] linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks);
+        dbContextMock.VerifyLinksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks(expectedIdCampaign, expectedLinks);
 
-        string[] linksSendToDeleteRemovedCampaignLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<DeleteRemovedCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignLinks);
+        dbContextMock.VerifyLinksSendToDeleteRemovedCampaignLinks(expectedIdCampaign, expectedLinks);
     }
 
     [Theory]
@@ -1294,53 +1276,18 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
 
-        string[] linksSendToSaveNewCampaignLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<SaveNewCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToSaveNewCampaignLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToSaveNewCampaignLinks);
+        dbContextMock.VerifyLinksSendToSaveNewCampaignLinks(expectedIdCampaign, expectedLinks);
 
-        string[] linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks);
+        dbContextMock.VerifyLinksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks(expectedIdCampaign, expectedLinks);
 
-        string[] linksSendToDeleteRemovedCampaignLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<DeleteRemovedCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignLinks);
+        dbContextMock.VerifyLinksSendToDeleteRemovedCampaignLinks(expectedIdCampaign, expectedLinks);
 
-        string[] linksSendToSaveNewCampaignBLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<SaveNewCampaignLinks>(q =>
-                q.IdContent == idCampaignB
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToSaveNewCampaignBLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToSaveNewCampaignBLinks);
+        dbContextMock.VerifyLinksSendToSaveNewCampaignLinks(idCampaignB, expectedLinks);
 
-        string[] linksSendToDeleteAutomationConditionalsOfRemovedCampaignBLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
-                q.IdContent == idCampaignB
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteAutomationConditionalsOfRemovedCampaignBLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToDeleteAutomationConditionalsOfRemovedCampaignBLinks);
+        dbContextMock.VerifyLinksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks(idCampaignB, expectedLinks);
 
-        string[] linksSendToDeleteRemovedCampaignBLinks = null;
-        dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<DeleteRemovedCampaignLinks>(q =>
-                q.IdContent == idCampaignB
-                && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignBLinks))
-        ), Times.Once);
-        Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignBLinks);
+        dbContextMock.VerifyLinksSendToDeleteRemovedCampaignLinks(idCampaignB, expectedLinks);
+
     }
 
     [Fact]
