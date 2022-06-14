@@ -483,6 +483,8 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(1, columns.GetArrayLength());
         var contents = columns[0].GetProperty("contents");
         Assert.Equal(0, contents.GetArrayLength());
+        var bodyValues = responseContentJson.GetProperty("meta").GetProperty("body").GetProperty("values");
+        Assert.Equal("600px", bodyValues.GetProperty("contentWidth").GetString());
     }
 
     [Theory]
