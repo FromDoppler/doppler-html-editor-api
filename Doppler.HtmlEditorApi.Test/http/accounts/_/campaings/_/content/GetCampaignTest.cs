@@ -474,6 +474,17 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.NotEmpty(responseContentJson.GetProperty("htmlContent").GetString());
         Assert.Equal(JsonValueKind.Object, responseContentJson.GetProperty("meta").ValueKind);
         Assert.NotEmpty(responseContentJson.GetProperty("meta").ToString());
+        var rows = responseContentJson.GetProperty("meta").GetProperty("body").GetProperty("rows");
+        Assert.Equal(1, rows.GetArrayLength());
+        var cells = rows[0].GetProperty("cells");
+        Assert.Equal(1, cells.GetArrayLength());
+        Assert.Equal(1, cells[0].GetInt32());
+        var columns = rows[0].GetProperty("columns");
+        Assert.Equal(1, columns.GetArrayLength());
+        var contents = columns[0].GetProperty("contents");
+        Assert.Equal(0, contents.GetArrayLength());
+        var bodyValues = responseContentJson.GetProperty("meta").GetProperty("body").GetProperty("values");
+        Assert.Equal("600px", bodyValues.GetProperty("contentWidth").GetString());
     }
 
     [Theory]
