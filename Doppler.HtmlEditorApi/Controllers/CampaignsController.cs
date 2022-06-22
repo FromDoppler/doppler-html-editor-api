@@ -93,31 +93,9 @@ namespace Doppler.HtmlEditorApi.Controllers
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
             var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
-            if (!campaignState.OwnCampaignExists)
+            if (!ValidateCampaignStateToUpdate(campaignState, out var error))
             {
-                return new NotFoundObjectResult(new ProblemDetails()
-                {
-                    Title = $@"The campaign was no found",
-                    Detail = $@"The campaign with id {campaignId} does not exists or belongs to another user than {accountName}"
-                });
-            }
-
-            if (!campaignState.IsWritable)
-            {
-                return new BadRequestObjectResult(new ProblemDetails()
-                {
-                    Title = "The campaign content is read only",
-                    Detail = $@"The content cannot be edited because status campaign is {campaignState.CampaignStatus}"
-                });
-            }
-
-            if (campaignState.TestABCondition == TestABCondition.TypeTestABContent)
-            {
-                return new BadRequestObjectResult(new ProblemDetails()
-                {
-                    Title = "The campaign is AB Test by content",
-                    Detail = $@"The type of campaign with id {campaignId} is AB Test by content and it's unsupported"
-                });
+                return error;
             }
 
             var fieldAliases = _fieldsOptions.Value.Aliases;
@@ -199,5 +177,28 @@ namespace Doppler.HtmlEditorApi.Controllers
             // Old Doppler code:
             // https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.HypermediaAPI/ApiMappers/FromDoppler/DtoContent_To_CampaignContent.cs#L23
             => content.HtmlContent;
+
+        private static bool ValidateCampaignStateToUpdate(CampaignState campaignState, out ObjectResult error)
+        {
+            error = !campaignState.OwnCampaignExists ? new NotFoundObjectResult(
+                    new ProblemDetails()
+                    {
+                        Title = $@"Not found campaign",
+                        Detail = $@"The campaign does not exists or belongs to another user"
+                    })
+                : !campaignState.IsWritable ? new BadRequestObjectResult(
+                    new ProblemDetails()
+                    {
+                        Title = "The campaign content is read only",
+                        Detail = $@"The content cannot be edited because status campaign is {campaignState.CampaignStatus}"
+                    })
+                : campaignState.TestABCondition == TestABCondition.TypeTestABContent ? new BadRequestObjectResult(
+                    new ProblemDetails()
+                    {
+                        Title = "The campaign is AB Test by content",
+                        Detail = $@"The type of campaign is AB Test by content and it's unsupported"
+                    }) : null;
+            return error == null;
+        }
     }
 }

@@ -1706,7 +1706,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var htmlContent = "My HTML Content";
         var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign is AB Test by content\"");
-        var matchDetail = new Regex($"\"detail\"\\s*:\\s*\"The type of campaign with id {campaignId} is AB Test by content and it's unsupported\"");
+        var matchDetail = new Regex($"\"detail\"\\s*:\\s*\"The type of campaign is AB Test by content and it's unsupported\"");
 
         repositoryMock
             .Setup(x => x.GetCampaignState(expectedAccountName, campaignId))
