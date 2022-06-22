@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.ApiModels;
@@ -98,21 +99,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return error;
             }
 
-            var fieldAliases = _fieldsOptions.Value.Aliases;
-
-            var basicFields = await _fieldsRepository.GetActiveBasicFields();
-            var customFields = await _fieldsRepository.GetCustomFields(accountName);
-            var fields = basicFields.Union(customFields);
-
-            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields, fieldAliases);
-
-            var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
-            htmlDocument.RemoveHarmfulTags();
-            htmlDocument.RemoveEventAttributes();
-            htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
-            htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
-            htmlDocument.SanitizeTrackableLinks();
-
+            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, campaignContent.htmlContent);
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
             var fieldIds = htmlDocument.GetFieldIds();
@@ -121,7 +108,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             // TODO: Validate if it's possible to delete PreviewImage property from BaseHtmlContentData,
             // because it's already in campaignContent
             // See it on: https://github.com/FromDoppler/doppler-html-editor-api/pull/111#discussion_r870681998
-            BaseHtmlContentData contentRow = campaignContent.type switch
+            BaseHtmlContentData baseHtmlContent = campaignContent.type switch
             {
                 ContentType.unlayer => new UnlayerContentData(
                     HtmlContent: content,
@@ -135,6 +122,14 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
+            await SaveCampaignContent(baseHtmlContent, fieldIds, trackableUrls, campaignState);
+
+            return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
+        }
+
+        private async Task SaveCampaignContent(BaseHtmlContentData content, IEnumerable<int> fieldIds, IEnumerable<string> trackableUrls, CampaignState campaignState)
+        {
+
             var campaignIds = new[] { campaignState.IdCampaignA, campaignState.IdCampaignB }
                 .Where(x => x != null)
                 .Select(x => x.Value);
@@ -143,18 +138,18 @@ namespace Doppler.HtmlEditorApi.Controllers
             {
                 if (campaignState.ContentExists)
                 {
-                    await _campaignContentRepository.UpdateCampaignContent(campaign, contentRow);
+                    await _campaignContentRepository.UpdateCampaignContent(campaign, content);
                 }
                 else
                 {
-                    await _campaignContentRepository.CreateCampaignContent(campaign, contentRow);
+                    await _campaignContentRepository.CreateCampaignContent(campaign, content);
                     await _campaignContentRepository.UpdateCampaignStatus(
                         setCurrentStep: 2,
                         setHtmlSourceType: TemplateHtmlSourceType,
                         whenIdCampaignIs: campaign,
                         whenCurrentStepIs: 1);
                 }
-                await _campaignContentRepository.UpdateCampaignPreviewImage(campaign, contentRow.PreviewImage);
+                await _campaignContentRepository.UpdateCampaignPreviewImage(campaign, content.PreviewImage);
                 await _campaignContentRepository.SaveNewFieldIds(campaign, fieldIds);
                 await _campaignContentRepository.SaveLinks(campaign, trackableUrls);
             }
@@ -167,8 +162,25 @@ namespace Doppler.HtmlEditorApi.Controllers
                     whenIdCampaignIs: campaignState.IdCampaignResult.Value,
                     whenCurrentStepIs: 1);
             }
+        }
 
-            return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
+        private async Task<DopplerHtmlDocument> ExtractHtmlDomFromCampaignContent(string accountName, string htmlContent)
+        {
+            var fieldAliases = _fieldsOptions.Value.Aliases;
+
+            var basicFields = await _fieldsRepository.GetActiveBasicFields();
+            var customFields = await _fieldsRepository.GetCustomFields(accountName);
+            var fields = basicFields.Union(customFields);
+
+            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields, fieldAliases);
+
+            var htmlDocument = new DopplerHtmlDocument(htmlContent);
+            htmlDocument.RemoveHarmfulTags();
+            htmlDocument.RemoveEventAttributes();
+            htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
+            htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
+            htmlDocument.SanitizeTrackableLinks();
+            return htmlDocument;
         }
 
         private static string GenerateHtmlContent(BaseHtmlContentData content)
