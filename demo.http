@@ -12,6 +12,11 @@ GET {{base}}/accounts/amoschini@makingsense.com/campaigns/18313525/content
 Authorization: Bearer {{Token}}
 
 ###
+POST {{base}}/accounts/cromero@makingsense.com/campaigns/36358896/content/from-template/17461
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+###
 PUT {{base}}/accounts/amoschini@makingsense.com/campaigns/18313525/content
 Content-Type: application/json
 Authorization: Bearer {{Token}}
