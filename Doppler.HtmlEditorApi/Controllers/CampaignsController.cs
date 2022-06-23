@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.ApiModels;
@@ -93,48 +94,12 @@ namespace Doppler.HtmlEditorApi.Controllers
         public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
         {
             var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
-            if (!campaignState.OwnCampaignExists)
+            if (!ValidateCampaignStateToUpdate(campaignState, out var error))
             {
-                return new NotFoundObjectResult(new ProblemDetails()
-                {
-                    Title = $@"The campaign was no found",
-                    Detail = $@"The campaign with id {campaignId} does not exists or belongs to another user than {accountName}"
-                });
+                return error;
             }
 
-            if (!campaignState.IsWritable)
-            {
-                return new BadRequestObjectResult(new ProblemDetails()
-                {
-                    Title = "The campaign content is read only",
-                    Detail = $@"The content cannot be edited because status campaign is {campaignState.CampaignStatus}"
-                });
-            }
-
-            if (campaignState.TestABCondition == TestABCondition.TypeTestABContent)
-            {
-                return new BadRequestObjectResult(new ProblemDetails()
-                {
-                    Title = "The campaign is AB Test by content",
-                    Detail = $@"The type of campaign with id {campaignId} is AB Test by content and it's unsupported"
-                });
-            }
-
-            var fieldAliases = _fieldsOptions.Value.Aliases;
-
-            var basicFields = await _fieldsRepository.GetActiveBasicFields();
-            var customFields = await _fieldsRepository.GetCustomFields(accountName);
-            var fields = basicFields.Union(customFields);
-
-            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields, fieldAliases);
-
-            var htmlDocument = new DopplerHtmlDocument(campaignContent.htmlContent);
-            htmlDocument.RemoveHarmfulTags();
-            htmlDocument.RemoveEventAttributes();
-            htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
-            htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
-            htmlDocument.SanitizeTrackableLinks();
-
+            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, campaignContent.htmlContent);
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
             var fieldIds = htmlDocument.GetFieldIds();
@@ -143,7 +108,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             // TODO: Validate if it's possible to delete PreviewImage property from BaseHtmlContentData,
             // because it's already in campaignContent
             // See it on: https://github.com/FromDoppler/doppler-html-editor-api/pull/111#discussion_r870681998
-            BaseHtmlContentData contentRow = campaignContent.type switch
+            BaseHtmlContentData baseHtmlContent = campaignContent.type switch
             {
                 ContentType.unlayer => new UnlayerContentData(
                     HtmlContent: content,
@@ -157,6 +122,14 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
+            await SaveCampaignContent(baseHtmlContent, fieldIds, trackableUrls, campaignState);
+
+            return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
+        }
+
+        private async Task SaveCampaignContent(BaseHtmlContentData content, IEnumerable<int> fieldIds, IEnumerable<string> trackableUrls, CampaignState campaignState)
+        {
+
             var campaignIds = new[] { campaignState.IdCampaignA, campaignState.IdCampaignB }
                 .Where(x => x != null)
                 .Select(x => x.Value);
@@ -165,18 +138,18 @@ namespace Doppler.HtmlEditorApi.Controllers
             {
                 if (campaignState.ContentExists)
                 {
-                    await _campaignContentRepository.UpdateCampaignContent(campaign, contentRow);
+                    await _campaignContentRepository.UpdateCampaignContent(campaign, content);
                 }
                 else
                 {
-                    await _campaignContentRepository.CreateCampaignContent(campaign, contentRow);
+                    await _campaignContentRepository.CreateCampaignContent(campaign, content);
                     await _campaignContentRepository.UpdateCampaignStatus(
                         setCurrentStep: 2,
                         setHtmlSourceType: TemplateHtmlSourceType,
                         whenIdCampaignIs: campaign,
                         whenCurrentStepIs: 1);
                 }
-                await _campaignContentRepository.UpdateCampaignPreviewImage(campaign, contentRow.PreviewImage);
+                await _campaignContentRepository.UpdateCampaignPreviewImage(campaign, content.PreviewImage);
                 await _campaignContentRepository.SaveNewFieldIds(campaign, fieldIds);
                 await _campaignContentRepository.SaveLinks(campaign, trackableUrls);
             }
@@ -189,8 +162,25 @@ namespace Doppler.HtmlEditorApi.Controllers
                     whenIdCampaignIs: campaignState.IdCampaignResult.Value,
                     whenCurrentStepIs: 1);
             }
+        }
 
-            return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
+        private async Task<DopplerHtmlDocument> ExtractHtmlDomFromCampaignContent(string accountName, string htmlContent)
+        {
+            var fieldAliases = _fieldsOptions.Value.Aliases;
+
+            var basicFields = await _fieldsRepository.GetActiveBasicFields();
+            var customFields = await _fieldsRepository.GetCustomFields(accountName);
+            var fields = basicFields.Union(customFields);
+
+            var dopplerFieldsProcessor = new DopplerFieldsProcessor(fields, fieldAliases);
+
+            var htmlDocument = new DopplerHtmlDocument(htmlContent);
+            htmlDocument.RemoveHarmfulTags();
+            htmlDocument.RemoveEventAttributes();
+            htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
+            htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
+            htmlDocument.SanitizeTrackableLinks();
+            return htmlDocument;
         }
 
         private static string GenerateHtmlContent(BaseHtmlContentData content)
@@ -199,5 +189,28 @@ namespace Doppler.HtmlEditorApi.Controllers
             // Old Doppler code:
             // https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.HypermediaAPI/ApiMappers/FromDoppler/DtoContent_To_CampaignContent.cs#L23
             => content.HtmlContent;
+
+        private static bool ValidateCampaignStateToUpdate(CampaignState campaignState, out ObjectResult error)
+        {
+            error = !campaignState.OwnCampaignExists ? new NotFoundObjectResult(
+                    new ProblemDetails()
+                    {
+                        Title = $@"Not found campaign",
+                        Detail = $@"The campaign does not exists or belongs to another user"
+                    })
+                : !campaignState.IsWritable ? new BadRequestObjectResult(
+                    new ProblemDetails()
+                    {
+                        Title = "The campaign content is read only",
+                        Detail = $@"The content cannot be edited because status campaign is {campaignState.CampaignStatus}"
+                    })
+                : campaignState.TestABCondition == TestABCondition.TypeTestABContent ? new BadRequestObjectResult(
+                    new ProblemDetails()
+                    {
+                        Title = "The campaign is AB Test by content",
+                        Detail = $@"The type of campaign is AB Test by content and it's unsupported"
+                    }) : null;
+            return error == null;
+        }
     }
 }
