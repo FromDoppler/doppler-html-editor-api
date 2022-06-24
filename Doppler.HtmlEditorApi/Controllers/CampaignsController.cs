@@ -38,13 +38,16 @@ namespace Doppler.HtmlEditorApi.Controllers
         private readonly ICampaignContentRepository _campaignContentRepository;
         private readonly IFieldsRepository _fieldsRepository;
         private readonly IOptions<FieldsOptions> _fieldsOptions;
+        private readonly ITemplateRepository _templateRepository;
 
         // We are using HTMLSourceType = 2 (Template) because Editor seems to be tied to the old HTML Editor
         // See https://github.com/MakingSense/Doppler/blob/48cf637bb1f8b4d81837fff904d8736fe889ff1c/Doppler.Transversal/Classes/CampaignHTMLContentTypeEnum.cs#L12-L17
         private const int TemplateHtmlSourceType = 2;
+        private const int EditorTypeUnlayer = 5;
 
-        public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions)
+        public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions, ITemplateRepository templateRepository)
         {
+            _templateRepository = templateRepository;
             _campaignContentRepository = repository;
             _fieldsRepository = fieldsRepository;
             _fieldsOptions = fieldsOptions;
@@ -122,6 +125,55 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
+            await SaveCampaignContent(baseHtmlContent, fieldIds, trackableUrls, campaignState);
+
+            return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
+        }
+
+        [Authorize(Policies.OwnResourceOrSuperUser)]
+        [HttpPost("/accounts/{accountName}/campaigns/{campaignId}/content/from-template/{templateId}")]
+        public async Task<IActionResult> CreateCampaignContentFromTemplate(string accountName, int campaignId, int templateId)
+        {
+            var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
+            if (!ValidateCampaignStateToUpdate(campaignState, out var error))
+            {
+                return error;
+            }
+
+            var templateData = await _templateRepository.GetTemplate(accountName, templateId);
+            if (templateData == null)
+            {
+                return new NotFoundObjectResult(new ProblemDetails()
+                {
+                    Title = $@"The template was no found",
+                    Detail = $@"The template not exists or Inactive"
+                });
+            }
+            if (templateData.EditorType != EditorTypeUnlayer)
+            {
+                return new BadRequestObjectResult(new ProblemDetails()
+                {
+                    Title = $@"The template cannot open",
+                    Detail = $@"The template exist but is not unlayer template"
+                });
+            }
+
+            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, templateData.HtmlCode);
+            var head = htmlDocument.GetHeadContent();
+            var content = htmlDocument.GetDopplerContent();
+            var fieldIds = htmlDocument.GetFieldIds();
+            var trackableUrls = htmlDocument.GetTrackableUrls();
+
+            // TODO: Validate if it's possible to delete PreviewImage property from BaseHtmlContentData,
+            // because it's already in campaignContent
+            // See it on: https://github.com/FromDoppler/doppler-html-editor-api/pull/111#discussion_r870681998
+            BaseHtmlContentData baseHtmlContent = new UnlayerContentData(
+                    HtmlContent: content,
+                    HtmlHead: head,
+                    Meta: templateData.Meta,
+                    PreviewImage: templateData.PreviewImage);
+
+            // TODO: Save templateId reference with the content
             await SaveCampaignContent(baseHtmlContent, fieldIds, trackableUrls, campaignState);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
