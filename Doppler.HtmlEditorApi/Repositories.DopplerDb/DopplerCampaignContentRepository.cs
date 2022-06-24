@@ -8,7 +8,7 @@ using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
-public class DapperCampaignContentRepository : ICampaignContentRepository
+public class DopplerCampaignContentRepository : ICampaignContentRepository
 {
     private const int EditorTypeMSEditor = 4;
     private const int EditorTypeUnlayer = 5;
@@ -19,7 +19,7 @@ public class DapperCampaignContentRepository : ICampaignContentRepository
     private static int? DopplerCampaignTypeClassic => null;
 
     private readonly IDbContext _dbContext;
-    public DapperCampaignContentRepository(IDbContext dbContext)
+    public DopplerCampaignContentRepository(IDbContext dbContext)
     {
         _dbContext = dbContext;
     }

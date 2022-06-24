@@ -7,10 +7,10 @@ using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
-public class DapperFieldsRepository : IFieldsRepository
+public class DopplerFieldsRepository : IFieldsRepository
 {
     private readonly IDbContext _dbContext;
-    public DapperFieldsRepository(IDbContext dbContext)
+    public DopplerFieldsRepository(IDbContext dbContext)
     {
         _dbContext = dbContext;
     }

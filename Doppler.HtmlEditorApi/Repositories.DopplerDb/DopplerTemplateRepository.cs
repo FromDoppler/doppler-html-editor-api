@@ -8,12 +8,12 @@ using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
-public class DapperTemplateRepository : ITemplateRepository
+public class DopplerTemplateRepository : ITemplateRepository
 {
     private const int EditorTypeUnlayer = 5;
 
     private readonly IDbContext _dbContext;
-    public DapperTemplateRepository(IDbContext dbContext)
+    public DopplerTemplateRepository(IDbContext dbContext)
     {
         _dbContext = dbContext;
     }

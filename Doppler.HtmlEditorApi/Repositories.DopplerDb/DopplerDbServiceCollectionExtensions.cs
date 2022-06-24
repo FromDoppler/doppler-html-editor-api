@@ -7,7 +7,7 @@ public static class DopplerDbServiceCollectionExtensions
 {
     public static IServiceCollection AddDopplerDbRepositories(this IServiceCollection services)
         => services
-            .AddScoped<ICampaignContentRepository, DapperCampaignContentRepository>()
-            .AddScoped<ITemplateRepository, DapperTemplateRepository>()
-            .AddScoped<IFieldsRepository, DapperFieldsRepository>();
+            .AddScoped<ICampaignContentRepository, DopplerCampaignContentRepository>()
+            .AddScoped<ITemplateRepository, DopplerTemplateRepository>()
+            .AddScoped<IFieldsRepository, DopplerFieldsRepository>();
 }
