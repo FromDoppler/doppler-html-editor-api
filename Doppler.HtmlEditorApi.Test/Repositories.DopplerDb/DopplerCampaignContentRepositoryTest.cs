@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
-public class DapperCampaignContentRepositoryTest : IClassFixture<WebApplicationFactory<Startup>>
+public class DopplerCampaignContentRepositoryTest : IClassFixture<WebApplicationFactory<Startup>>
 {
     [Theory]
     [InlineData(null, false)]
@@ -46,7 +46,7 @@ public class DapperCampaignContentRepositoryTest : IClassFixture<WebApplicationF
                 EditorType = 5,
                 Status = dopplerCampaignStatus
             });
-        var repository = new DapperCampaignContentRepository(dbContextMock.Object);
+        var repository = new DopplerCampaignContentRepository(dbContextMock.Object);
 
         var campaignState = await repository.GetCampaignState(It.IsAny<string>(), It.IsAny<int>());
         Assert.Equal(expectedIsWritable, campaignState.IsWritable);
