@@ -26,7 +26,7 @@ public class DopplerTemplateRepository : ITemplateRepository
         ));
 
         return queryResult == null ? null
-            : (queryResult.IsPublic && queryResult.EditorType == EditorTypeUnlayer) ? new UnlayerTemplateData(
+            : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerTemplateData(
                 HtmlCode: queryResult.HtmlCode,
                 Meta: queryResult.Meta,
                 PreviewImage: queryResult.PreviewImage,
