@@ -131,14 +131,16 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
                 Meta: unlayerContentData.Meta,
-                EditorType: EditorTypeUnlayer
+                EditorType: EditorTypeUnlayer,
+                IdTemplate: unlayerContentData.IdTemplate
             ),
             HtmlContentData htmlContentData => new UpdateCampaignContentDbQuery(
                 IdCampaign: campaignId,
                 Content: htmlContentData.HtmlContent,
                 Head: htmlContentData.HtmlHead,
                 Meta: null,
-                EditorType: null
+                EditorType: null,
+                IdTemplate: htmlContentData.IdTemplate
             ),
             // TODO: test this scenario
             // Probably a unit test will be necessary
