@@ -62,7 +62,8 @@ public static class IDbContextMockExtensions
         int idCampaign,
         string htmlContent,
         string meta,
-        int result)
+        int? idTemplate = null,
+        int result = 1)
     {
         dbContextMock.Setup(x => x.ExecuteAsync(
             It.Is<IExecutableDbQuery>(q =>
@@ -71,12 +72,14 @@ public static class IDbContextMockExtensions
                     q.Is<InsertCampaignContentDbQuery>(x =>
                     x.IdCampaign == idCampaign
                     && x.Content == htmlContent
-                    && x.Meta == meta)
+                    && x.Meta == meta
+                    && x.IdTemplate == idTemplate)
                     ||
                     q.Is<UpdateCampaignContentDbQuery>(x =>
                     x.IdCampaign == idCampaign
                     && x.Content == htmlContent
-                    && x.Meta == meta)
+                    && x.Meta == meta
+                    && x.IdTemplate == idTemplate)
                 ))))
         .ReturnsAsync(result);
     }
