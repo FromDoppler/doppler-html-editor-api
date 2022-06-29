@@ -18,6 +18,6 @@ SET
     Head = @Head,
     Meta = @Meta,
     EditorType = @EditorType
-    {(IdTemplate.HasValue ? ",IdTemplate = @IdTemplate" : "")}
+{(IdTemplate.HasValue ? ",IdTemplate = @IdTemplate" : "")}
 WHERE IdCampaign = @IdCampaign";
 }

@@ -31,7 +31,7 @@ SET
     Head = @Head,
     Meta = @Meta,
     EditorType = @EditorType
-    ,IdTemplate = @IdTemplate
+,IdTemplate = @IdTemplate
 WHERE IdCampaign = @IdCampaign";
 
         // Act
@@ -67,7 +67,7 @@ SET
     Head = @Head,
     Meta = @Meta,
     EditorType = @EditorType
-    
+
 WHERE IdCampaign = @IdCampaign";
 
         // Act
