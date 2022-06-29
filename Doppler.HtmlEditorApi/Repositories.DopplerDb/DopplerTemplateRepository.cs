@@ -32,10 +32,7 @@ public class DopplerTemplateRepository : ITemplateRepository
                 PreviewImage: queryResult.PreviewImage,
                 EditorType: queryResult.EditorType,
                 IsPublic: queryResult.IsPublic)
-            // TODO: improve flow for content when is from other editor type
             : new UnknownTemplateData(
-                HtmlCode: queryResult.HtmlCode,
-                PreviewImage: queryResult.PreviewImage,
                 EditorType: queryResult.EditorType,
                 IsPublic: queryResult.IsPublic);
     }
