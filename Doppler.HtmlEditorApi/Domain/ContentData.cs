@@ -22,18 +22,21 @@ public sealed record MSEditorContentData(
 public abstract record BaseHtmlContentData(
     string HtmlContent,
     string HtmlHead,
-    string PreviewImage)
+    string PreviewImage,
+    int? IdTemplate)
     : ContentData();
 
 public sealed record HtmlContentData(
     string HtmlContent,
     string HtmlHead,
-    string PreviewImage)
-    : BaseHtmlContentData(HtmlContent, HtmlHead, PreviewImage);
+    string PreviewImage,
+    int? IdTemplate)
+    : BaseHtmlContentData(HtmlContent, HtmlHead, PreviewImage, IdTemplate);
 
 public sealed record UnlayerContentData(
     string HtmlContent,
     string HtmlHead,
     string Meta,
-    string PreviewImage)
-    : BaseHtmlContentData(HtmlContent, HtmlHead, PreviewImage);
+    string PreviewImage,
+    int? IdTemplate)
+    : BaseHtmlContentData(HtmlContent, HtmlHead, PreviewImage, IdTemplate);

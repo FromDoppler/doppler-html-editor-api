@@ -7,7 +7,8 @@ public record InsertCampaignContentDbQuery(
     int? EditorType,
     string Content,
     string Head,
-    string Meta
+    string Meta,
+    int? IdTemplate
 ) : IExecutableDbQuery
 {
     public string GenerateSqlQuery() => @"
@@ -16,12 +17,14 @@ INSERT INTO Content (
     Content,
     Head,
     Meta,
-    EditorType
+    EditorType,
+    IdTemplate
 ) VALUES (
     @IdCampaign,
     @Content,
     @Head,
     @Meta,
-    @EditorType
+    @EditorType,
+    @IdTemplate
 )";
 }

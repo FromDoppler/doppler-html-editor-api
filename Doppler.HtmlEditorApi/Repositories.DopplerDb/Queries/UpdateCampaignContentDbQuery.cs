@@ -7,15 +7,17 @@ public record UpdateCampaignContentDbQuery(
     int? EditorType,
     string Content,
     string Head,
-    string Meta
+    string Meta,
+    int? IdTemplate
 ) : IExecutableDbQuery
 {
-    public string GenerateSqlQuery() => @"
+    public string GenerateSqlQuery() => @$"
 UPDATE Content
 SET
     Content = @Content,
     Head = @Head,
     Meta = @Meta,
     EditorType = @EditorType
+{(IdTemplate.HasValue ? ",IdTemplate = @IdTemplate" : "")}
 WHERE IdCampaign = @IdCampaign";
 }

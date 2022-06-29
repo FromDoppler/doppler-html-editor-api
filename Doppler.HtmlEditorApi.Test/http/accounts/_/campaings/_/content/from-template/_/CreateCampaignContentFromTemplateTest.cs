@@ -314,6 +314,68 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     }
 
     [Theory]
+    [InlineData(true, "UPDATE")]
+    [InlineData(false, "INSERT")]
+    public async Task POST_content_from_template_should_be_create_with_right_content_and_return_Ok(bool contentExist, string sqlQueryStartsWith)
+    {
+        // Arrange
+        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var expectedTemplateId = 123;
+        var expectedIdCampaign = 456;
+        var htmlContent = "<html></html>";
+        var url = $"/accounts/{expectedAccountName}/campaigns/{expectedIdCampaign}/content/from-template/{expectedTemplateId}";
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
+            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+            {
+                OwnCampaignExists = true,
+                ContentExists = contentExist,
+                EditorType = 5,
+                Status = 1
+            });
+
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(
+                new GetTemplateByIdWithStatusDbQuery(expectedTemplateId, expectedAccountName)))
+            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+            {
+                EditorType = 5,
+                HtmlCode = htmlContent,
+                IsPublic = true,
+                Meta = "{}",
+                PreviewImage = ""
+            });
+
+        dbContextMock
+            .SetupInsertOrUpdateContentRow(
+                sqlQueryStartsWith,
+                expectedIdCampaign,
+                htmlContent,
+                meta: "{}",
+                idTemplate: expectedTemplateId,
+                result: 1);
+
+        var client = _factory.CreateSutClient(
+            dbContextMock.Object,
+            Mock.Of<IFieldsRepository>(),
+            TestUsersData.TOKEN_TEST1_EXPIRE_20330518);
+
+        // Act
+        var response = await client.PostAsync(url, JsonContent.Create(new { }));
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        dbContextMock.VerifyAll();
+    }
+
+    [Theory]
     [InlineData(null, true, "UPDATE")]
     [InlineData(55, true, "UPDATE")]
     [InlineData(4, true, "UPDATE")]
@@ -322,7 +384,8 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_store_html_code_when_campaign_is_TestAB(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var expectedIdTemplate = 123;
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/{expectedIdTemplate}";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var expectedIdCampaign = 456;
@@ -365,6 +428,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 expectedIdCampaign,
                 htmlContent,
                 meta: "{}",
+                expectedIdTemplate,
                 result: 1);
 
         dbContextMock
@@ -373,6 +437,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 idCampaignB,
                 htmlContent,
                 meta: "{}",
+                expectedIdTemplate,
                 result: 1);
 
         var client = _factory.CreateSutClient(
@@ -380,11 +445,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             token: token);
 
         // Act
-        var response = await client.PostAsync(url, JsonContent.Create(new
-        {
-            type = "html",
-            htmlContent
-        }));
+        var response = await client.PostAsync(url, JsonContent.Create(new { }));
         _output.WriteLine(response.GetHeadersAsString());
         var responseContent = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseContent);
@@ -440,11 +501,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             token: token);
 
         // Act
-        var response = await client.PostAsync(url, JsonContent.Create(new
-        {
-            type = "html",
-            htmlContent
-        }));
+        var response = await client.PostAsync(url, JsonContent.Create(new { }));
         _output.WriteLine(response.GetHeadersAsString());
         var responseContent = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseContent);
@@ -536,7 +593,8 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_store_unlayer_content_and_ensure_campaign_status_when_content_no_exist()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var expectedIdTemplate = 123;
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/{expectedIdTemplate}";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var expectedIdCampaign = 456;
@@ -575,6 +633,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 expectedIdCampaign,
                 htmlContent,
                 metaAsString,
+                expectedIdTemplate,
                 result: 1);
 
         var setCurrentStep = 2;
@@ -748,7 +807,8 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_store_unlayer_content_and_ensure_campaign_status(int? currentEditorType, bool contentExists, string sqlQueryStartsWith)
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var expectedIdTemplate = 123;
+        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/{expectedIdTemplate}";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
         var expectedIdCampaign = 456;
@@ -787,6 +847,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 expectedIdCampaign,
                 htmlContent,
                 metaAsString,
+                expectedIdTemplate,
                 result: 1);
 
         var client = _factory.CreateSutClient(
@@ -794,12 +855,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             token: token);
 
         // Act
-        var response = await client.PostAsync(url, JsonContent.Create(new
-        {
-            type = "unlayer",
-            htmlContent,
-            meta = Utils.ParseAsJsonElement(metaAsString)
-        }));
+        var response = await client.PostAsync(url, JsonContent.Create(new { }));
         _output.WriteLine(response.GetHeadersAsString());
         var responseContent = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseContent);
@@ -854,12 +910,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             token: token);
 
         // Act
-        var response = await client.PostAsync(url, JsonContent.Create(new
-        {
-            type = "unlayer",
-            htmlContent,
-            meta = Utils.ParseAsJsonElement("{}")
-        }));
+        var response = await client.PostAsync(url, JsonContent.Create(new { }));
         _output.WriteLine(response.GetHeadersAsString());
         var responseContent = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseContent);
@@ -1326,12 +1377,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             token: token);
 
         // Act
-        var response = await client.PostAsync(url, JsonContent.Create(new
-        {
-            type = "unlayer",
-            htmlContent,
-            meta = Utils.ParseAsJsonElement("{}")
-        }));
+        var response = await client.PostAsync(url, JsonContent.Create(new { }));
         _output.WriteLine(response.GetHeadersAsString());
         var responseContent = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseContent);
@@ -1606,7 +1652,6 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{campaignId}/content/from-template/123";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var htmlContent = "My HTML Content";
         var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign is AB Test by content\"");
         var matchDetail = new Regex($"\"detail\"\\s*:\\s*\"The type of campaign is AB Test by content and it's unsupported\"");
 
@@ -1620,12 +1665,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             token);
 
         // Act
-        var response = await client.PostAsync(url, JsonContent.Create(new
-        {
-            type = "unlayer",
-            htmlContent,
-            meta = new { }
-        }));
+        var response = await client.PostAsync(url, JsonContent.Create(new { }));
 
         _output.WriteLine(response.GetHeadersAsString());
         var responseContent = await response.Content.ReadAsStringAsync();
