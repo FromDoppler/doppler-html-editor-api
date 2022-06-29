@@ -116,11 +116,13 @@ namespace Doppler.HtmlEditorApi.Controllers
                     HtmlContent: content,
                     HtmlHead: head,
                     Meta: campaignContent.meta.ToString(),
-                    PreviewImage: campaignContent.previewImage),
+                    PreviewImage: campaignContent.previewImage,
+                    IdTemplate: null),
                 ContentType.html => new HtmlContentData(
                     HtmlContent: content,
                     HtmlHead: head,
-                    PreviewImage: campaignContent.previewImage),
+                    PreviewImage: campaignContent.previewImage,
+                    IdTemplate: null),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
@@ -170,7 +172,8 @@ namespace Doppler.HtmlEditorApi.Controllers
                     HtmlContent: content,
                     HtmlHead: head,
                     Meta: unlayerTemplateData.Meta,
-                    PreviewImage: unlayerTemplateData.PreviewImage);
+                    PreviewImage: unlayerTemplateData.PreviewImage,
+                    IdTemplate: templateId);
 
             // TODO: Save templateId reference with the content
             await SaveCampaignContent(baseHtmlContent, fieldIds, trackableUrls, campaignState);

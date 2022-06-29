@@ -38,11 +38,13 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
                 Meta: queryResult.Meta,
-                PreviewImage: queryResult.PreviewImage)
+                PreviewImage: queryResult.PreviewImage,
+                IdTemplate: queryResult.IdTemplate)
             : queryResult.EditorType == null ? new HtmlContentData(
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
-                PreviewImage: queryResult.PreviewImage)
+                PreviewImage: queryResult.PreviewImage,
+                IdTemplate: queryResult.IdTemplate)
             : new UnknownContentData(
                 CampaignId: queryResult.IdCampaign,
                 Content: queryResult.Content,
@@ -101,14 +103,16 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
                 Meta: unlayerContentData.Meta,
-                EditorType: EditorTypeUnlayer
+                EditorType: EditorTypeUnlayer,
+                IdTemplate: unlayerContentData.IdTemplate
             ),
             HtmlContentData htmlContentData => new InsertCampaignContentDbQuery(
                 IdCampaign: campaignId,
                 Content: htmlContentData.HtmlContent,
                 Head: htmlContentData.HtmlHead,
                 Meta: null,
-                EditorType: null
+                EditorType: null,
+                IdTemplate: htmlContentData.IdTemplate
             ),
             // TODO: test this scenario
             // Probably a unit test will be necessary
