@@ -43,7 +43,6 @@ namespace Doppler.HtmlEditorApi.Controllers
         // We are using HTMLSourceType = 2 (Template) because Editor seems to be tied to the old HTML Editor
         // See https://github.com/MakingSense/Doppler/blob/48cf637bb1f8b4d81837fff904d8736fe889ff1c/Doppler.Transversal/Classes/CampaignHTMLContentTypeEnum.cs#L12-L17
         private const int TemplateHtmlSourceType = 2;
-        private const int EditorTypeUnlayer = 5;
 
         public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions, ITemplateRepository templateRepository)
         {
@@ -149,7 +148,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                     Detail = $@"The template not exists or Inactive"
                 });
             }
-            if (templateData.EditorType != EditorTypeUnlayer)
+            if (templateData is not UnlayerTemplateData unlayerTemplateData)
             {
                 return new BadRequestObjectResult(new ProblemDetails()
                 {
@@ -158,7 +157,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 });
             }
 
-            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, templateData.HtmlCode);
+            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, unlayerTemplateData.HtmlCode);
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
             var fieldIds = htmlDocument.GetFieldIds();
@@ -170,8 +169,8 @@ namespace Doppler.HtmlEditorApi.Controllers
             BaseHtmlContentData baseHtmlContent = new UnlayerContentData(
                     HtmlContent: content,
                     HtmlHead: head,
-                    Meta: templateData.Meta,
-                    PreviewImage: templateData.PreviewImage);
+                    Meta: unlayerTemplateData.Meta,
+                    PreviewImage: unlayerTemplateData.PreviewImage);
 
             // TODO: Save templateId reference with the content
             await SaveCampaignContent(baseHtmlContent, fieldIds, trackableUrls, campaignState);
