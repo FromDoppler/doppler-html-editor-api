@@ -101,7 +101,7 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
                 Meta: unlayerContentData.Meta,
-                EditorType: (int?)EditorTypeUnlayer
+                EditorType: EditorTypeUnlayer
             ),
             HtmlContentData htmlContentData => new InsertCampaignContentDbQuery(
                 IdCampaign: campaignId,
@@ -127,7 +127,7 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
                 Meta: unlayerContentData.Meta,
-                EditorType: (int?)EditorTypeUnlayer
+                EditorType: EditorTypeUnlayer
             ),
             HtmlContentData htmlContentData => new UpdateCampaignContentDbQuery(
                 IdCampaign: campaignId,
