@@ -82,12 +82,7 @@ namespace Doppler.HtmlEditorApi
 
             app.UseRouting();
 
-            app.UseCors(policy => policy
-                .SetIsOriginAllowed(isOriginAllowed: _ => true)
-                .SetPreflightMaxAge(TimeSpan.FromHours(24))
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials());
+            app.UseDopplerCors();
 
             app.UseAuthorization();
 
