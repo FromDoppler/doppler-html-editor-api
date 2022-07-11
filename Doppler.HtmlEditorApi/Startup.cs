@@ -82,6 +82,15 @@ namespace Doppler.HtmlEditorApi
 
             app.UseRouting();
 
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Method == "OPTIONS")
+                {
+                    context.Response.Headers.CacheControl = "public, max-age=86400";
+                }
+                await next();
+            });
+
             app.UseCors(policy => policy
                 .SetIsOriginAllowed(isOriginAllowed: _ => true)
                 .SetPreflightMaxAge(TimeSpan.FromHours(24))
