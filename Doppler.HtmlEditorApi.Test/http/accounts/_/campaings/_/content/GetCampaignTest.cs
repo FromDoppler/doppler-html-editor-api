@@ -137,6 +137,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             HtmlContent: "<html></html>",
             HtmlHead: null,
             PreviewImage: null,
+            CampaignName: "unlayer_name",
             IdTemplate: null);
 
         var repositoryMock = new Mock<ICampaignContentRepository>();
@@ -159,6 +160,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Matches("\"type\":\"unlayer\"", responseContent);
+        Assert.Matches("\"campaignName\":\"unlayer_name\"", responseContent);
         Assert.NotNull(contentModelResponse.meta);
         Assert.True(contentModelResponse.meta.Value.TryGetProperty("schemaVersion", out var resultSchemaVersionProp), "schemaVersion property is not present");
         Assert.Equal(JsonValueKind.Number, resultSchemaVersionProp.ValueKind);

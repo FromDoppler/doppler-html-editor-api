@@ -39,11 +39,13 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
                 HtmlHead: queryResult.Head,
                 Meta: queryResult.Meta,
                 PreviewImage: queryResult.PreviewImage,
+                CampaignName: queryResult.Name,
                 IdTemplate: queryResult.IdTemplate)
             : queryResult.EditorType == null ? new HtmlContentData(
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
                 PreviewImage: queryResult.PreviewImage,
+                CampaignName: queryResult.Name,
                 IdTemplate: queryResult.IdTemplate)
             : new UnknownContentData(
                 CampaignId: queryResult.IdCampaign,
