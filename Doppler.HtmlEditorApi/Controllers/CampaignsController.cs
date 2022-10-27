@@ -54,7 +54,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content")]
-        public async Task<ActionResult<CampaignContent>> GetCampaign(string accountName, int campaignId)
+        public async Task<ActionResult<CampaignContent>> GetCampaignContent(string accountName, int campaignId)
         {
             // TODO: Considere refactoring accountName validation
             var contentRow = await _campaignContentRepository.GetCampaignModel(accountName, campaignId);
@@ -96,7 +96,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
-        public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
+        public async Task<IActionResult> SaveCampaignContent(string accountName, int campaignId, CampaignContent campaignContent)
         {
             var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
             if (!ValidateCampaignStateToUpdate(campaignState, out var error))
