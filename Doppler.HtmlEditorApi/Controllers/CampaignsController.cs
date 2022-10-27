@@ -244,7 +244,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         private static string GenerateHtmlContent(BaseHtmlCampaignContentData content)
             // Notice that it is not symmetric with ExtractDopplerHtmlData.
-            // The head is being lossed here. It is not good if we try to edit an imported content.
+            // The head is being loosed here. It is not good if we try to edit an imported content.
             // Old Doppler code:
             // https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.HypermediaAPI/ApiMappers/FromDoppler/DtoContent_To_CampaignContent.cs#L23
             => content.HtmlContent;
