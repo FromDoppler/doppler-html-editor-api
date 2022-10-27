@@ -133,6 +133,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             HtmlCode: "<html></html>",
             Meta: "{}",
             PreviewImage: "",
+            Name: "",
             EditorType: 5,
             IsPublic: true
         );

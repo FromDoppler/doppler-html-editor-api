@@ -178,7 +178,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                     HtmlHead: head,
                     Meta: unlayerTemplateData.Meta,
                     PreviewImage: unlayerTemplateData.PreviewImage,
-                    CampaignName: "",
+                    CampaignName: unlayerTemplateData.Name,
                     IdTemplate: templateId);
 
             // TODO: Save templateId reference with the content
