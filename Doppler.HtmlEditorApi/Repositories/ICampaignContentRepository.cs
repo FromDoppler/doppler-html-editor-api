@@ -7,7 +7,7 @@ namespace Doppler.HtmlEditorApi.Repositories;
 public interface ICampaignContentRepository
 {
     Task<CampaignState> GetCampaignState(string accountName, int campaignId);
-    Task<CampaignContentData> GetCampaignModel(string accountName, int campaignId);
+    Task<CampaignModel> GetCampaignModel(string accountName, int campaignId);
     Task CreateCampaignContent(int campaignId, CampaignContentData content);
     Task UpdateCampaignContent(int campaignId, CampaignContentData content);
 
