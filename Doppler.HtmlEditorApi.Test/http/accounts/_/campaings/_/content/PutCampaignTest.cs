@@ -135,7 +135,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
             .ReturnsAsync(new ClassicCampaignState(campaignId, true, null, CampaignStatus.Draft));
         repositoryMock
-            .Setup(x => x.UpdateCampaignContent(campaignId, It.IsAny<BaseHtmlContentData>()))
+            .Setup(x => x.UpdateCampaignContent(campaignId, It.IsAny<BaseHtmlCampaignContentData>()))
             .Returns(Task.CompletedTask);
 
         var client = _factory.CreateSutClient(

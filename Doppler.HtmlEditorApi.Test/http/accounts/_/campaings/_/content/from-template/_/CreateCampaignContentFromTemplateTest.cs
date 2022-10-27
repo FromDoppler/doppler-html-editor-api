@@ -129,7 +129,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName, int templateId)
     {
         // Arrange
-        var unlayerTemplateData = new UnlayerTemplateData(
+        var unlayerTemplateData = new UnlayerTemplateContentData(
             HtmlCode: "<html></html>",
             Meta: "{}",
             PreviewImage: "",
@@ -170,7 +170,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_return_error_when_type_is_not_unlayer_editor(string url, string token)
     {
         // Arrange
-        var uknownTemplateData = new UnknownTemplateData(
+        var uknownTemplateData = new UnknownTemplateContentData(
             EditorType: 4,
             IsPublic: true
         );

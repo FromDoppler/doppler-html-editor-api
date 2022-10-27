@@ -33,7 +33,7 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
         var repository = new DopplerTemplateRepository(dbContextMock.Object);
 
         var templateData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
-        var unlayerTemplateData = Assert.IsType<UnlayerTemplateData>(templateData);
+        var unlayerTemplateData = Assert.IsType<UnlayerTemplateContentData>(templateData);
         Assert.NotNull(unlayerTemplateData.HtmlCode);
         Assert.NotNull(unlayerTemplateData.Meta);
         Assert.NotNull(unlayerTemplateData.PreviewImage);
@@ -62,7 +62,7 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
         var repository = new DopplerTemplateRepository(dbContextMock.Object);
 
         var templateData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
-        var uknownTemplateData = Assert.IsType<UnknownTemplateData>(templateData);
+        var uknownTemplateData = Assert.IsType<UnknownTemplateContentData>(templateData);
         Assert.Equal(isPublicExpected, uknownTemplateData.IsPublic);
         Assert.Equal(_msEditorType, uknownTemplateData.EditorType);
         dbContextMock.VerifyAll();

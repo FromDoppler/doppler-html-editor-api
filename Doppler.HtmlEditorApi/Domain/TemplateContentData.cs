@@ -1,18 +1,18 @@
 namespace Doppler.HtmlEditorApi.Domain;
 
-public abstract record TemplateData()
+public abstract record TemplateContentData()
 { }
 
-public sealed record UnlayerTemplateData(
+public sealed record UnlayerTemplateContentData(
     string HtmlCode,
     string Meta,
     string PreviewImage,
     string Name,
     int EditorType,
     bool IsPublic)
-    : TemplateData();
+    : TemplateContentData();
 
-public sealed record UnknownTemplateData(
+public sealed record UnknownTemplateContentData(
     int EditorType,
     bool IsPublic)
-    : TemplateData();
+    : TemplateContentData();
