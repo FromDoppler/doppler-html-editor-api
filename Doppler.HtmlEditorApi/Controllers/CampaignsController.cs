@@ -143,8 +143,8 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return error;
             }
 
-            var templateContentData = await _templateRepository.GetTemplate(accountName, templateId);
-            if (templateContentData == null)
+            var templateModel = await _templateRepository.GetTemplate(accountName, templateId);
+            if (templateModel == null)
             {
                 return new NotFoundObjectResult(new ProblemDetails()
                 {
@@ -152,7 +152,9 @@ namespace Doppler.HtmlEditorApi.Controllers
                     Detail = $@"The template not exists or Inactive"
                 });
             }
-            if (templateContentData is not UnlayerTemplateContentData unlayerTemplateData)
+
+            var templateContentData = templateModel.Content;
+            if (templateContentData is not UnlayerTemplateContentData unlayerTemplateContentData)
             {
                 return new BadRequestObjectResult(new ProblemDetails()
                 {
@@ -161,7 +163,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 });
             }
 
-            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, unlayerTemplateData.HtmlComplete);
+            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, unlayerTemplateContentData.HtmlComplete);
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
             var fieldIds = htmlDocument.GetFieldIds();
@@ -170,11 +172,11 @@ namespace Doppler.HtmlEditorApi.Controllers
             BaseHtmlCampaignContentData contentData = new UnlayerCampaignContentData(
                     HtmlContent: content,
                     HtmlHead: head,
-                    Meta: unlayerTemplateData.Meta,
+                    Meta: unlayerTemplateContentData.Meta,
                     IdTemplate: templateId);
 
             // TODO: Save templateId reference with the content
-            await SaveCampaignContent(contentData, fieldIds, trackableUrls, campaignState, unlayerTemplateData.PreviewImage);
+            await SaveCampaignContent(contentData, fieldIds, trackableUrls, campaignState, templateModel.PreviewImage);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }

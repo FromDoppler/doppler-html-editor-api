@@ -18,23 +18,25 @@ public class DopplerTemplateRepository : ITemplateRepository
         _dbContext = dbContext;
     }
 
-    public async Task<TemplateContentData> GetTemplate(string accountName, int templateId)
+    public async Task<TemplateModel> GetTemplate(string accountName, int templateId)
     {
         var queryResult = await _dbContext.ExecuteAsync(new GetTemplateByIdWithStatusDbQuery(
             IdTemplate: templateId,
             AccountName: accountName
         ));
 
-        return queryResult == null ? null
-            : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerTemplateContentData(
+        if (queryResult == null)
+        {
+            return null;
+        }
+
+        TemplateContentData content = queryResult.EditorType == EditorTypeUnlayer
+            ? new UnlayerTemplateContentData(
                 HtmlComplete: queryResult.HtmlCode,
-                Meta: queryResult.Meta,
-                PreviewImage: queryResult.PreviewImage,
-                Name: queryResult.Name,
-                EditorType: queryResult.EditorType,
-                IsPublic: queryResult.IsPublic)
+                Meta: queryResult.Meta)
             : new UnknownTemplateContentData(
-                EditorType: queryResult.EditorType,
-                IsPublic: queryResult.IsPublic);
+                EditorType: queryResult.EditorType);
+
+        return new TemplateModel(templateId, queryResult.IsPublic, queryResult.PreviewImage, queryResult.Name, content);
     }
 }

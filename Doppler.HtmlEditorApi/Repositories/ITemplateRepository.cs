@@ -6,5 +6,5 @@ namespace Doppler.HtmlEditorApi.Repositories;
 
 public interface ITemplateRepository
 {
-    Task<TemplateContentData> GetTemplate(string accountName, int templateId);
+    Task<TemplateModel> GetTemplate(string accountName, int templateId);
 }
