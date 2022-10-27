@@ -1,5 +1,7 @@
 namespace Doppler.HtmlEditorApi.Domain;
 
+// TemplateContentData is different than CampaignContentData because CampaignContentData has
+// two fields HtmlContent and HtmlHead and TemplateContentData merges both in HtmlComplete
 public abstract record CampaignContentData();
 
 public sealed record EmptyCampaignContentData()

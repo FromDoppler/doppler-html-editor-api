@@ -27,7 +27,7 @@ public class DopplerTemplateRepository : ITemplateRepository
 
         return queryResult == null ? null
             : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerTemplateContentData(
-                HtmlCode: queryResult.HtmlCode,
+                HtmlComplete: queryResult.HtmlCode,
                 Meta: queryResult.Meta,
                 PreviewImage: queryResult.PreviewImage,
                 Name: queryResult.Name,

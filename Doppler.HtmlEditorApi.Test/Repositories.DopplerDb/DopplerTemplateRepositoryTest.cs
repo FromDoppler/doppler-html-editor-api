@@ -34,7 +34,7 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
 
         var templateData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
         var unlayerTemplateData = Assert.IsType<UnlayerTemplateContentData>(templateData);
-        Assert.NotNull(unlayerTemplateData.HtmlCode);
+        Assert.NotNull(unlayerTemplateData.HtmlComplete);
         Assert.NotNull(unlayerTemplateData.Meta);
         Assert.NotNull(unlayerTemplateData.PreviewImage);
         Assert.Equal(isPublicExpected, unlayerTemplateData.IsPublic);

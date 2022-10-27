@@ -130,7 +130,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     {
         // Arrange
         var unlayerTemplateData = new UnlayerTemplateContentData(
-            HtmlCode: "<html></html>",
+            HtmlComplete: "<html></html>",
             Meta: "{}",
             PreviewImage: "",
             Name: "",

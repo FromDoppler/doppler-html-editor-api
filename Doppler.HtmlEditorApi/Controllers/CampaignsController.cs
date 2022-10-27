@@ -164,7 +164,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 });
             }
 
-            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, unlayerTemplateData.HtmlCode);
+            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, unlayerTemplateData.HtmlComplete);
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
             var fieldIds = htmlDocument.GetFieldIds();
