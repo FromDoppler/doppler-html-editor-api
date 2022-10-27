@@ -102,12 +102,12 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     public async Task GET_campaign_should_accept_right_tokens_and_return_404_when_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         // Arrange
-        BaseHtmlCampaignContentData emptyContentModel = null;
+        BaseHtmlCampaignContentData contentData = null;
         var repositoryMock = new Mock<ICampaignContentRepository>();
 
         repositoryMock
             .Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-            .ReturnsAsync(emptyContentModel);
+            .ReturnsAsync(contentData);
 
         var client = _factory.CreateSutClient(
             serviceToOverride1: repositoryMock.Object,
@@ -129,7 +129,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     {
         // Arrange
         var expectedSchemaVersion = 999;
-        var contentRow = new UnlayerCampaignContentData(
+        var contentData = new UnlayerCampaignContentData(
             Meta: JsonSerializer.Serialize(new
             {
                 schemaVersion = expectedSchemaVersion
@@ -144,7 +144,7 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         repositoryMock
             .Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-            .ReturnsAsync(contentRow);
+            .ReturnsAsync(contentData);
 
         var client = _factory.CreateSutClient(
             serviceToOverride1: repositoryMock.Object,
