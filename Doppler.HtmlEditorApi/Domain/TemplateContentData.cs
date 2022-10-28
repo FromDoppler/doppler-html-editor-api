@@ -7,14 +7,9 @@ public abstract record TemplateContentData()
 
 public sealed record UnlayerTemplateContentData(
     string HtmlComplete,
-    string Meta,
-    string PreviewImage,
-    string Name,
-    int EditorType,
-    bool IsPublic)
+    string Meta)
     : TemplateContentData();
 
 public sealed record UnknownTemplateContentData(
-    int EditorType,
-    bool IsPublic)
+    int EditorType)
     : TemplateContentData();

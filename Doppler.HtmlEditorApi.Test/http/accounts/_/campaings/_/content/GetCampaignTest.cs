@@ -102,12 +102,12 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     public async Task GET_campaign_should_accept_right_tokens_and_return_404_when_not_exist(string url, string token, string expectedAccountName, int expectedIdCampaign)
     {
         // Arrange
-        BaseHtmlCampaignContentData contentData = null;
+        CampaignModel campaignModel = null;
         var repositoryMock = new Mock<ICampaignContentRepository>();
 
         repositoryMock
             .Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-            .ReturnsAsync(contentData);
+            .ReturnsAsync(campaignModel);
 
         var client = _factory.CreateSutClient(
             serviceToOverride1: repositoryMock.Object,
@@ -136,15 +136,18 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
             }),
             HtmlContent: "<html></html>",
             HtmlHead: null,
-            PreviewImage: null,
-            CampaignName: "unlayer_name",
             IdTemplate: null);
+        var campaignModel = new CampaignModel(
+            CampaignId: expectedIdCampaign,
+            Name: "unlayer_name",
+            PreviewImage: null,
+            Content: contentData);
 
         var repositoryMock = new Mock<ICampaignContentRepository>();
 
         repositoryMock
             .Setup(x => x.GetCampaignModel(expectedAccountName, expectedIdCampaign))
-            .ReturnsAsync(contentData);
+            .ReturnsAsync(campaignModel);
 
         var client = _factory.CreateSutClient(
             serviceToOverride1: repositoryMock.Object,
@@ -160,7 +163,6 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Matches("\"type\":\"unlayer\"", responseContent);
-        Assert.Matches("\"campaignName\":\"unlayer_name\"", responseContent);
         Assert.NotNull(contentModelResponse.meta);
         Assert.True(contentModelResponse.meta.Value.TryGetProperty("schemaVersion", out var resultSchemaVersionProp), "schemaVersion property is not present");
         Assert.Equal(JsonValueKind.Number, resultSchemaVersionProp.ValueKind);

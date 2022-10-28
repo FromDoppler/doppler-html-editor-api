@@ -32,12 +32,12 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
             });
         var repository = new DopplerTemplateRepository(dbContextMock.Object);
 
-        var templateContentData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
-        var unlayerTemplateContentData = Assert.IsType<UnlayerTemplateContentData>(templateContentData);
+        var templateModel = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
+        var unlayerTemplateContentData = Assert.IsType<UnlayerTemplateContentData>(templateModel.Content);
         Assert.NotNull(unlayerTemplateContentData.HtmlComplete);
         Assert.NotNull(unlayerTemplateContentData.Meta);
-        Assert.NotNull(unlayerTemplateContentData.PreviewImage);
-        Assert.Equal(isPublicExpected, unlayerTemplateContentData.IsPublic);
+        Assert.NotNull(templateModel.PreviewImage);
+        Assert.Equal(isPublicExpected, templateModel.IsPublic);
         dbContextMock.VerifyAll();
     }
 
@@ -61,10 +61,10 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
             });
         var repository = new DopplerTemplateRepository(dbContextMock.Object);
 
-        var templateContentData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
-        var uknownTemplateContentData = Assert.IsType<UnknownTemplateContentData>(templateContentData);
-        Assert.Equal(isPublicExpected, uknownTemplateContentData.IsPublic);
-        Assert.Equal(_msEditorType, uknownTemplateContentData.EditorType);
+        var templateModel = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
+        var unknownTemplateContentData = Assert.IsType<UnknownTemplateContentData>(templateModel.Content);
+        Assert.Equal(isPublicExpected, templateModel.IsPublic);
+        Assert.Equal(_msEditorType, unknownTemplateContentData.EditorType);
         dbContextMock.VerifyAll();
     }
 }

@@ -129,13 +129,16 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName, int templateId)
     {
         // Arrange
-        var templateContentData = new UnlayerTemplateContentData(
+        var contentData = new UnlayerTemplateContentData(
             HtmlComplete: "<html></html>",
-            Meta: "{}",
+            Meta: "{}");
+
+        var templateModel = new TemplateModel(
+            TemplateId: templateId,
+            IsPublic: true,
             PreviewImage: "",
-            Name: "",
-            EditorType: 5,
-            IsPublic: true
+            Name: "TemplateName",
+            Content: contentData
         );
 
         var templateRepositoryMock = new Mock<ITemplateRepository>();
@@ -146,7 +149,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Draft));
         templateRepositoryMock
             .Setup(x => x.GetTemplate(expectedAccountName, templateId))
-            .ReturnsAsync(templateContentData);
+            .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(
             templateRepositoryMock.Object,
@@ -166,13 +169,19 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     }
 
     [Theory]
-    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123", TestUsersData.TOKEN_TEST1_EXPIRE_20330518)]
-    public async Task POST_content_from_template_should_return_error_when_type_is_not_unlayer_editor(string url, string token)
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, 123)]
+    public async Task POST_content_from_template_should_return_error_when_type_is_not_unlayer_editor(string url, string token, int templateId)
     {
         // Arrange
         var templateContentData = new UnknownTemplateContentData(
-            EditorType: 4,
-            IsPublic: true
+            EditorType: 4);
+
+        var templateModel = new TemplateModel(
+            TemplateId: templateId,
+            IsPublic: true,
+            PreviewImage: "",
+            Name: "TemplateName",
+            Content: templateContentData
         );
 
         var templateRepositoryMock = new Mock<ITemplateRepository>();
@@ -182,8 +191,8 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             .Setup(x => x.GetCampaignState(It.IsAny<string>(), It.IsAny<int>()))
             .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Draft));
         templateRepositoryMock
-            .Setup(x => x.GetTemplate(It.IsAny<string>(), It.IsAny<int>()))
-            .ReturnsAsync(templateContentData);
+            .Setup(x => x.GetTemplate(It.IsAny<string>(), templateId))
+            .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(
             templateRepositoryMock.Object,

@@ -12,7 +12,8 @@ public record CampaignContent(
     [Required]
     string htmlContent,
     string previewImage,
-    string campaignName) : Content(type, meta, htmlContent, previewImage, campaignName), IValidatableObject
+    // Readonly
+    string campaignName) : Content(type, meta, htmlContent), IValidatableObject
 {
     private static readonly HashSet<ContentType> ValidContentTypes = new HashSet<ContentType>(Enum.GetValues<ContentType>());
 

@@ -24,36 +24,41 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
         _dbContext = dbContext;
     }
 
-    public async Task<CampaignContentData> GetCampaignModel(string accountName, int campaignId)
+    public async Task<CampaignModel> GetCampaignModel(string accountName, int campaignId)
     {
         var queryResult = await _dbContext.ExecuteAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery(
             IdCampaign: campaignId,
             AccountName: accountName
         ));
 
-        return queryResult == null || !queryResult.CampaignExists ? null
-            : !queryResult.CampaignHasContent ? new EmptyCampaignContentData()
-            : queryResult.EditorType == EditorTypeMSEditor ? new MSEditorCampaignContentData(campaignId, queryResult.Content)
+        if (queryResult == null || !queryResult.CampaignExists)
+        {
+            return null;
+        }
+
+        CampaignContentData content = !queryResult.CampaignHasContent ? new EmptyCampaignContentData()
+            : queryResult.EditorType == EditorTypeMSEditor ? new MSEditorCampaignContentData(queryResult.Content)
             : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerCampaignContentData(
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
                 Meta: queryResult.Meta,
-                PreviewImage: queryResult.PreviewImage,
-                CampaignName: queryResult.Name,
                 IdTemplate: queryResult.IdTemplate)
             : queryResult.EditorType == null ? new HtmlCampaignContentData(
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
-                PreviewImage: queryResult.PreviewImage,
-                CampaignName: queryResult.Name,
                 IdTemplate: queryResult.IdTemplate)
             : new UnknownCampaignContentData(
-                CampaignId: queryResult.IdCampaign,
                 Content: queryResult.Content,
                 Head: queryResult.Head,
                 Meta: queryResult.Meta,
-                EditorType: queryResult.EditorType,
-                PreviewImage: queryResult.PreviewImage);
+                EditorType: queryResult.EditorType);
+
+        return new CampaignModel(
+            queryResult.IdCampaign,
+            Name: queryResult.Name,
+            queryResult.PreviewImage,
+            content
+        );
     }
 
     public async Task<CampaignState> GetCampaignState(string accountName, int campaignId)
