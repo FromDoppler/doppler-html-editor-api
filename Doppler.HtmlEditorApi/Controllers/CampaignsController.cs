@@ -54,33 +54,33 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpGet("/accounts/{accountName}/campaigns/{campaignId}/content")]
-        public async Task<ActionResult<CampaignContent>> GetCampaign(string accountName, int campaignId)
+        public async Task<ActionResult<CampaignContent>> GetCampaignContent(string accountName, int campaignId)
         {
             // TODO: Considere refactoring accountName validation
-            var contentRow = await _campaignContentRepository.GetCampaignModel(accountName, campaignId);
+            var contentData = await _campaignContentRepository.GetCampaignModel(accountName, campaignId);
 
-            ActionResult<CampaignContent> result = contentRow switch
+            ActionResult<CampaignContent> result = contentData switch
             {
                 null => new NotFoundObjectResult("Campaign not found or belongs to a different account"),
-                EmptyContentData => new CampaignContent(
+                EmptyCampaignContentData => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(EmptyUnlayerContentJson),
                     htmlContent: EmptyUnlayerContentHtml,
                     previewImage: null,
                     campaignName: null), // TODO: Take the name from campaign information
-                UnlayerContentData unlayerContent => new CampaignContent(
+                UnlayerCampaignContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(unlayerContent.Meta),
                     htmlContent: GenerateHtmlContent(unlayerContent),
                     previewImage: unlayerContent.PreviewImage,
                     campaignName: unlayerContent.CampaignName),
-                BaseHtmlContentData htmlContent => new CampaignContent(
+                BaseHtmlCampaignContentData htmlContent => new CampaignContent(
                     type: ContentType.html,
                     meta: null,
                     htmlContent: GenerateHtmlContent(htmlContent),
                     previewImage: htmlContent.PreviewImage,
                     campaignName: htmlContent.CampaignName),
-                _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
+                _ => throw new NotImplementedException($"Unsupported campaign content type {contentData.GetType()}")
             };
 
             return result;
@@ -96,7 +96,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content")]
-        public async Task<IActionResult> SaveCampaign(string accountName, int campaignId, CampaignContent campaignContent)
+        public async Task<IActionResult> SaveCampaignContent(string accountName, int campaignId, CampaignContent campaignContent)
         {
             var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
             if (!ValidateCampaignStateToUpdate(campaignState, out var error))
@@ -113,16 +113,16 @@ namespace Doppler.HtmlEditorApi.Controllers
             // TODO: Validate if it's possible to delete PreviewImage property from BaseHtmlContentData,
             // because it's already in campaignContent
             // See it on: https://github.com/FromDoppler/doppler-html-editor-api/pull/111#discussion_r870681998
-            BaseHtmlContentData baseHtmlContent = campaignContent.type switch
+            BaseHtmlCampaignContentData contentData = campaignContent.type switch
             {
-                ContentType.unlayer => new UnlayerContentData(
+                ContentType.unlayer => new UnlayerCampaignContentData(
                     HtmlContent: content,
                     HtmlHead: head,
                     Meta: campaignContent.meta.ToString(),
                     PreviewImage: campaignContent.previewImage,
                     CampaignName: campaignContent.campaignName,
                     IdTemplate: null),
-                ContentType.html => new HtmlContentData(
+                ContentType.html => new HtmlCampaignContentData(
                     HtmlContent: content,
                     HtmlHead: head,
                     PreviewImage: campaignContent.previewImage,
@@ -131,7 +131,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
 
-            await SaveCampaignContent(baseHtmlContent, fieldIds, trackableUrls, campaignState);
+            await SaveCampaignContent(contentData, fieldIds, trackableUrls, campaignState);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
@@ -146,8 +146,8 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return error;
             }
 
-            var templateData = await _templateRepository.GetTemplate(accountName, templateId);
-            if (templateData == null)
+            var templateContentData = await _templateRepository.GetTemplate(accountName, templateId);
+            if (templateContentData == null)
             {
                 return new NotFoundObjectResult(new ProblemDetails()
                 {
@@ -155,7 +155,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                     Detail = $@"The template not exists or Inactive"
                 });
             }
-            if (templateData is not UnlayerTemplateData unlayerTemplateData)
+            if (templateContentData is not UnlayerTemplateContentData unlayerTemplateData)
             {
                 return new BadRequestObjectResult(new ProblemDetails()
                 {
@@ -164,7 +164,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 });
             }
 
-            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, unlayerTemplateData.HtmlCode);
+            var htmlDocument = await ExtractHtmlDomFromCampaignContent(accountName, unlayerTemplateData.HtmlComplete);
             var head = htmlDocument.GetHeadContent();
             var content = htmlDocument.GetDopplerContent();
             var fieldIds = htmlDocument.GetFieldIds();
@@ -173,7 +173,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             // TODO: Validate if it's possible to delete PreviewImage property from BaseHtmlContentData,
             // because it's already in campaignContent
             // See it on: https://github.com/FromDoppler/doppler-html-editor-api/pull/111#discussion_r870681998
-            BaseHtmlContentData baseHtmlContent = new UnlayerContentData(
+            BaseHtmlCampaignContentData contentData = new UnlayerCampaignContentData(
                     HtmlContent: content,
                     HtmlHead: head,
                     Meta: unlayerTemplateData.Meta,
@@ -182,36 +182,35 @@ namespace Doppler.HtmlEditorApi.Controllers
                     IdTemplate: templateId);
 
             // TODO: Save templateId reference with the content
-            await SaveCampaignContent(baseHtmlContent, fieldIds, trackableUrls, campaignState);
+            await SaveCampaignContent(contentData, fieldIds, trackableUrls, campaignState);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
         }
 
-        private async Task SaveCampaignContent(BaseHtmlContentData content, IEnumerable<int> fieldIds, IEnumerable<string> trackableUrls, CampaignState campaignState)
+        private async Task SaveCampaignContent(BaseHtmlCampaignContentData contentData, IEnumerable<int> fieldIds, IEnumerable<string> trackableUrls, CampaignState campaignState)
         {
-
             var campaignIds = new[] { campaignState.IdCampaignA, campaignState.IdCampaignB }
                 .Where(x => x != null)
                 .Select(x => x.Value);
 
-            foreach (var campaign in campaignIds)
+            foreach (var campaignId in campaignIds)
             {
                 if (campaignState.ContentExists)
                 {
-                    await _campaignContentRepository.UpdateCampaignContent(campaign, content);
+                    await _campaignContentRepository.UpdateCampaignContent(campaignId, contentData);
                 }
                 else
                 {
-                    await _campaignContentRepository.CreateCampaignContent(campaign, content);
+                    await _campaignContentRepository.CreateCampaignContent(campaignId, contentData);
                     await _campaignContentRepository.UpdateCampaignStatus(
                         setCurrentStep: 2,
                         setHtmlSourceType: TemplateHtmlSourceType,
-                        whenIdCampaignIs: campaign,
+                        whenIdCampaignIs: campaignId,
                         whenCurrentStepIs: 1);
                 }
-                await _campaignContentRepository.UpdateCampaignPreviewImage(campaign, content.PreviewImage);
-                await _campaignContentRepository.SaveNewFieldIds(campaign, fieldIds);
-                await _campaignContentRepository.SaveLinks(campaign, trackableUrls);
+                await _campaignContentRepository.UpdateCampaignPreviewImage(campaignId, contentData.PreviewImage);
+                await _campaignContentRepository.SaveNewFieldIds(campaignId, fieldIds);
+                await _campaignContentRepository.SaveLinks(campaignId, trackableUrls);
             }
 
             if (campaignState.IdCampaignResult != null && !campaignState.ContentExists)
@@ -243,9 +242,9 @@ namespace Doppler.HtmlEditorApi.Controllers
             return htmlDocument;
         }
 
-        private static string GenerateHtmlContent(BaseHtmlContentData content)
+        private static string GenerateHtmlContent(BaseHtmlCampaignContentData content)
             // Notice that it is not symmetric with ExtractDopplerHtmlData.
-            // The head is being lossed here. It is not good if we try to edit an imported content.
+            // The head is being loosed here. It is not good if we try to edit an imported content.
             // Old Doppler code:
             // https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.HypermediaAPI/ApiMappers/FromDoppler/DtoContent_To_CampaignContent.cs#L23
             => content.HtmlContent;

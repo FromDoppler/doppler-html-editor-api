@@ -24,7 +24,7 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
         _dbContext = dbContext;
     }
 
-    public async Task<ContentData> GetCampaignModel(string accountName, int campaignId)
+    public async Task<CampaignContentData> GetCampaignModel(string accountName, int campaignId)
     {
         var queryResult = await _dbContext.ExecuteAsync(new FirstOrDefaultContentWithCampaignStatusDbQuery(
             IdCampaign: campaignId,
@@ -32,22 +32,22 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
         ));
 
         return queryResult == null || !queryResult.CampaignExists ? null
-            : !queryResult.CampaignHasContent ? new EmptyContentData()
-            : queryResult.EditorType == EditorTypeMSEditor ? new MSEditorContentData(campaignId, queryResult.Content)
-            : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerContentData(
+            : !queryResult.CampaignHasContent ? new EmptyCampaignContentData()
+            : queryResult.EditorType == EditorTypeMSEditor ? new MSEditorCampaignContentData(campaignId, queryResult.Content)
+            : queryResult.EditorType == EditorTypeUnlayer ? new UnlayerCampaignContentData(
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
                 Meta: queryResult.Meta,
                 PreviewImage: queryResult.PreviewImage,
                 CampaignName: queryResult.Name,
                 IdTemplate: queryResult.IdTemplate)
-            : queryResult.EditorType == null ? new HtmlContentData(
+            : queryResult.EditorType == null ? new HtmlCampaignContentData(
                 HtmlContent: queryResult.Content,
                 HtmlHead: queryResult.Head,
                 PreviewImage: queryResult.PreviewImage,
                 CampaignName: queryResult.Name,
                 IdTemplate: queryResult.IdTemplate)
-            : new UnknownContentData(
+            : new UnknownCampaignContentData(
                 CampaignId: queryResult.IdCampaign,
                 Content: queryResult.Content,
                 Head: queryResult.Head,
@@ -95,12 +95,12 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
             );
     }
 
-    public async Task CreateCampaignContent(int campaignId, ContentData content)
+    public async Task CreateCampaignContent(int campaignId, CampaignContentData content)
     {
 
         IExecutableDbQuery insertContentQuery = content switch
         {
-            UnlayerContentData unlayerContentData => new InsertCampaignContentDbQuery(
+            UnlayerCampaignContentData unlayerContentData => new InsertCampaignContentDbQuery(
                 IdCampaign: campaignId,
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
@@ -108,7 +108,7 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
                 EditorType: EditorTypeUnlayer,
                 IdTemplate: unlayerContentData.IdTemplate
             ),
-            HtmlContentData htmlContentData => new InsertCampaignContentDbQuery(
+            HtmlCampaignContentData htmlContentData => new InsertCampaignContentDbQuery(
                 IdCampaign: campaignId,
                 Content: htmlContentData.HtmlContent,
                 Head: htmlContentData.HtmlHead,
@@ -124,11 +124,11 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
         await _dbContext.ExecuteAsync(insertContentQuery);
     }
 
-    public async Task UpdateCampaignContent(int campaignId, ContentData content)
+    public async Task UpdateCampaignContent(int campaignId, CampaignContentData content)
     {
         IExecutableDbQuery updateContentQuery = content switch
         {
-            UnlayerContentData unlayerContentData => new UpdateCampaignContentDbQuery(
+            UnlayerCampaignContentData unlayerContentData => new UpdateCampaignContentDbQuery(
                 IdCampaign: campaignId,
                 Content: unlayerContentData.HtmlContent,
                 Head: unlayerContentData.HtmlHead,
@@ -136,7 +136,7 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
                 EditorType: EditorTypeUnlayer,
                 IdTemplate: unlayerContentData.IdTemplate
             ),
-            HtmlContentData htmlContentData => new UpdateCampaignContentDbQuery(
+            HtmlCampaignContentData htmlContentData => new UpdateCampaignContentDbQuery(
                 IdCampaign: campaignId,
                 Content: htmlContentData.HtmlContent,
                 Head: htmlContentData.HtmlHead,

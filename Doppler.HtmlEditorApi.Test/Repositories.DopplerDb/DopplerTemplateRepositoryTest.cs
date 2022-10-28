@@ -32,12 +32,12 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
             });
         var repository = new DopplerTemplateRepository(dbContextMock.Object);
 
-        var templateData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
-        var unlayerTemplateData = Assert.IsType<UnlayerTemplateData>(templateData);
-        Assert.NotNull(unlayerTemplateData.HtmlCode);
-        Assert.NotNull(unlayerTemplateData.Meta);
-        Assert.NotNull(unlayerTemplateData.PreviewImage);
-        Assert.Equal(isPublicExpected, unlayerTemplateData.IsPublic);
+        var templateContentData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
+        var unlayerTemplateContentData = Assert.IsType<UnlayerTemplateContentData>(templateContentData);
+        Assert.NotNull(unlayerTemplateContentData.HtmlComplete);
+        Assert.NotNull(unlayerTemplateContentData.Meta);
+        Assert.NotNull(unlayerTemplateContentData.PreviewImage);
+        Assert.Equal(isPublicExpected, unlayerTemplateContentData.IsPublic);
         dbContextMock.VerifyAll();
     }
 
@@ -61,10 +61,10 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
             });
         var repository = new DopplerTemplateRepository(dbContextMock.Object);
 
-        var templateData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
-        var uknownTemplateData = Assert.IsType<UnknownTemplateData>(templateData);
-        Assert.Equal(isPublicExpected, uknownTemplateData.IsPublic);
-        Assert.Equal(_msEditorType, uknownTemplateData.EditorType);
+        var templateContentData = await repository.GetTemplate(It.IsAny<string>(), It.IsAny<int>());
+        var uknownTemplateContentData = Assert.IsType<UnknownTemplateContentData>(templateContentData);
+        Assert.Equal(isPublicExpected, uknownTemplateContentData.IsPublic);
+        Assert.Equal(_msEditorType, uknownTemplateContentData.EditorType);
         dbContextMock.VerifyAll();
     }
 }

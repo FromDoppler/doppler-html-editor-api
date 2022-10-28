@@ -7,9 +7,9 @@ namespace Doppler.HtmlEditorApi.Repositories;
 public interface ICampaignContentRepository
 {
     Task<CampaignState> GetCampaignState(string accountName, int campaignId);
-    Task<ContentData> GetCampaignModel(string accountName, int campaignId);
-    Task CreateCampaignContent(int campaignId, ContentData content);
-    Task UpdateCampaignContent(int campaignId, ContentData content);
+    Task<CampaignContentData> GetCampaignModel(string accountName, int campaignId);
+    Task CreateCampaignContent(int campaignId, CampaignContentData content);
+    Task UpdateCampaignContent(int campaignId, CampaignContentData content);
 
     /// <summary>
     /// It keeps existing DB entries and only adds new ones without deleting anything.

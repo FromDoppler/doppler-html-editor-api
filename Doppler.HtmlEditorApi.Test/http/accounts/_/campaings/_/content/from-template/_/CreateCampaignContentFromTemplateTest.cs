@@ -129,8 +129,8 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName, int templateId)
     {
         // Arrange
-        var unlayerTemplateData = new UnlayerTemplateData(
-            HtmlCode: "<html></html>",
+        var templateContentData = new UnlayerTemplateContentData(
+            HtmlComplete: "<html></html>",
             Meta: "{}",
             PreviewImage: "",
             Name: "",
@@ -146,7 +146,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Draft));
         templateRepositoryMock
             .Setup(x => x.GetTemplate(expectedAccountName, templateId))
-            .ReturnsAsync(unlayerTemplateData);
+            .ReturnsAsync(templateContentData);
 
         var client = _factory.CreateSutClient(
             templateRepositoryMock.Object,
@@ -170,7 +170,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_return_error_when_type_is_not_unlayer_editor(string url, string token)
     {
         // Arrange
-        var uknownTemplateData = new UnknownTemplateData(
+        var templateContentData = new UnknownTemplateContentData(
             EditorType: 4,
             IsPublic: true
         );
@@ -183,7 +183,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Draft));
         templateRepositoryMock
             .Setup(x => x.GetTemplate(It.IsAny<string>(), It.IsAny<int>()))
-            .ReturnsAsync(uknownTemplateData);
+            .ReturnsAsync(templateContentData);
 
         var client = _factory.CreateSutClient(
             templateRepositoryMock.Object,
