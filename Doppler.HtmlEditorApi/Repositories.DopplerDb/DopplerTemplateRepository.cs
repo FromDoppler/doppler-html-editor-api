@@ -30,6 +30,7 @@ public class DopplerTemplateRepository : ITemplateRepository
                 HtmlCode: queryResult.HtmlCode,
                 Meta: queryResult.Meta,
                 PreviewImage: queryResult.PreviewImage,
+                Name: queryResult.Name,
                 EditorType: queryResult.EditorType,
                 IsPublic: queryResult.IsPublic)
             : new UnknownTemplateData(

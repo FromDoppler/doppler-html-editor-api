@@ -66,17 +66,20 @@ namespace Doppler.HtmlEditorApi.Controllers
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(EmptyUnlayerContentJson),
                     htmlContent: EmptyUnlayerContentHtml,
-                    previewImage: null),
+                    previewImage: null,
+                    campaignName: null), // TODO: Take the name from campaign information
                 UnlayerContentData unlayerContent => new CampaignContent(
                     type: ContentType.unlayer,
                     meta: Utils.ParseAsJsonElement(unlayerContent.Meta),
                     htmlContent: GenerateHtmlContent(unlayerContent),
-                    previewImage: unlayerContent.PreviewImage),
+                    previewImage: unlayerContent.PreviewImage,
+                    campaignName: unlayerContent.CampaignName),
                 BaseHtmlContentData htmlContent => new CampaignContent(
                     type: ContentType.html,
                     meta: null,
                     htmlContent: GenerateHtmlContent(htmlContent),
-                    previewImage: htmlContent.PreviewImage),
+                    previewImage: htmlContent.PreviewImage,
+                    campaignName: htmlContent.CampaignName),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {contentRow.GetType()}")
             };
 
@@ -117,11 +120,13 @@ namespace Doppler.HtmlEditorApi.Controllers
                     HtmlHead: head,
                     Meta: campaignContent.meta.ToString(),
                     PreviewImage: campaignContent.previewImage,
+                    CampaignName: campaignContent.campaignName,
                     IdTemplate: null),
                 ContentType.html => new HtmlContentData(
                     HtmlContent: content,
                     HtmlHead: head,
                     PreviewImage: campaignContent.previewImage,
+                    CampaignName: campaignContent.campaignName,
                     IdTemplate: null),
                 _ => throw new NotImplementedException($"Unsupported campaign content type {campaignContent.type:G}")
             };
@@ -173,6 +178,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                     HtmlHead: head,
                     Meta: unlayerTemplateData.Meta,
                     PreviewImage: unlayerTemplateData.PreviewImage,
+                    CampaignName: unlayerTemplateData.Name,
                     IdTemplate: templateId);
 
             // TODO: Save templateId reference with the content

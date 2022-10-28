@@ -7,6 +7,7 @@ public sealed record UnlayerTemplateData(
     string HtmlCode,
     string Meta,
     string PreviewImage,
+    string Name,
     int EditorType,
     bool IsPublic)
     : TemplateData();

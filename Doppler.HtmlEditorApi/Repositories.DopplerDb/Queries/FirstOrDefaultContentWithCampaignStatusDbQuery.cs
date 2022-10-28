@@ -17,7 +17,8 @@ SELECT
     co.Head,
     co.Meta,
     co.IdTemplate,
-    ca.PreviewImage
+    ca.PreviewImage,
+    ca.Name
 FROM [User] u
 LEFT JOIN [Campaign] ca ON
     u.IdUser = ca.IdUser
@@ -37,6 +38,7 @@ WHERE
         public string Head { get; init; }
         public string Meta { get; init; }
         public string PreviewImage { get; init; }
+        public string Name { get; init; }
         public int? IdTemplate { get; init; }
     }
 }

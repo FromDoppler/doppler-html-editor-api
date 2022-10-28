@@ -14,7 +14,8 @@ SELECT
     Tp.EditorType,
     Tp.HtmlCode,
     Tp.Meta,
-    Tp.PreviewImage
+    Tp.PreviewImage,
+    Tp.Name
 FROM [Template] Tp
 LEFT JOIN [User] u ON
     u.IdUser = Tp.IdUser
@@ -30,5 +31,6 @@ WHERE
         public string HtmlCode { get; init; }
         public string Meta { get; init; }
         public string PreviewImage { get; init; }
+        public string Name { get; init; }
     }
 }
