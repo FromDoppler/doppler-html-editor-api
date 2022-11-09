@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -61,7 +62,7 @@ public class DopplerHtmlDocument
 
     public IEnumerable<int> GetFieldIds()
         => FieldIdTagRegex.Matches(_contentNode.InnerHtml)
-            .Select(x => int.Parse(x.Groups[1].ValueSpan))
+            .Select(x => int.Parse(x.Groups[1].ValueSpan, provider: CultureInfo.InvariantCulture))
             .Distinct();
 
     public IEnumerable<string> GetTrackableUrls()
@@ -124,7 +125,7 @@ public class DopplerHtmlDocument
     {
         _contentNode.TraverseAndReplaceTextsAndAttributeValues(text => FieldIdTagRegex.Replace(
             text,
-            match => fieldIdExistFunc(int.Parse(match.Groups[1].ValueSpan))
+            match => fieldIdExistFunc(int.Parse(match.Groups[1].ValueSpan, provider: CultureInfo.InvariantCulture))
                 ? match.Value
                 : string.Empty));
     }

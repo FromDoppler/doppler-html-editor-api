@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -16,7 +17,7 @@ namespace Doppler.HtmlEditorApi.Logging
             configuration.ConfigureLoggly(hostEnvironment);
 
             loggerConfiguration
-                .WriteTo.Console()
+                .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
                 .Enrich.WithProperty("Application", hostEnvironment.ApplicationName)
                 .Enrich.WithProperty("Environment", hostEnvironment.EnvironmentName)
                 .Enrich.WithProperty("Platform", Environment.OSVersion.Platform)
@@ -26,7 +27,7 @@ namespace Doppler.HtmlEditorApi.Logging
             if (!hostEnvironment.IsDevelopment())
             {
                 loggerConfiguration
-                    .WriteTo.Loggly();
+                    .WriteTo.Loggly(formatProvider: CultureInfo.InvariantCulture);
             }
 
             loggerConfiguration.ReadFrom.Configuration(configuration);
