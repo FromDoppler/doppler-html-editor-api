@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Doppler.HtmlEditorApi/bin/Debug/net6.0/Doppler.HtmlEditorApi.dll",
+            "program": "${workspaceFolder}/Doppler.HtmlEditorApi/bin/Debug/net7.0/Doppler.HtmlEditorApi.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Doppler.HtmlEditorApi",
             "stopAtEntry": false,
