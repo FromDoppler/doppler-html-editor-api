@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.ApiModels;
+using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.DopplerSecurity;
+using Doppler.HtmlEditorApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +13,37 @@ namespace Doppler.HtmlEditorApi.Controllers
     [ApiController]
     public class TemplatesController
     {
+        private readonly ITemplateRepository _templateRepository;
+
+        public TemplatesController(ITemplateRepository templateRepository)
+        {
+            _templateRepository = templateRepository;
+        }
+
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpGet("/accounts/{accountName}/templates/{templateId}")]
-        public Task<ActionResult<Template>> GetTemplate(string accountName, int templateId)
+        public async Task<ActionResult<Template>> GetTemplate(string accountName, int templateId)
         {
-            throw new NotImplementedException();
+            // TODO: Considere refactoring accountName validation
+            var templateModel = await _templateRepository.GetTemplate(accountName, templateId);
+
+            if (templateModel == null)
+            {
+                return new NotFoundObjectResult("Template not found or belongs to a different account");
+            }
+
+            ActionResult<Template> result = templateModel.Content switch
+            {
+                UnlayerTemplateContentData unlayerContent => new Template(
+                    name: templateModel.Name,
+                    isPublic: templateModel.IsPublic,
+                    previewImage: templateModel.PreviewImage,
+                    htmlContent: unlayerContent.HtmlComplete,
+                    meta: Utils.ParseAsJsonElement(unlayerContent.Meta)),
+                _ => throw new NotImplementedException($"Unsupported template content type {templateModel.Content.GetType()}")
+            };
+
+            return result;
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
