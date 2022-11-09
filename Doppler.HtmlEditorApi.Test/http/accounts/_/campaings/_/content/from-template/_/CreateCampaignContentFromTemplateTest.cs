@@ -1,10 +1,8 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DataAccess;
@@ -126,7 +124,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 123)]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 123)]
     [InlineData("/accounts/otro@test.com/campaigns/456/content/from-template/123", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 123)]
-    public async Task POST_content_from_template_should_accept_right_tokens_and_return_Ok(string url, string token, string expectedAccountName, int templateId)
+    public async Task POST_content_from_template_should_accept_right_tokens_and_return_Ok(string url, string token, string accountName, int idTemplate)
     {
         // Arrange
         var contentData = new UnlayerTemplateContentData(
@@ -134,7 +132,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             Meta: "{}");
 
         var templateModel = new TemplateModel(
-            TemplateId: templateId,
+            TemplateId: idTemplate,
             IsPublic: true,
             PreviewImage: "",
             Name: "TemplateName",
@@ -145,10 +143,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         var campaignContentRepositoryMock = new Mock<ICampaignContentRepository>();
 
         campaignContentRepositoryMock
-            .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
+            .Setup(x => x.GetCampaignState(accountName, It.IsAny<int>()))
             .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Draft));
         templateRepositoryMock
-            .Setup(x => x.GetTemplate(expectedAccountName, templateId))
+            .Setup(x => x.GetTemplate(accountName, idTemplate))
             .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(
@@ -170,14 +168,14 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
 
     [Theory]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, 123)]
-    public async Task POST_content_from_template_should_return_error_when_type_is_not_unlayer_editor(string url, string token, int templateId)
+    public async Task POST_content_from_template_should_return_error_when_type_is_not_unlayer_editor(string url, string token, int idTemplate)
     {
         // Arrange
         var templateContentData = new UnknownTemplateContentData(
             EditorType: 4);
 
         var templateModel = new TemplateModel(
-            TemplateId: templateId,
+            TemplateId: idTemplate,
             IsPublic: true,
             PreviewImage: "",
             Name: "TemplateName",
@@ -191,7 +189,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             .Setup(x => x.GetCampaignState(It.IsAny<string>(), It.IsAny<int>()))
             .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Draft));
         templateRepositoryMock
-            .Setup(x => x.GetTemplate(It.IsAny<string>(), templateId))
+            .Setup(x => x.GetTemplate(It.IsAny<string>(), idTemplate))
             .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(
@@ -215,17 +213,17 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_return_404_error_when_campaign_does_not_exist()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/123";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = false,
                 ContentExists = false,
@@ -254,17 +252,17 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_return_404_error_when_user_does_not_exist()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/123";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = false,
                 ContentExists = false,
@@ -293,15 +291,16 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     {
         // Arrange
         var repositoryMock = new Mock<ICampaignContentRepository>();
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/123";
         var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign content is read only\"");
         var matchDetail = new Regex("\"detail\"\\s*:\\s*\"The content cannot be edited because status campaign is Other\"");
 
         repositoryMock
-            .Setup(x => x.GetCampaignState(expectedAccountName, It.IsAny<int>()))
-            .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Other));
+            .Setup(x => x.GetCampaignState(accountName, It.IsAny<int>()))
+            .ReturnsAsync(new ClassicCampaignState(idCampaign, true, null, CampaignStatus.Other));
 
         var client = _factory.CreateSutClient(
             repositoryMock.Object,
@@ -329,18 +328,18 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_be_create_with_right_content_and_return_Ok(bool contentExist, string sqlQueryStartsWith)
     {
         // Arrange
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var accountName = TestUsersData.EMAIL_TEST1;
         var expectedTemplateId = 123;
-        var expectedIdCampaign = 456;
+        var idCampaign = 456;
         var htmlContent = "<html></html>";
-        var url = $"/accounts/{expectedAccountName}/campaigns/{expectedIdCampaign}/content/from-template/{expectedTemplateId}";
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{expectedTemplateId}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = contentExist,
@@ -348,10 +347,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 Status = 1
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(expectedTemplateId, expectedAccountName)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            expectedTemplateId,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -363,7 +362,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         dbContextMock
             .SetupInsertOrUpdateContentRow(
                 sqlQueryStartsWith,
-                expectedIdCampaign,
+                idCampaign,
                 htmlContent,
                 meta: "{}",
                 idTemplate: expectedTemplateId,
@@ -395,35 +394,35 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     {
         // Arrange
         var expectedIdTemplate = 123;
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/{expectedIdTemplate}";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
         var idCampaignB = 123;
         var idCampaignResult = 567;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{expectedIdTemplate}";
         var htmlContent = "My HTML Content";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = contentExists,
                 EditorType = currentEditorType,
                 Status = 1,
                 TestType = 1,
-                IdCampaignA = expectedIdCampaign,
+                IdCampaignA = idCampaign,
                 IdCampaignB = idCampaignB,
                 IdCampaignResult = idCampaignResult
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, expectedAccountName)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            expectedIdTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -435,7 +434,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         dbContextMock
             .SetupInsertOrUpdateContentRow(
                 sqlQueryStartsWith,
-                expectedIdCampaign,
+                idCampaign,
                 htmlContent,
                 meta: "{}",
                 expectedIdTemplate,
@@ -469,35 +468,36 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_update_campaign_status_when_campaign_is_TestAB_and_content_not_exist()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
         var idCampaignB = 123;
         var idCampaignResult = 567;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
         var htmlContent = "My HTML Content";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = false,
                 EditorType = null,
                 Status = 1,
                 TestType = 1,
-                IdCampaignA = expectedIdCampaign,
+                IdCampaignA = idCampaign,
                 IdCampaignB = idCampaignB,
                 IdCampaignResult = idCampaignResult
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, expectedAccountName)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -523,7 +523,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             It.Is<UpdateCampaignStatusDbQuery>(q =>
                 q.SetCurrentStep == 2 &&
                 q.SetHtmlSourceType == 2 &&
-                q.WhenIdCampaignIs == expectedIdCampaign &&
+                q.WhenIdCampaignIs == idCampaign &&
                 q.WhenCurrentStepIs == 1
             )));
 
@@ -548,32 +548,33 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_not_update_campaign_status_when_campaign_is_TestAB_and_content_exists()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = 4,
                 Status = 1,
                 TestType = 1,
-                IdCampaignA = expectedIdCampaign,
+                IdCampaignA = idCampaign,
                 IdCampaignB = 123,
                 IdCampaignResult = 567
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, expectedAccountName)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = "<html></html>",
@@ -604,19 +605,19 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     {
         // Arrange
         var expectedIdTemplate = 123;
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/{expectedIdTemplate}";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{expectedIdTemplate}";
         var htmlContent = "My HTML Content";
         var metaAsString = "{\"data\":\"My Meta Content\"}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = false,
@@ -625,10 +626,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, expectedAccountName)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            expectedIdTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -640,7 +641,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         dbContextMock
             .SetupInsertOrUpdateContentRow(
                 "INSERT",
-                expectedIdCampaign,
+                idCampaign,
                 htmlContent,
                 metaAsString,
                 expectedIdTemplate,
@@ -649,7 +650,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         var setCurrentStep = 2;
         var setHtmlSourceType = 2;
         var whenCurrentStepIs = 1;
-        var whenIdCampaignIs = expectedIdCampaign;
+        var whenIdCampaignIs = idCampaign;
         dbContextMock
             .Setup(x => x.ExecuteAsync(
                 new UpdateCampaignStatusDbQuery(
@@ -688,15 +689,17 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     {
         // Arrange
         var idCampaign = 456;
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{idCampaign}/content/from-template/123";
+        var idTemplate = 123;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = contentExists,
@@ -705,10 +708,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = "<html></html>",
@@ -752,15 +755,17 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         var idCampaign = 456;
         var idCampaignB = 789;
         var idCampaignResult = 321;
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{idCampaign}/content/from-template/123";
+        var idTemplate = 123;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = contentExists,
@@ -772,10 +777,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 IdCampaignResult = idCampaignResult
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = "<html></html>",
@@ -818,19 +823,19 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     {
         // Arrange
         var expectedIdTemplate = 123;
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/{expectedIdTemplate}";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{expectedIdTemplate}";
         var htmlContent = "My HTML Content";
         var metaAsString = "{\"data\":\"My Meta Content\"}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = contentExists,
@@ -839,10 +844,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            TestUsersData.EMAIL_TEST1,
+            expectedIdTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -854,7 +859,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         dbContextMock
             .SetupInsertOrUpdateContentRow(
                 sqlQueryStartsWith,
-                expectedIdCampaign,
+                idCampaign,
                 htmlContent,
                 metaAsString,
                 expectedIdTemplate,
@@ -882,17 +887,18 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_store_field_relations(string htmlContent, string expectedSubQuery)
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
@@ -901,10 +907,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -930,7 +936,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         dbContextMock.VerifyAll();
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<SaveNewCampaignFields>(q =>
-                q.IdContent == expectedIdCampaign
+                q.IdContent == idCampaign
                 && q.SqlQueryContains(expectedSubQuery))
         ), Times.Once);
     }
@@ -942,34 +948,35 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_store_field_relations_in_campaign_TestAB(string htmlContent, string expectedSubQuery)
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
         var idCampaignB = 789;
         var idCampaignResult = 321;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = 5,
                 Status = 1,
                 TestType = 1,
-                IdCampaignA = expectedIdCampaign,
+                IdCampaignA = idCampaign,
                 IdCampaignB = idCampaignB,
                 IdCampaignResult = idCampaignResult
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -995,7 +1002,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         dbContextMock.VerifyAll();
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<SaveNewCampaignFields>(q =>
-                q.IdContent == expectedIdCampaign
+                q.IdContent == idCampaign
                 && q.SqlQueryContains(expectedSubQuery))
         ), Times.Once);
 
@@ -1010,18 +1017,19 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_no_store_field_relations_when_no_fields()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
         var htmlContent = "<html>No content</html>";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
@@ -1030,10 +1038,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -1077,17 +1085,18 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_add_and_remove_link_relations(string htmlContent, string[] expectedLinks)
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
@@ -1095,15 +1104,15 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 Status = 1,
                 TestType = null,
                 TestABCategory = null,
-                IdCampaignA = 456,
+                IdCampaignA = idCampaign,
                 IdCampaignB = null,
                 IdCampaignResult = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -1128,11 +1137,11 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
 
-        dbContextMock.VerifyLinksSendToSaveNewCampaignLinks(expectedIdCampaign, expectedLinks);
+        dbContextMock.VerifyLinksSendToSaveNewCampaignLinks(idCampaign, expectedLinks);
 
-        dbContextMock.VerifyLinksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks(expectedIdCampaign, expectedLinks);
+        dbContextMock.VerifyLinksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks(idCampaign, expectedLinks);
 
-        dbContextMock.VerifyLinksSendToDeleteRemovedCampaignLinks(expectedIdCampaign, expectedLinks);
+        dbContextMock.VerifyLinksSendToDeleteRemovedCampaignLinks(idCampaign, expectedLinks);
     }
 
     [Theory]
@@ -1150,19 +1159,20 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_add_and_remove_link_relations_in_campaign_TestAB(string htmlContent, string[] expectedLinks)
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
         var idCampaignB = 789;
         var idCampaignResult = 321;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
@@ -1170,15 +1180,15 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 Status = 1,
                 TestType = 1,
                 TestABCategory = null,
-                IdCampaignA = expectedIdCampaign,
+                IdCampaignA = idCampaign,
                 IdCampaignB = idCampaignB,
                 IdCampaignResult = idCampaignResult
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -1203,11 +1213,11 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         dbContextMock.VerifyAll();
 
-        dbContextMock.VerifyLinksSendToSaveNewCampaignLinks(expectedIdCampaign, expectedLinks);
+        dbContextMock.VerifyLinksSendToSaveNewCampaignLinks(idCampaign, expectedLinks);
 
-        dbContextMock.VerifyLinksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks(expectedIdCampaign, expectedLinks);
+        dbContextMock.VerifyLinksSendToDeleteAutomationConditionalsOfRemovedCampaignLinks(idCampaign, expectedLinks);
 
-        dbContextMock.VerifyLinksSendToDeleteRemovedCampaignLinks(expectedIdCampaign, expectedLinks);
+        dbContextMock.VerifyLinksSendToDeleteRemovedCampaignLinks(idCampaign, expectedLinks);
 
         dbContextMock.VerifyLinksSendToSaveNewCampaignLinks(idCampaignB, expectedLinks);
 
@@ -1221,18 +1231,19 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_no_add_links_relations_when_no_links()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
         var htmlContent = "<html>No content</html>";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
@@ -1241,10 +1252,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -1278,18 +1289,19 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_remove_links_relations_when_no_links()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
         var htmlContent = "<html>No content</html>";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
@@ -1298,10 +1310,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -1328,13 +1340,13 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
 
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
+                q.IdContent == idCampaign
                 && !q.Links.Any())
         ), Times.Once);
 
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<DeleteRemovedCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
+                q.IdContent == idCampaign
                 && !q.Links.Any())
         ), Times.Once);
     }
@@ -1343,35 +1355,36 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     public async Task POST_content_from_template_should_remove_links_relations_when_no_links_in_campaign_TestAB()
     {
         // Arrange
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content/from-template/123";
+        var idTemplate = 123;
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
-        var expectedIdCampaign = 456;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var idCampaign = 456;
         var idCampaignB = 789;
         var idCampaignResult = 321;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
         var htmlContent = "<html>No content</html>";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(expectedIdCampaign, expectedAccountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
                 EditorType = 5,
                 Status = 1,
                 TestType = 1,
-                IdCampaignA = expectedIdCampaign,
+                IdCampaignA = idCampaign,
                 IdCampaignB = idCampaignB,
                 IdCampaignResult = idCampaignResult
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
@@ -1398,13 +1411,13 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
 
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<DeleteAutomationConditionalsOfRemovedCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
+                q.IdContent == idCampaign
                 && !q.Links.Any())
         ), Times.Once);
 
         dbContextMock.Verify(x => x.ExecuteAsync(
             It.Is<DeleteRemovedCampaignLinks>(q =>
-                q.IdContent == expectedIdCampaign
+                q.IdContent == idCampaign
                 && !q.Links.Any())
         ), Times.Once);
 
@@ -1440,14 +1453,15 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var accountName = TestUsersData.EMAIL_TEST1;
         var idCampaign = 456;
-        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/123";
+        var idTemplate = 123;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = existingContent,
@@ -1456,10 +1470,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlInput,
@@ -1515,14 +1529,15 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var accountName = TestUsersData.EMAIL_TEST1;
         var idCampaign = 456;
-        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/123";
+        var idTemplate = 123;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
@@ -1531,10 +1546,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlInput,
@@ -1598,14 +1613,15 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         // Arrange
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
         var accountName = TestUsersData.EMAIL_TEST1;
-        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/123";
+        var idTemplate = 123;
+        var url = $"/accounts/{accountName}/campaigns/{idCampaign}/content/from-template/{idTemplate}";
 
         var dbContextMock = new Mock<IDbContext>();
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new FirstOrDefaultCampaignStatusDbQuery(idCampaign, accountName)))
-            .ReturnsAsync(new FirstOrDefaultCampaignStatusDbQuery.Result()
+        dbContextMock.SetupCampaignStatus(
+            accountName,
+            idCampaign,
+            new()
             {
                 OwnCampaignExists = true,
                 ContentExists = true,
@@ -1614,10 +1630,10 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 TestType = null
             });
 
-        dbContextMock
-            .Setup(x => x.ExecuteAsync(
-                new GetTemplateByIdWithStatusDbQuery(123, TestUsersData.EMAIL_TEST1)))
-            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
             {
                 EditorType = 5,
                 HtmlCode = htmlInput,
@@ -1659,14 +1675,14 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
         var campaignIdA = 456;
         var campaignIdB = 789;
         var campaignIdResult = 123;
-        var url = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{campaignId}/content/from-template/123";
         var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
-        var expectedAccountName = TestUsersData.EMAIL_TEST1;
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var url = $"/accounts/{accountName}/campaigns/{campaignId}/content/from-template/123";
         var matchTitle = new Regex("\"title\"\\s*:\\s*\"The campaign is AB Test by content\"");
         var matchDetail = new Regex($"\"detail\"\\s*:\\s*\"The type of campaign is AB Test by content and it's unsupported\"");
 
         repositoryMock
-            .Setup(x => x.GetCampaignState(expectedAccountName, campaignId))
+            .Setup(x => x.GetCampaignState(accountName, campaignId))
             .ReturnsAsync(new TestABCampaignState(true, null, CampaignStatus.Draft, TestABCondition.TypeTestABContent, campaignIdA, campaignIdB, campaignIdResult));
 
         var client = _factory.CreateSutClient(

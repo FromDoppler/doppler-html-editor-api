@@ -25,6 +25,36 @@ public static class IDbContextMockExtensions
         setup.ReturnsAsync(result);
     }
 
+    public static void SetupCampaignStatus(
+        this Mock<IDbContext> dbContextMock,
+        string expectedAccountName,
+        int expectedIdCampaign,
+        FirstOrDefaultCampaignStatusDbQuery.Result result)
+    {
+        var setup = dbContextMock.Setup(x => x.ExecuteAsync(
+            new FirstOrDefaultCampaignStatusDbQuery(
+                expectedIdCampaign,
+                expectedAccountName
+            )));
+
+        setup.ReturnsAsync(result);
+    }
+
+    public static void SetupTemplateWithStatus(
+        this Mock<IDbContext> dbContextMock,
+        string accountName,
+        int idTemplate,
+        GetTemplateByIdWithStatusDbQuery.Result result)
+    {
+        var setup = dbContextMock.Setup(x => x.ExecuteAsync(
+            new GetTemplateByIdWithStatusDbQuery(
+                idTemplate,
+                accountName
+            )));
+
+        setup.ReturnsAsync(result);
+    }
+
     public static void SetupBasicFields(
         this Mock<IDbContext> dbContextMock)
     {
