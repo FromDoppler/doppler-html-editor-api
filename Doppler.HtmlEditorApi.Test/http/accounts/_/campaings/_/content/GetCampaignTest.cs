@@ -267,6 +267,10 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         // Assert
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal("https://httpstatuses.io/500", responseContentJson.GetProperty("type").GetString());
+        Assert.Equal("Internal Server Error", responseContentJson.GetProperty("title").GetString());
+        Assert.Equal("Unsupported campaign content type Doppler.HtmlEditorApi.Domain.MSEditorCampaignContentData", responseContentJson.GetProperty("detail").GetString());
+        Assert.Equal(500, responseContentJson.GetProperty("status").GetInt32());
     }
 
     [Theory]
@@ -443,6 +447,10 @@ public class GetCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         // Assert
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal("https://httpstatuses.io/500", responseContentJson.GetProperty("type").GetString());
+        Assert.Equal("Internal Server Error", responseContentJson.GetProperty("title").GetString());
+        Assert.Equal("Unsupported campaign content type Doppler.HtmlEditorApi.Domain.UnknownCampaignContentData", responseContentJson.GetProperty("detail").GetString());
+        Assert.Equal(500, responseContentJson.GetProperty("status").GetInt32());
     }
 
     [Theory]
