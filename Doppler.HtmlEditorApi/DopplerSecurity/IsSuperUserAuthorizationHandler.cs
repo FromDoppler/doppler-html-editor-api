@@ -10,19 +10,6 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
 {
     public partial class IsSuperUserAuthorizationHandler : AuthorizationHandler<DopplerAuthorizationRequirement>
     {
-        [LoggerMessage(0, LogLevel.Debug, "The token hasn't super user permissions.")]
-        partial void LogUserHasNotSuperUserPermissions();
-
-        [LoggerMessage(1, LogLevel.Debug, "The token super user permissions is false.")]
-        partial void LogTokenSuperUserPermissionsIsFalse();
-
-        private readonly ILogger<IsSuperUserAuthorizationHandler> _logger;
-
-        public IsSuperUserAuthorizationHandler(ILogger<IsSuperUserAuthorizationHandler> logger)
-        {
-            _logger = logger;
-        }
-
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, DopplerAuthorizationRequirement requirement)
         {
             if (requirement.AllowSuperUser && IsSuperUser(context))
@@ -33,22 +20,15 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
             return Task.CompletedTask;
         }
 
-        private bool IsSuperUser(AuthorizationHandlerContext context)
+        private static bool IsSuperUser(AuthorizationHandlerContext context)
         {
             if (!context.User.HasClaim(c => c.Type.Equals(DopplerSecurityDefaults.SuperUserJwtKey, StringComparison.Ordinal)))
             {
-                LogUserHasNotSuperUserPermissions();
                 return false;
             }
 
             var isSuperUser = bool.Parse(context.User.FindFirst(c => c.Type.Equals(DopplerSecurityDefaults.SuperUserJwtKey, StringComparison.Ordinal)).Value);
-            if (isSuperUser)
-            {
-                return true;
-            }
-
-            LogTokenSuperUserPermissionsIsFalse();
-            return false;
+            return isSuperUser;
         }
     }
 }
