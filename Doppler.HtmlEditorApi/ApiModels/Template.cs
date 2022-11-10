@@ -1,13 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
 namespace Doppler.HtmlEditorApi.ApiModels;
 
 public record Template(
-    string name,
+    string templateName,
     bool isPublic,
     string previewImage,
     string htmlContent,
-    JsonElement? meta)
-{
-    public string type { get; } = "unlayer";
-}
+    JsonElement? meta) : Content(ContentType.unlayer, meta, htmlContent);
