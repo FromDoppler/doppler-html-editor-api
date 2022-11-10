@@ -40,6 +40,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             ActionResult<Template> result = templateModel.Content switch
             {
                 UnlayerTemplateContentData unlayerContent => new Template(
+                    type: ContentType.unlayer,
                     templateName: templateModel.Name,
                     isPublic: templateModel.IsPublic,
                     previewImage: templateModel.PreviewImage,
