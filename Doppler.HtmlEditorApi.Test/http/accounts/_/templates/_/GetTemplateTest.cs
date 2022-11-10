@@ -154,7 +154,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(JsonValueKind.Number, resultSchemaVersionProp.ValueKind);
         Assert.True(resultSchemaVersionProp.TryGetInt32(out var resultSchemaVersion), "schemaVersion is not a valid Int32 value");
         Assert.Equal(expectedSchemaVersion, resultSchemaVersion);
-        Assert.Equal(name, contentModelResponse.name);
+        Assert.Equal(name, contentModelResponse.templateName);
         Assert.Equal(previewImage, contentModelResponse.previewImage);
         Assert.Equal(isPublic, contentModelResponse.isPublic);
         Assert.Equal(contentData.HtmlComplete, contentModelResponse.htmlContent);
@@ -245,7 +245,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(JsonValueKind.Object, responseContentJson.GetProperty("meta").ValueKind);
         Assert.Equal(meta, responseContentJson.GetProperty("meta").ToString());
         Assert.Equal(isPublic, responseContentJson.GetProperty("isPublic").GetBoolean());
-        Assert.Equal(name, responseContentJson.GetProperty("name").GetString());
+        Assert.Equal(name, responseContentJson.GetProperty("templateName").GetString());
         Assert.Equal(previewImage, responseContentJson.GetProperty("previewImage").GetString());
     }
 }
