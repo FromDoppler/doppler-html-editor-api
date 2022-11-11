@@ -200,4 +200,79 @@ public class PutTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("The meta field is required.", responseContentJson.GetProperty("errors").GetProperty("meta")[0].GetString());
     }
+
+    [Fact]
+    public async Task PUT_template_should_return_404_when_template_does_not_exist()
+    {
+        // Arrange
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var templateId = 456;
+        var url = $"/accounts/{accountName}/templates/{templateId}";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var jsonContent = JsonContent.Create(new
+        {
+            meta = new { },
+            htmlContent = "HTML CONTENT",
+            templateName = "TemplateName",
+            type = "unlayer"
+        });
+
+        var repositoryMock = new Mock<ITemplateRepository>();
+        repositoryMock
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, templateId))
+            .ReturnsAsync((TemplateModel)null);
+
+        var client = _factory.CreateSutClient(
+            repositoryMock.Object,
+            token);
+
+        // Act
+        var response = await client.PutAsync(url, jsonContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("Template not found, belongs to a different account, or it is a public template.", responseContent);
+    }
+
+    [Fact]
+    public async Task PUT_template_should_return_404_when_template_is_public()
+    {
+        // Arrange
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var templateId = 456;
+        var url = $"/accounts/{accountName}/templates/{templateId}";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var jsonContent = JsonContent.Create(new
+        {
+            meta = new { },
+            htmlContent = "HTML CONTENT",
+            templateName = "TemplateName",
+            type = "unlayer"
+        });
+
+        var repositoryMock = new Mock<ITemplateRepository>();
+        repositoryMock
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, templateId))
+            .ReturnsAsync(new TemplateModel(
+                TemplateId: templateId,
+                IsPublic: true,
+                PreviewImage: "PreviewImage",
+                Name: "Name",
+                Content: new UnlayerTemplateContentData(
+                    HtmlComplete: "HtmlComplete",
+                    Meta: "Meta")));
+
+        var client = _factory.CreateSutClient(
+            repositoryMock.Object,
+            token);
+
+        // Act
+        var response = await client.PutAsync(url, jsonContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("Template not found, belongs to a different account, or it is a public template.", responseContent);
+    }
 }

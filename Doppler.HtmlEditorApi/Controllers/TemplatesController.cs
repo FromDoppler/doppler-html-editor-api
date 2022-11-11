@@ -54,8 +54,16 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPut("/accounts/{accountName}/templates/{templateId}")]
-        public Task<IActionResult> SaveTemplate(string accountName, int templateId, Template templateModel)
+        public async Task<IActionResult> SaveTemplate(string accountName, int templateId, Template templateModel)
         {
+            // TODO: Considere refactoring accountName validation
+            var currentTemplate = await _templateRepository.GetOwnOrPublicTemplate(accountName, templateId);
+
+            if (currentTemplate == null || currentTemplate.IsPublic)
+            {
+                return new NotFoundObjectResult("Template not found, belongs to a different account, or it is a public template.");
+            }
+
             throw new NotImplementedException();
         }
 
