@@ -25,11 +25,16 @@ namespace Doppler.HtmlEditorApi.Controllers
         public async Task<ActionResult<Template>> GetTemplate(string accountName, int templateId)
         {
             // TODO: Considere refactoring accountName validation
-            var templateModel = await _templateRepository.GetTemplate(accountName, templateId);
+            var templateModel = await _templateRepository.GetOwnOrPublicTemplate(accountName, templateId);
 
             if (templateModel == null)
             {
                 return new NotFoundObjectResult("Template not found or belongs to a different account");
+            }
+
+            if (templateModel.IsPublic)
+            {
+                return new NotFoundObjectResult($"It is a public template, use /shared/templates/{templateId}");
             }
 
             ActionResult<Template> result = templateModel.Content switch

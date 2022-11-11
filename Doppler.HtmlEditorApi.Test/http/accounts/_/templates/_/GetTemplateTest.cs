@@ -89,7 +89,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         var repositoryMock = new Mock<ITemplateRepository>();
 
         repositoryMock
-            .Setup(x => x.GetTemplate(accountName, idTemplate))
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, idTemplate))
             .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(
@@ -112,7 +112,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
     {
         // Arrange
         var expectedSchemaVersion = 999;
-        var isPublic = true;
+        var isPublic = false;
         var previewImage = "PreviewImage";
         var name = "Name";
         var contentData = new UnlayerTemplateContentData(
@@ -132,7 +132,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         var repositoryMock = new Mock<ITemplateRepository>();
 
         repositoryMock
-            .Setup(x => x.GetTemplate(accountName, idTemplate))
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, idTemplate))
             .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(
@@ -162,7 +162,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
 
     [Theory]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/456", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
-    public async Task GET_templte_should_error_when_template_content_is_mseditor(string url, string token, string accountName, int idTemplate)
+    public async Task GET_template_should_error_when_template_content_is_mseditor(string url, string token, string accountName, int idTemplate)
     {
         var editorType = 4;
         var content = "content";
@@ -175,7 +175,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
             idTemplate,
             new()
             {
-                IsPublic = true,
+                IsPublic = false,
                 EditorType = editorType,
                 HtmlCode = content,
                 Meta = meta,
@@ -210,7 +210,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         var html = "<html></html>";
         var name = "Name";
         var previewImage = "Preview";
-        var isPublic = true;
+        var isPublic = false;
 
         var dbContextMock = new Mock<IDbContext>();
 
@@ -247,5 +247,43 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(isPublic, responseContentJson.GetProperty("isPublic").GetBoolean());
         Assert.Equal(name, responseContentJson.GetProperty("templateName").GetString());
         Assert.Equal(previewImage, responseContentJson.GetProperty("previewImage").GetString());
+    }
+
+    [Theory]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/456", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
+    public async Task GET_template_should_return_not_found_when_template_is_public(string url, string token, string accountName, int idTemplate)
+    {
+        var meta = "{\"demo\":\"unlayer\"}";
+        var html = "<html></html>";
+        var name = "Name";
+        var previewImage = "Preview";
+        var isPublic = true;
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock.SetupTemplateWithStatus(
+            accountName,
+            idTemplate,
+            new()
+            {
+                EditorType = 5,
+                HtmlCode = html,
+                IsPublic = isPublic,
+                Meta = meta,
+                Name = name,
+                PreviewImage = previewImage
+            });
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: dbContextMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.GetAsync(url);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal($"It is a public template, use /shared/templates/{idTemplate}", responseContent);
     }
 }

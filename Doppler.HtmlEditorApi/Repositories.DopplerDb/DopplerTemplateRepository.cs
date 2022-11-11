@@ -18,7 +18,7 @@ public class DopplerTemplateRepository : ITemplateRepository
         _dbContext = dbContext;
     }
 
-    public async Task<TemplateModel> GetTemplate(string accountName, int templateId)
+    public async Task<TemplateModel> GetOwnOrPublicTemplate(string accountName, int templateId)
     {
         var queryResult = await _dbContext.ExecuteAsync(new GetTemplateByIdWithStatusDbQuery(
             IdTemplate: templateId,

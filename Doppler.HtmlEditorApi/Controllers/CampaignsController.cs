@@ -143,7 +143,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return error;
             }
 
-            var templateModel = await _templateRepository.GetTemplate(accountName, templateId);
+            var templateModel = await _templateRepository.GetOwnOrPublicTemplate(accountName, templateId);
             if (templateModel == null)
             {
                 return new NotFoundObjectResult(new ProblemDetails()
