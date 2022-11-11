@@ -112,7 +112,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
     {
         // Arrange
         var expectedSchemaVersion = 999;
-        var isPublic = true;
+        var isPublic = false;
         var previewImage = "PreviewImage";
         var name = "Name";
         var contentData = new UnlayerTemplateContentData(
@@ -162,7 +162,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
 
     [Theory]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/456", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 456)]
-    public async Task GET_templte_should_error_when_template_content_is_mseditor(string url, string token, string accountName, int idTemplate)
+    public async Task GET_template_should_error_when_template_content_is_mseditor(string url, string token, string accountName, int idTemplate)
     {
         var editorType = 4;
         var content = "content";
@@ -175,7 +175,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
             idTemplate,
             new()
             {
-                IsPublic = true,
+                IsPublic = false,
                 EditorType = editorType,
                 HtmlCode = content,
                 Meta = meta,
@@ -210,7 +210,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         var html = "<html></html>";
         var name = "Name";
         var previewImage = "Preview";
-        var isPublic = true;
+        var isPublic = false;
 
         var dbContextMock = new Mock<IDbContext>();
 
