@@ -32,6 +32,11 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return new NotFoundObjectResult("Template not found or belongs to a different account");
             }
 
+            if (templateModel.IsPublic)
+            {
+                return new NotFoundObjectResult($"It is a public template, use /shared/templates/{templateId}");
+            }
+
             ActionResult<Template> result = templateModel.Content switch
             {
                 UnlayerTemplateContentData unlayerContent => new Template(
