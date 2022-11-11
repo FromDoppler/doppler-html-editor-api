@@ -54,7 +54,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPut("/accounts/{accountName}/templates/{templateId}")]
-        public async Task<IActionResult> SaveTemplate(string accountName, int templateId, Template templateModel)
+        public async Task<IActionResult> SaveTemplate(string accountName, int templateId, Template template)
         {
             // TODO: Considere refactoring accountName validation
             var currentTemplate = await _templateRepository.GetOwnOrPublicTemplate(accountName, templateId);
@@ -64,7 +64,20 @@ namespace Doppler.HtmlEditorApi.Controllers
                 return new NotFoundObjectResult("Template not found, belongs to a different account, or it is a public template.");
             }
 
-            throw new NotImplementedException();
+            var htmlDocument = ExtractHtmlDomFromTemplateContent(template.htmlContent);
+
+            var templateModel = new TemplateModel(
+                TemplateId: templateId,
+                IsPublic: false,
+                PreviewImage: template.previewImage,
+                Name: template.templateName,
+                Content: new UnlayerTemplateContentData(
+                    HtmlComplete: htmlDocument.GetCompleteContent(),
+                    Meta: template.meta.ToString()));
+
+            await _templateRepository.UpdateTemplate(templateModel);
+
+            return new OkObjectResult($"El template'{templateId}' del usuario '{accountName}' se guardó exitosamente.");
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
@@ -79,6 +92,15 @@ namespace Doppler.HtmlEditorApi.Controllers
         public Task<ActionResult<Template>> GetSharedTemplate(int templateId)
         {
             throw new NotImplementedException();
+        }
+
+        private static DopplerHtmlDocument ExtractHtmlDomFromTemplateContent(string htmlContent)
+        {
+            var htmlDocument = new DopplerHtmlDocument(htmlContent);
+            htmlDocument.RemoveHarmfulTags();
+            htmlDocument.RemoveEventAttributes();
+            htmlDocument.SanitizeTrackableLinks();
+            return htmlDocument;
         }
     }
 }

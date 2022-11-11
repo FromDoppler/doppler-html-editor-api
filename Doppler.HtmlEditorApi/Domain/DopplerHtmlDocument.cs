@@ -60,6 +60,9 @@ public class DopplerHtmlDocument
     public string GetHeadContent()
         => _headNode?.InnerHtml;
 
+    public string GetCompleteContent()
+        => _rootNode.OuterHtml;
+
     public IEnumerable<int> GetFieldIds()
         => FieldIdTagRegex.Matches(_contentNode.InnerHtml)
             .Select(x => int.Parse(x.Groups[1].ValueSpan, provider: CultureInfo.InvariantCulture))

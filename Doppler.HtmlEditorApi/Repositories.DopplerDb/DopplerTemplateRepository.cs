@@ -39,4 +39,6 @@ public class DopplerTemplateRepository : ITemplateRepository
 
         return new TemplateModel(templateId, queryResult.IsPublic, queryResult.PreviewImage, queryResult.Name, content);
     }
+
+    public Task UpdateTemplate(TemplateModel templateModel) => throw new NotImplementedException();
 }

@@ -275,4 +275,60 @@ public class PutTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal("Template not found, belongs to a different account, or it is a public template.", responseContent);
     }
+
+    [Fact]
+    public async Task PUT_template_should_save_the_new_data()
+    {
+        // Arrange
+        var accountName = TestUsersData.EMAIL_TEST1;
+        var templateId = 456;
+        var url = $"/accounts/{accountName}/templates/{templateId}";
+        var token = TestUsersData.TOKEN_TEST1_EXPIRE_20330518;
+        var meta = new { test = "NEW META" };
+        var expectedMeta = """{"test":"NEW META"}""";
+        var htmlContent = "NEW HTML CONTENT";
+        var templateName = "NEW NAME";
+        var previewImage = "NEW PREVIEW IMAGE";
+        var jsonContent = JsonContent.Create(new
+        {
+            meta,
+            htmlContent,
+            templateName,
+            previewImage,
+            type = "unlayer"
+        });
+
+        var repositoryMock = new Mock<ITemplateRepository>();
+        repositoryMock
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, templateId))
+            .ReturnsAsync(new TemplateModel(
+                TemplateId: templateId,
+                IsPublic: false,
+                PreviewImage: "OLD PREVIEW IMAGE",
+                Name: "OLD NAME",
+                Content: new UnlayerTemplateContentData(
+                    HtmlComplete: "OLD HTML CONTENT",
+                    Meta: "{\"test\":\"OLD META\"}")));
+
+        var client = _factory.CreateSutClient(
+            repositoryMock.Object,
+            token);
+
+        // Act
+        var response = await client.PutAsync(url, jsonContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        TemplateModel savedData = null;
+        repositoryMock.Verify(x => x.UpdateTemplate(
+            It.Is<TemplateModel>(y => AssertHelper.GetValueAndContinue(y, out savedData))));
+        Assert.False(savedData.IsPublic);
+        Assert.Equal(templateName, savedData.Name);
+        Assert.Equal(previewImage, savedData.PreviewImage);
+        Assert.Equal(templateId, savedData.TemplateId);
+        var unlayerContent = Assert.IsType<UnlayerTemplateContentData>(savedData.Content);
+        Assert.Equal(htmlContent, unlayerContent.HtmlComplete);
+        Assert.Equal(expectedMeta, unlayerContent.Meta);
+    }
 }
