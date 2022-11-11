@@ -323,9 +323,11 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     }
 
     [Theory]
-    [InlineData(true, "UPDATE")]
-    [InlineData(false, "INSERT")]
-    public async Task POST_content_from_template_should_be_create_with_right_content_and_return_Ok(bool contentExist, string sqlQueryStartsWith)
+    [InlineData(true, "UPDATE", false)]
+    [InlineData(false, "INSERT", false)]
+    [InlineData(true, "UPDATE", true)]
+    [InlineData(false, "INSERT", true)]
+    public async Task POST_content_from_template_should_be_create_with_right_content_and_return_Ok(bool campaignContentExist, string sqlQueryStartsWith, bool templateIsPublic)
     {
         // Arrange
         var accountName = TestUsersData.EMAIL_TEST1;
@@ -342,7 +344,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             new()
             {
                 OwnCampaignExists = true,
-                ContentExists = contentExist,
+                ContentExists = campaignContentExist,
                 EditorType = 5,
                 Status = 1
             });
@@ -354,7 +356,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             {
                 EditorType = 5,
                 HtmlCode = htmlContent,
-                IsPublic = true,
+                IsPublic = templateIsPublic,
                 Meta = "{}",
                 PreviewImage = ""
             });
