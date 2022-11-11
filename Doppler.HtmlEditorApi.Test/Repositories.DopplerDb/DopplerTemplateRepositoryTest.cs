@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
+using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Xunit;
@@ -93,5 +94,45 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
             await sut.UpdateTemplate(templateModel);
         });
         Assert.StartsWith("Unsupported template content type", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateTemplate_should_execute_the_right_query_and_parameters()
+    {
+        // Arrange
+        var dbContextMock = new Mock<IDbContext>();
+        var sut = new DopplerTemplateRepository(dbContextMock.Object);
+        var templateId = 123;
+        var previewImage = "NEW PREVIEW IMAGE";
+        var name = "NEW NAME";
+        var htmlComplete = "NEW HTML CONTENT";
+        var meta = "{\"test\":\"NEW META\"}";
+        var templateModel = new TemplateModel(
+            TemplateId: templateId,
+            IsPublic: false,
+            PreviewImage: previewImage,
+            Name: name,
+            Content: new UnlayerTemplateContentData(
+                HtmlComplete: htmlComplete,
+                Meta: meta));
+
+        // Act
+        await sut.UpdateTemplate(templateModel);
+
+        // Assert
+        var dbQuery = dbContextMock.VerifyAndGetExecutableDbQuery();
+        dbQuery.VerifySqlParametersContain("IdTemplate", templateId);
+        dbQuery.VerifySqlParametersContain("EditorType", 5);
+        dbQuery.VerifySqlParametersContain("HtmlCode", htmlComplete);
+        dbQuery.VerifySqlParametersContain("Meta", meta);
+        dbQuery.VerifySqlParametersContain("PreviewImage", previewImage);
+        dbQuery.VerifySqlParametersContain("Name", name);
+        dbQuery.VerifySqlQueryContains("UPDATE Template");
+        dbQuery.VerifySqlQueryContains("WHERE IdTemplate = @IdTemplate");
+        dbQuery.VerifySqlQueryContains("EditorType = @EditorType");
+        dbQuery.VerifySqlQueryContains("HtmlCode = @HtmlCode");
+        dbQuery.VerifySqlQueryContains("Meta = @Meta");
+        dbQuery.VerifySqlQueryContains("PreviewImage = @PreviewImage");
+        dbQuery.VerifySqlQueryContains("Name = @Name");
     }
 }
