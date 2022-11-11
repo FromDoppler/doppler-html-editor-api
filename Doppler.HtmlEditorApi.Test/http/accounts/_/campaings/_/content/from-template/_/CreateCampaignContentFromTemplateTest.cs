@@ -146,7 +146,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             .Setup(x => x.GetCampaignState(accountName, It.IsAny<int>()))
             .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Draft));
         templateRepositoryMock
-            .Setup(x => x.GetTemplate(accountName, idTemplate))
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, idTemplate))
             .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(
@@ -189,7 +189,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
             .Setup(x => x.GetCampaignState(It.IsAny<string>(), It.IsAny<int>()))
             .ReturnsAsync(new ClassicCampaignState(456, true, null, CampaignStatus.Draft));
         templateRepositoryMock
-            .Setup(x => x.GetTemplate(It.IsAny<string>(), idTemplate))
+            .Setup(x => x.GetOwnOrPublicTemplate(It.IsAny<string>(), idTemplate))
             .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(

@@ -89,7 +89,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         var repositoryMock = new Mock<ITemplateRepository>();
 
         repositoryMock
-            .Setup(x => x.GetTemplate(accountName, idTemplate))
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, idTemplate))
             .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(
@@ -132,7 +132,7 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         var repositoryMock = new Mock<ITemplateRepository>();
 
         repositoryMock
-            .Setup(x => x.GetTemplate(accountName, idTemplate))
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, idTemplate))
             .ReturnsAsync(templateModel);
 
         var client = _factory.CreateSutClient(

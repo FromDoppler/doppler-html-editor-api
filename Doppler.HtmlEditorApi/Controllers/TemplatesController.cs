@@ -25,7 +25,7 @@ namespace Doppler.HtmlEditorApi.Controllers
         public async Task<ActionResult<Template>> GetTemplate(string accountName, int templateId)
         {
             // TODO: Considere refactoring accountName validation
-            var templateModel = await _templateRepository.GetTemplate(accountName, templateId);
+            var templateModel = await _templateRepository.GetOwnOrPublicTemplate(accountName, templateId);
 
             if (templateModel == null)
             {
