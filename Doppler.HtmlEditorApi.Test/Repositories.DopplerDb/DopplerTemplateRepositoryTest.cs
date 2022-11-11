@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
@@ -66,5 +68,30 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
         Assert.Equal(isPublicExpected, templateModel.IsPublic);
         Assert.Equal(_msEditorType, unknownTemplateContentData.EditorType);
         dbContextMock.VerifyAll();
+    }
+
+    [Fact]
+    public async Task UpdateTemplate_should_throw_when_content_is_not_UnlayerTemplateContentData()
+    {
+        // Arrange
+        var otherTemplateContentData = Mock.Of<TemplateContentData>();
+        var dbContext = Mock.Of<IDbContext>();
+        var sut = new DopplerTemplateRepository(dbContext);
+        var templateId = 123;
+        var templateModel = new TemplateModel(
+            TemplateId: templateId,
+            IsPublic: false,
+            PreviewImage: "NEW PREVIEW IMAGE",
+            Name: "NEW NAME",
+            Content: otherTemplateContentData);
+
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<NotImplementedException>(async () =>
+        {
+            // Act
+            await sut.UpdateTemplate(templateModel);
+        });
+        Assert.StartsWith("Unsupported template content type", exception.Message);
     }
 }
