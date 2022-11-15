@@ -120,6 +120,9 @@ public static class IDbContextMockExtensions
     public static bool SqlQueryContains(this IDbQuery q, string sqlQueryContains)
         => q.GenerateSqlQuery().Contains(sqlQueryContains);
 
+    public static void VerifySqlQueryContains(this IDbQuery q, string sqlQueryContains)
+        => Assert.True(q.SqlQueryContains(sqlQueryContains), $"Query string does not contain {sqlQueryContains}");
+
     public static bool Is<T>(this IDbQuery q)
         => q is T;
 
@@ -137,6 +140,9 @@ public static class IDbContextMockExtensions
         var propValue = propInfo.GetValue(parameters);
         return (value == null && propValue == null) || (value != null && value.Equals(propValue));
     }
+
+    public static void VerifySqlParametersContain(this IDbQuery q, string name, object value)
+        => Assert.True(q.SqlParametersContain(name, value), $"Query does not contain parameter {name} = {value}");
 
     public static void VerifyLinksSendToSaveNewCampaignLinks(
         this Mock<IDbContext> dbContextMock,
@@ -179,5 +185,13 @@ public static class IDbContextMockExtensions
                 && AssertHelper.GetValueAndContinue(q.Links.ToArray(), out linksSendToDeleteRemovedCampaignLinks))
         ), Times.Once);
         Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignLinks);
+    }
+
+    public static IDbQuery VerifyAndGetExecutableDbQuery(this Mock<IDbContext> dbContextMock)
+    {
+        IDbQuery dbQuery = null;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<IExecutableDbQuery>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
+        return dbQuery;
     }
 }

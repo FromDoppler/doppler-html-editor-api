@@ -39,4 +39,24 @@ public class DopplerTemplateRepository : ITemplateRepository
 
         return new TemplateModel(templateId, queryResult.IsPublic, queryResult.PreviewImage, queryResult.Name, content);
     }
+
+    public async Task UpdateTemplate(TemplateModel templateModel)
+    {
+        if (templateModel.Content is not UnlayerTemplateContentData unlayerTemplateContentData)
+        {
+            // I am breaking the Liskov Substitution Principle, and I like it!
+            throw new NotImplementedException($"Unsupported template content type {templateModel.Content.GetType()}");
+        }
+
+        var updateTemplateQuery = new UpdateTemplateDbQuery(
+            IdTemplate: templateModel.TemplateId,
+            EditorType: 5,
+            HtmlCode: unlayerTemplateContentData.HtmlComplete,
+            Meta: unlayerTemplateContentData.Meta,
+            PreviewImage: templateModel.PreviewImage,
+            Name: templateModel.Name
+        );
+
+        await _dbContext.ExecuteAsync(updateTemplateQuery);
+    }
 }
