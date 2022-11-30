@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -32,7 +33,7 @@ public class DopplerCampaignContentRepositoryTest : IClassFixture<WebApplication
     [InlineData(20, false)]
     [InlineData(21, false)]
     [InlineData(22, false)]
-    public async void GetCampaignState_with_content_writable_when_valid_doppler_status_code(int? dopplerCampaignStatus, bool expectedIsWritable)
+    public async Task GetCampaignState_with_content_writable_when_valid_doppler_status_code(int? dopplerCampaignStatus, bool expectedIsWritable)
     {
         var dbContextMock = new Mock<IDbContext>();
         dbContextMock

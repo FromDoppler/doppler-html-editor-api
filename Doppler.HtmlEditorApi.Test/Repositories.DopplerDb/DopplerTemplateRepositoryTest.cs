@@ -18,7 +18,7 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async void GetTemplate_unlayer_template(bool isPublicExpected)
+    public async Task GetTemplate_unlayer_template(bool isPublicExpected)
     {
         var dbContextMock = new Mock<IDbContext>();
         dbContextMock
@@ -47,7 +47,7 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async void Get_unknown_template(bool isPublicExpected)
+    public async Task Get_unknown_template(bool isPublicExpected)
     {
         var dbContextMock = new Mock<IDbContext>();
         dbContextMock
