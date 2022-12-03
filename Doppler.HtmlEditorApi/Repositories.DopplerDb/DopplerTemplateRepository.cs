@@ -59,4 +59,19 @@ public class DopplerTemplateRepository : ITemplateRepository
 
         await _dbContext.ExecuteAsync(updateTemplateQuery);
     }
+
+    public Task<int> CreatePrivateTemplate(string accountName, TemplateModel templateModel)
+    {
+        // To avoid ambiguities
+        if (templateModel.TemplateId > 0)
+        {
+            throw new ArgumentException("TemplateId should not be set to create a new private template", nameof(templateModel));
+        }
+        if (templateModel.IsPublic)
+        {
+            throw new ArgumentException("IsPublic should be false to create a new private template", nameof(templateModel));
+        }
+
+        throw new NotImplementedException();
+    }
 }

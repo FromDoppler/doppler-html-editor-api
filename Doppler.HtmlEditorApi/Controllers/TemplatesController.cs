@@ -5,6 +5,8 @@ using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.DopplerSecurity;
 using Doppler.HtmlEditorApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Doppler.HtmlEditorApi.Controllers
@@ -21,7 +23,7 @@ namespace Doppler.HtmlEditorApi.Controllers
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
-        [HttpGet("/accounts/{accountName}/templates/{templateId}")]
+        [HttpGet("/accounts/{accountName}/templates/{templateId}", Name = "GetTemplate")]
         public async Task<ActionResult<Template>> GetTemplate(string accountName, int templateId)
         {
             // TODO: Considere refactoring accountName validation
@@ -79,6 +81,37 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             return new OkObjectResult($"El template'{templateId}' del usuario '{accountName}' se guardó exitosamente.");
         }
+
+        [Authorize(Policies.OwnResourceOrSuperUser)]
+        [HttpPost("/accounts/{accountName}/templates/from-template/{baseTemplateId}")]
+        public async Task<Results<NotFound<ProblemDetails>, CreatedAtRoute<ResourceCreated>>> CreateTemplateFromTemplate(string accountName, int baseTemplateId)
+        {
+            var templateModel = await _templateRepository.GetOwnOrPublicTemplate(accountName, baseTemplateId);
+            if (templateModel == null)
+            {
+                return TypedResults.NotFound(new ProblemDetails()
+                {
+                    Detail = "The template not exists or Inactive"
+                });
+            }
+
+            if (templateModel.Content is not UnlayerTemplateContentData)
+            {
+                throw new NotImplementedException($"Unsupported template content type {templateModel.Content.GetType()}");
+            }
+
+            // To avoid ambiguities
+            var newTemplate = templateModel with
+            {
+                TemplateId = 0,
+                IsPublic = false
+            };
+
+            var templateId = await _templateRepository.CreatePrivateTemplate(accountName, newTemplate);
+
+            return TypedResults.CreatedAtRoute(new ResourceCreated(templateId), "GetTemplate", new { accountName, templateId });
+        }
+
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPost("/accounts/{accountName}/templates")]
