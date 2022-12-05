@@ -121,7 +121,7 @@ public static class IDbContextMockExtensions
         => q.GenerateSqlQuery().Contains(sqlQueryContains);
 
     public static void VerifySqlQueryContains(this IDbQuery q, string sqlQueryContains)
-        => Assert.True(q.SqlQueryContains(sqlQueryContains), $"Query string does not contain {sqlQueryContains}");
+        => Assert.Contains(sqlQueryContains, q.GenerateSqlQuery());
 
     public static bool Is<T>(this IDbQuery q)
         => q is T;

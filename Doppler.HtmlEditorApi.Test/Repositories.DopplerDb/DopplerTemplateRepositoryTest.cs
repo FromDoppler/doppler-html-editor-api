@@ -133,6 +133,7 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
         dbQuery.VerifySqlQueryContains("HtmlCode = @HtmlCode");
         dbQuery.VerifySqlQueryContains("Meta = @Meta");
         dbQuery.VerifySqlQueryContains("PreviewImage = @PreviewImage");
+        dbQuery.VerifySqlQueryContains("ModifiedAt = GETUTCDATE()");
         dbQuery.VerifySqlQueryContains("Name = @Name");
     }
 
@@ -173,13 +174,17 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
         dbQuery.VerifySqlParametersContain("Name", name);
         dbQuery.VerifySqlQueryContains("FROM [User] u");
         dbQuery.VerifySqlQueryContains("WHERE u.Email = @AccountName");
-        dbQuery.VerifySqlQueryContains("INSERT INTO Template (IdUser, EditorType, HtmlCode, Meta, PreviewImage, Name, Active)");
+        dbQuery.VerifySqlQueryContains("INSERT INTO Template (IdUser, EditorType, HtmlCode, Meta, PreviewImage, Name, Active, CreatedBy, IdTemplateCategory, CreatedAt, ModifiedAt)");
         dbQuery.VerifySqlQueryContains("u.IdUser AS IdUser");
         dbQuery.VerifySqlQueryContains("@EditorType AS EditorType");
         dbQuery.VerifySqlQueryContains("@HtmlCode AS HtmlCode");
         dbQuery.VerifySqlQueryContains("@Meta AS Meta");
         dbQuery.VerifySqlQueryContains("@PreviewImage AS PreviewImage");
         dbQuery.VerifySqlQueryContains("@Name AS Name");
+        dbQuery.VerifySqlQueryContains("u.IdUser AS CreatedBy");
+        dbQuery.VerifySqlQueryContains("1 AS IdTemplateCategory");
+        dbQuery.VerifySqlQueryContains("GETUTCDATE() AS CreatedAt");
+        dbQuery.VerifySqlQueryContains("GETUTCDATE() AS ModifiedAt");
         dbQuery.VerifySqlQueryContains("1 AS Active");
         dbQuery.VerifySqlQueryContains("OUTPUT INSERTED.idTemplate AS NewTemplateId");
     }

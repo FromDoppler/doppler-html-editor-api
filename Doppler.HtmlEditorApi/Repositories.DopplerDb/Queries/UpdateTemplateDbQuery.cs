@@ -18,7 +18,8 @@ public record UpdateTemplateDbQuery(
             HtmlCode = @HtmlCode,
             Meta = @Meta,
             PreviewImage = @PreviewImage,
-            Name = @Name
+            Name = @Name,
+            ModifiedAt = GETUTCDATE()
         WHERE IdTemplate = @IdTemplate
         """;
 }
