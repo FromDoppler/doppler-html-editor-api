@@ -24,7 +24,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpGet("/accounts/{accountName}/templates/{templateId}", Name = "GetTemplate")]
-        public async Task<Results<NotFound<ProblemDetails>, Ok<Template>>> GetTemplate(string accountName, int templateId)
+        public async Task<Results<NotFound<ProblemDetails>, ProblemHttpResult, Ok<Template>>> GetTemplate(string accountName, int templateId)
         {
             // TODO: Considere refactoring accountName validation
             var templateModel = await _templateRepository.GetOwnOrPublicTemplate(accountName, templateId);
@@ -45,19 +45,21 @@ namespace Doppler.HtmlEditorApi.Controllers
                 });
             }
 
-            var result = templateModel.Content switch
+            if (templateModel.Content is UnlayerTemplateContentData unlayerContent)
             {
-                UnlayerTemplateContentData unlayerContent => new Template(
+                return TypedResults.Ok(new Template(
                     type: ContentType.unlayer,
                     templateName: templateModel.Name,
                     isPublic: templateModel.IsPublic,
                     previewImage: templateModel.PreviewImage,
                     htmlContent: unlayerContent.HtmlComplete,
-                    meta: Utils.ParseAsJsonElement(unlayerContent.Meta)),
-                _ => throw new NotImplementedException($"Unsupported template content type {templateModel.Content.GetType()}")
-            };
+                    meta: Utils.ParseAsJsonElement(unlayerContent.Meta)));
+            }
 
-            return TypedResults.Ok(result);
+            return TypedResults.Problem(
+                detail: $"Unsupported template content type {templateModel.Content.GetType()}",
+                statusCode: StatusCodes.Status501NotImplemented,
+                title: "Not Implemented");
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
