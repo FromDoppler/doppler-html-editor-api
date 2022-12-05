@@ -79,7 +79,7 @@ dotnet_style_operator_placement_when_wrapping = beginning_of_line:error
 dotnet_style_prefer_auto_properties = true:error
 dotnet_style_prefer_compound_assignment = true:error
 dotnet_style_prefer_conditional_expression_over_assignment = true:error
-dotnet_style_prefer_conditional_expression_over_return = true:error
+dotnet_style_prefer_conditional_expression_over_return = none:error
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:error
 dotnet_style_prefer_inferred_tuple_names = true:error
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:error
@@ -375,6 +375,11 @@ dotnet_analyzer_diagnostic.category-Reliability.severity = error
 dotnet_analyzer_diagnostic.category-Security.severity = error
 dotnet_analyzer_diagnostic.category-Usage.severity = error
 dotnet_analyzer_diagnostic.category-CodeQuality.severity = error
+
+# .NET Analyzers
+
+# CS8509: The switch expression does not handle all possible values of its input type (it is not exhaustive).
+dotnet_diagnostic.CS8509.severity = error
 
 [**.Test/**.cs]
 # Remove the underscores from member name (because we like underscores in test names)
