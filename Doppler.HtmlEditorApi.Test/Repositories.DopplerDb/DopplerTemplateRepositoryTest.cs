@@ -133,6 +133,7 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
         dbQuery.VerifySqlQueryContains("HtmlCode = @HtmlCode");
         dbQuery.VerifySqlQueryContains("Meta = @Meta");
         dbQuery.VerifySqlQueryContains("PreviewImage = @PreviewImage");
+        dbQuery.VerifySqlQueryContains("ModifiedAt = GETUTCDATE()");
         dbQuery.VerifySqlQueryContains("Name = @Name");
     }
 
