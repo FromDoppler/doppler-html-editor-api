@@ -187,11 +187,39 @@ public static class IDbContextMockExtensions
         Assert.Equal(expectedLinks, linksSendToDeleteRemovedCampaignLinks);
     }
 
-    public static IDbQuery VerifyAndGetExecutableDbQuery(this Mock<IDbContext> dbContextMock)
+    public static T VerifyAndGetExecutableDbQuery<T>(this Mock<IDbContext> dbContextMock)
+        where T : IExecutableDbQuery
     {
-        IDbQuery dbQuery = null;
+        T dbQuery = default;
         dbContextMock.Verify(x => x.ExecuteAsync(
-            It.Is<IExecutableDbQuery>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
+            It.Is<T>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
         return dbQuery;
     }
+
+    public static IExecutableDbQuery VerifyAndGetExecutableDbQuery(this Mock<IDbContext> dbContextMock)
+        => VerifyAndGetExecutableDbQuery<IExecutableDbQuery>(dbContextMock);
+
+    public static T VerifyAndGetSingleItemDbQuery<T, T2>(this Mock<IDbContext> dbContextMock)
+        where T : ISingleItemDbQuery<T2>
+    {
+        T dbQuery = default;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<T>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
+        return dbQuery;
+    }
+
+    public static ISingleItemDbQuery<T> VerifyAndGetSingleItemDbQuery<T>(this Mock<IDbContext> dbContextMock)
+        => VerifyAndGetSingleItemDbQuery<ISingleItemDbQuery<T>, T>(dbContextMock);
+
+    public static T VerifyAndGetCollectionDbQuery<T, T2>(this Mock<IDbContext> dbContextMock)
+        where T : ICollectionDbQuery<T2>
+    {
+        T dbQuery = default;
+        dbContextMock.Verify(x => x.ExecuteAsync(
+            It.Is<T>(q => AssertHelper.GetValueAndContinue(q, out dbQuery))));
+        return dbQuery;
+    }
+
+    public static ICollectionDbQuery<T> VerifyAndGetCollectionDbQuery<T>(this Mock<IDbContext> dbContextMock)
+        => VerifyAndGetCollectionDbQuery<ICollectionDbQuery<T>, T>(dbContextMock);
 }
