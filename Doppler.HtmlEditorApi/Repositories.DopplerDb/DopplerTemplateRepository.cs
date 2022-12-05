@@ -60,7 +60,7 @@ public class DopplerTemplateRepository : ITemplateRepository
         await _dbContext.ExecuteAsync(updateTemplateQuery);
     }
 
-    public Task<int> CreatePrivateTemplate(string accountName, TemplateModel templateModel)
+    public async Task<int> CreatePrivateTemplate(string accountName, TemplateModel templateModel)
     {
         // To avoid ambiguities
         if (templateModel.TemplateId > 0)
@@ -71,7 +71,28 @@ public class DopplerTemplateRepository : ITemplateRepository
         {
             throw new ArgumentException("IsPublic should be false to create a new private template", nameof(templateModel));
         }
+        if (templateModel.Content is not UnlayerTemplateContentData unlayerTemplateContentData)
+        {
+            // I am breaking the Liskov Substitution Principle, and I like it!
+            throw new NotImplementedException($"Unsupported template content type {templateModel.Content.GetType()}");
+        }
 
-        throw new NotImplementedException();
+        var createTemplateQuery = new CreatePrivateTemplateDbQuery(
+            AccountName: accountName,
+            EditorType: 5,
+            HtmlCode: unlayerTemplateContentData.HtmlComplete,
+            Meta: unlayerTemplateContentData.Meta,
+            PreviewImage: templateModel.PreviewImage,
+            Name: templateModel.Name
+        );
+
+        var result = await _dbContext.ExecuteAsync(createTemplateQuery);
+
+        if (result is null)
+        {
+            throw new ArgumentException($"Account with name '{accountName}' does not exist.", nameof(accountName));
+        }
+
+        return result.NewTemplateId;
     }
 }

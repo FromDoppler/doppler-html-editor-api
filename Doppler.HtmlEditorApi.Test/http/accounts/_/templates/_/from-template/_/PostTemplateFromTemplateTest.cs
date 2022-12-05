@@ -2,8 +2,10 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Repositories;
+using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 using Doppler.HtmlEditorApi.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
@@ -111,42 +113,47 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
     public async Task GET_template_should_accept_right_tokens_and_call_repository_and_return_createdResourceId(string url, string token, string accountName, int baseTemplateId)
     {
         // Arrange
-        var newTemplateId = 5;
+        const int unlayerEditorType = 5;
+        var newTemplateId = 8;
         var expectedSchemaVersion = 999;
         var isPublic = true;
         var previewImage = "PreviewImage";
         var name = "Name";
-        var contentData = new UnlayerTemplateContentData(
-            HtmlComplete: "<html></html>",
-            Meta: JsonSerializer.Serialize(new
+        var htmlComplete = "<html></html>";
+        var meta = JsonSerializer.Serialize(new
+        {
+            schemaVersion = expectedSchemaVersion
+        });
+
+        var dbContextMock = new Mock<IDbContext>();
+
+        dbContextMock.Setup(x =>
+            x.ExecuteAsync(new GetTemplateByIdWithStatusDbQuery(baseTemplateId, accountName)))
+            .ReturnsAsync(new GetTemplateByIdWithStatusDbQuery.Result()
             {
-                schemaVersion = expectedSchemaVersion
-            }));
+                IsPublic = isPublic,
+                EditorType = unlayerEditorType,
+                HtmlCode = htmlComplete,
+                Meta = meta,
+                PreviewImage = previewImage,
+                Name = name,
+            });
 
-        var templateModel = new TemplateModel(
-            TemplateId: baseTemplateId,
-            IsPublic: isPublic,
-            PreviewImage: previewImage,
-            Name: name,
-            Content: contentData);
-
-        var repositoryMock = new Mock<ITemplateRepository>();
-
-        repositoryMock
-            .Setup(x => x.GetOwnOrPublicTemplate(accountName, baseTemplateId))
-            .ReturnsAsync(templateModel);
-
-        repositoryMock
-            .Setup(x => x.CreatePrivateTemplate(
+        dbContextMock.Setup(x =>
+            x.ExecuteAsync(new CreatePrivateTemplateDbQuery(
                 accountName,
-                It.Is<TemplateModel>(t =>
-                    t != templateModel
-                    && !t.IsPublic
-                    && t.TemplateId == 0)))
-            .ReturnsAsync(newTemplateId);
+                unlayerEditorType,
+                htmlComplete,
+                meta,
+                previewImage,
+                name)))
+            .ReturnsAsync(new CreatePrivateTemplateDbQuery.Result()
+            {
+                NewTemplateId = newTemplateId
+            });
 
         var client = _factory.CreateSutClient(
-            serviceToOverride1: repositoryMock.Object,
+            serviceToOverride1: dbContextMock.Object,
             token: token);
 
         // Act
@@ -156,9 +163,9 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        repositoryMock.VerifyAll();
-        repositoryMock.VerifyNoOtherCalls();
-        Assert.Matches("""{"createdResourceId":5}""", responseContent);
+        dbContextMock.VerifyAll();
+        dbContextMock.VerifyNoOtherCalls();
+        Assert.Matches($$"""{"createdResourceId":{{newTemplateId}}}""", responseContent);
         Assert.Contains($"Location: http://localhost/accounts/{accountName}/templates/{newTemplateId}", headers);
     }
 
