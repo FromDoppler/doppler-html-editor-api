@@ -284,6 +284,8 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        Assert.Equal($"It is a public template, use /shared/templates/{idTemplate}", responseContent);
+        Assert.Contains($"\"detail\":\"It is a public template, use /shared/templates/{idTemplate}\"", responseContent);
+        Assert.Contains("\"title\":\"Not Found\"", responseContent);
+        Assert.Contains("\"status\":404", responseContent);
     }
 }

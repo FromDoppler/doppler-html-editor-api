@@ -24,22 +24,28 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpGet("/accounts/{accountName}/templates/{templateId}", Name = "GetTemplate")]
-        public async Task<ActionResult<Template>> GetTemplate(string accountName, int templateId)
+        public async Task<Results<NotFound<ProblemDetails>, Ok<Template>>> GetTemplate(string accountName, int templateId)
         {
             // TODO: Considere refactoring accountName validation
             var templateModel = await _templateRepository.GetOwnOrPublicTemplate(accountName, templateId);
 
             if (templateModel == null)
             {
-                return new NotFoundObjectResult("Template not found or belongs to a different account");
+                return TypedResults.NotFound(new ProblemDetails()
+                {
+                    Detail = "Template not found or belongs to a different account"
+                });
             }
 
             if (templateModel.IsPublic)
             {
-                return new NotFoundObjectResult($"It is a public template, use /shared/templates/{templateId}");
+                return TypedResults.NotFound(new ProblemDetails()
+                {
+                    Detail = $"It is a public template, use /shared/templates/{templateId}"
+                });
             }
 
-            ActionResult<Template> result = templateModel.Content switch
+            var result = templateModel.Content switch
             {
                 UnlayerTemplateContentData unlayerContent => new Template(
                     type: ContentType.unlayer,
@@ -51,19 +57,22 @@ namespace Doppler.HtmlEditorApi.Controllers
                 _ => throw new NotImplementedException($"Unsupported template content type {templateModel.Content.GetType()}")
             };
 
-            return result;
+            return TypedResults.Ok(result);
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPut("/accounts/{accountName}/templates/{templateId}")]
-        public async Task<IActionResult> SaveTemplate(string accountName, int templateId, Template template)
+        public async Task<Results<NotFound<ProblemDetails>, Ok<string>>> SaveTemplate(string accountName, int templateId, Template template)
         {
             // TODO: Considere refactoring accountName validation
             var currentTemplate = await _templateRepository.GetOwnOrPublicTemplate(accountName, templateId);
 
             if (currentTemplate == null || currentTemplate.IsPublic)
             {
-                return new NotFoundObjectResult("Template not found, belongs to a different account, or it is a public template.");
+                return TypedResults.NotFound(new ProblemDetails()
+                {
+                    Detail = "Template not found, belongs to a different account, or it is a public template."
+                });
             }
 
             var htmlDocument = ExtractHtmlDomFromTemplateContent(template.htmlContent);
@@ -79,7 +88,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             await _templateRepository.UpdateTemplate(templateModel);
 
-            return new OkObjectResult($"El template'{templateId}' del usuario '{accountName}' se guardó exitosamente.");
+            return TypedResults.Ok($"El template'{templateId}' del usuario '{accountName}' se guardó exitosamente.");
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
@@ -115,14 +124,14 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPost("/accounts/{accountName}/templates")]
-        public Task<IActionResult> CreateTemplate(string accountName, Template templateModel)
+        public Task<IResult> CreateTemplate(string accountName, Template templateModel)
         {
             throw new NotImplementedException();
         }
 
         [Authorize(Policies.OnlySuperUser)]
         [HttpPost("/shared/templates/{templateId}")]
-        public Task<ActionResult<Template>> GetSharedTemplate(int templateId)
+        public Task<Results<NotFound<string>, Ok<Template>>> GetSharedTemplate(int templateId)
         {
             throw new NotImplementedException();
         }
