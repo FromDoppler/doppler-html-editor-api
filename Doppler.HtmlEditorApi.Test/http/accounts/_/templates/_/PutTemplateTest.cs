@@ -232,7 +232,9 @@ public class PutTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        Assert.Equal("Template not found, belongs to a different account, or it is a public template.", responseContent);
+        Assert.Contains("Template not found, belongs to a different account, or it is a public template", responseContent);
+        Assert.Contains("\"title\":\"Not Found\"", responseContent);
+        Assert.Contains("\"status\":404", responseContent);
     }
 
     [Fact]
@@ -273,7 +275,9 @@ public class PutTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        Assert.Equal("Template not found, belongs to a different account, or it is a public template.", responseContent);
+        Assert.Contains("\"detail\":\"Template not found, belongs to a different account, or it is a public template.\"", responseContent);
+        Assert.Contains("\"title\":\"Not Found\"", responseContent);
+        Assert.Contains("\"status\":404", responseContent);
     }
 
     [Fact]

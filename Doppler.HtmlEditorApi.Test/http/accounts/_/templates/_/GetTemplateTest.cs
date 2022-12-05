@@ -195,11 +195,10 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
         var responseContentJson = responseContentDoc.RootElement;
 
         // Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-        Assert.Equal("https://httpstatuses.io/500", responseContentJson.GetProperty("type").GetString());
-        Assert.Equal("Internal Server Error", responseContentJson.GetProperty("title").GetString());
+        Assert.Equal(HttpStatusCode.NotImplemented, response.StatusCode);
+        Assert.Equal("Not Implemented", responseContentJson.GetProperty("title").GetString());
         Assert.Equal("Unsupported template content type Doppler.HtmlEditorApi.Domain.UnknownTemplateContentData", responseContentJson.GetProperty("detail").GetString());
-        Assert.Equal(500, responseContentJson.GetProperty("status").GetInt32());
+        Assert.Equal(501, responseContentJson.GetProperty("status").GetInt32());
     }
 
     [Theory]
@@ -284,6 +283,8 @@ public class GetTemplateTest : IClassFixture<WebApplicationFactory<Startup>>
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        Assert.Equal($"It is a public template, use /shared/templates/{idTemplate}", responseContent);
+        Assert.Contains($"\"detail\":\"It is a public template, use /shared/templates/{idTemplate}\"", responseContent);
+        Assert.Contains("\"title\":\"Not Found\"", responseContent);
+        Assert.Contains("\"status\":404", responseContent);
     }
 }

@@ -135,4 +135,166 @@ public class DopplerTemplateRepositoryTest : IClassFixture<WebApplicationFactory
         dbQuery.VerifySqlQueryContains("PreviewImage = @PreviewImage");
         dbQuery.VerifySqlQueryContains("Name = @Name");
     }
+
+    [Fact]
+    public async Task CreatePrivateTemplate_should_execute_the_right_query_and_parameters()
+    {
+        // Arrange
+        var dbContextMock = new Mock<IDbContext>();
+        dbContextMock.Setup(x =>
+            x.ExecuteAsync(It.IsAny<ISingleItemDbQuery<CreatePrivateTemplateDbQuery.Result>>()))
+            .ReturnsAsync(new CreatePrivateTemplateDbQuery.Result() { NewTemplateId = 123 });
+
+        var sut = new DopplerTemplateRepository(dbContextMock.Object);
+
+        var previewImage = "NEW PREVIEW IMAGE";
+        var name = "NEW NAME";
+        var htmlComplete = "NEW HTML CONTENT";
+        var meta = "{\"test\":\"NEW META\"}";
+        var templateModel = new TemplateModel(
+            TemplateId: 0,
+            IsPublic: false,
+            PreviewImage: previewImage,
+            Name: name,
+            Content: new UnlayerTemplateContentData(
+                HtmlComplete: htmlComplete,
+                Meta: meta));
+        var accountName = "test@test";
+
+        // Act
+        var result = await sut.CreatePrivateTemplate(accountName, templateModel);
+
+        // Assert
+        var dbQuery = dbContextMock.VerifyAndGetSingleItemDbQuery<CreatePrivateTemplateDbQuery.Result>();
+        dbQuery.VerifySqlParametersContain("EditorType", _unlayerEditorType);
+        dbQuery.VerifySqlParametersContain("HtmlCode", htmlComplete);
+        dbQuery.VerifySqlParametersContain("Meta", meta);
+        dbQuery.VerifySqlParametersContain("PreviewImage", previewImage);
+        dbQuery.VerifySqlParametersContain("Name", name);
+        dbQuery.VerifySqlQueryContains("FROM [User] u");
+        dbQuery.VerifySqlQueryContains("WHERE u.Email = @AccountName");
+        dbQuery.VerifySqlQueryContains("INSERT INTO Template (IdUser, EditorType, HtmlCode, Meta, PreviewImage, Name, Active)");
+        dbQuery.VerifySqlQueryContains("u.IdUser AS IdUser");
+        dbQuery.VerifySqlQueryContains("@EditorType AS EditorType");
+        dbQuery.VerifySqlQueryContains("@HtmlCode AS HtmlCode");
+        dbQuery.VerifySqlQueryContains("@Meta AS Meta");
+        dbQuery.VerifySqlQueryContains("@PreviewImage AS PreviewImage");
+        dbQuery.VerifySqlQueryContains("@Name AS Name");
+        dbQuery.VerifySqlQueryContains("1 AS Active");
+        dbQuery.VerifySqlQueryContains("OUTPUT INSERTED.idTemplate AS NewTemplateId");
+    }
+
+    [Fact]
+    public async Task CreatePrivateTemplate_throw_when_there_are_no_rows_inserted()
+    {
+        // Arrange
+        var dbContextMock = new Mock<IDbContext>();
+        dbContextMock.Setup(x =>
+            x.ExecuteAsync(It.IsAny<ISingleItemDbQuery<CreatePrivateTemplateDbQuery.Result>>()))
+            .ReturnsAsync((CreatePrivateTemplateDbQuery.Result)null);
+
+        var sut = new DopplerTemplateRepository(dbContextMock.Object);
+
+        var templateModel = new TemplateModel(
+            TemplateId: 0,
+            IsPublic: false,
+            PreviewImage: "NEW PREVIEW IMAGE",
+            Name: "NEW NAME",
+            Content: new UnlayerTemplateContentData(
+                HtmlComplete: "NEW HTML CONTENT",
+                Meta: "{\"test\":\"NEW META\"}"));
+        var accountName = "test@test";
+
+        // Act
+        var action = async () => await sut.CreatePrivateTemplate(accountName, templateModel);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(action);
+        Assert.Equal("accountName", exception.ParamName);
+        Assert.Equal($"Account with name '{accountName}' does not exist. (Parameter 'accountName')", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreatePrivateTemplate_should_throw_when_TemplateId_is_not_0()
+    {
+        // Arrange
+        var templateId = 123;
+        var dbContextMock = new Mock<IDbContext>();
+
+        var sut = new DopplerTemplateRepository(dbContextMock.Object);
+
+        var templateModel = new TemplateModel(
+            TemplateId: templateId,
+            IsPublic: false,
+            PreviewImage: "NEW PREVIEW IMAGE",
+            Name: "NEW NAME",
+            Content: new UnlayerTemplateContentData(
+                HtmlComplete: "NEW HTML CONTENT",
+                Meta: "{\"test\":\"NEW META\"}"));
+        var accountName = "test@test";
+
+        // Act
+        var action = async () => await sut.CreatePrivateTemplate(accountName, templateModel);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(action);
+        Assert.Equal("templateModel", exception.ParamName);
+        Assert.Equal("TemplateId should not be set to create a new private template (Parameter 'templateModel')", exception.Message);
+        dbContextMock.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task CreatePrivateTemplate_should_throw_when_IsPublic_is_true()
+    {
+        // Arrange
+        var isPublic = true;
+        var dbContextMock = new Mock<IDbContext>();
+
+        var sut = new DopplerTemplateRepository(dbContextMock.Object);
+
+        var templateModel = new TemplateModel(
+            TemplateId: 0,
+            IsPublic: isPublic,
+            PreviewImage: "NEW PREVIEW IMAGE",
+            Name: "NEW NAME",
+            Content: new UnlayerTemplateContentData(
+                HtmlComplete: "NEW HTML CONTENT",
+                Meta: "{\"test\":\"NEW META\"}"));
+        var accountName = "test@test";
+
+        // Act
+        var action = async () => await sut.CreatePrivateTemplate(accountName, templateModel);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(action);
+        Assert.Equal("templateModel", exception.ParamName);
+        Assert.Equal("IsPublic should be false to create a new private template (Parameter 'templateModel')", exception.Message);
+        dbContextMock.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task CreatePrivateTemplate_should_throw_when_the_template_is_not_unlayer_one()
+    {
+        // Arrange
+        var content = new UnknownTemplateContentData(_msEditorType);
+        var dbContextMock = new Mock<IDbContext>();
+
+        var sut = new DopplerTemplateRepository(dbContextMock.Object);
+
+        var templateModel = new TemplateModel(
+            TemplateId: 0,
+            IsPublic: false,
+            PreviewImage: "NEW PREVIEW IMAGE",
+            Name: "NEW NAME",
+            Content: content);
+        var accountName = "test@test";
+
+        // Act
+        var action = async () => await sut.CreatePrivateTemplate(accountName, templateModel);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<NotImplementedException>(action);
+        Assert.Equal("Unsupported template content type Doppler.HtmlEditorApi.Domain.UnknownTemplateContentData", exception.Message);
+        dbContextMock.VerifyNoOtherCalls();
+    }
 }
