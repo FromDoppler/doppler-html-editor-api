@@ -126,9 +126,21 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPost("/accounts/{accountName}/templates")]
-        public Task<IResult> CreateTemplate(string accountName, Template templateModel)
+        public async Task<CreatedAtRoute<ResourceCreated>> CreateTemplate(string accountName, Template template)
         {
-            throw new NotImplementedException();
+            var htmlDocument = ExtractHtmlDomFromTemplateContent(template.htmlContent);
+            var templateModel = new TemplateModel(
+                TemplateId: 0,
+                IsPublic: false,
+                PreviewImage: template.previewImage,
+                Name: template.templateName,
+                Content: new UnlayerTemplateContentData(
+                    HtmlComplete: htmlDocument.GetCompleteContent(),
+                    Meta: template.meta.ToString()));
+
+            var templateId = await _templateRepository.CreatePrivateTemplate(accountName, templateModel);
+
+            return TypedResults.CreatedAtRoute(new ResourceCreated(templateId), "GetTemplate", new { accountName, templateId });
         }
 
         [Authorize(Policies.OnlySuperUser)]
