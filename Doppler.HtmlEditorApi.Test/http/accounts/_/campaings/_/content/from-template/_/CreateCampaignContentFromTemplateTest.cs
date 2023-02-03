@@ -885,7 +885,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     [Theory]
     [InlineData("[[[firstname]]]", "VALUES (319)")]
     [InlineData("[[[firstname]]] [[[lastname]]]", "VALUES (319),(320)")]
-    [InlineData("[[[firstname]]] [[[lastname]]] [[[noexist]]]", "VALUES (319),(320)")]
+    [InlineData("[[[firstname]]] [[[lastname]]] [[[unknown]]]", "VALUES (319),(320)")]
     public async Task POST_content_from_template_should_store_field_relations(string htmlContent, string expectedSubQuery)
     {
         // Arrange
@@ -946,7 +946,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
     [Theory]
     [InlineData("[[[firstname]]]", "VALUES (319)")]
     [InlineData("[[[firstname]]] [[[lastname]]]", "VALUES (319),(320)")]
-    [InlineData("[[[firstname]]] [[[lastname]]] [[[noexist]]]", "VALUES (319),(320)")]
+    [InlineData("[[[firstname]]] [[[lastname]]] [[[unknown]]]", "VALUES (319),(320)")]
     public async Task POST_content_from_template_should_store_field_relations_in_campaign_TestAB(string htmlContent, string expectedSubQuery)
     {
         // Arrange

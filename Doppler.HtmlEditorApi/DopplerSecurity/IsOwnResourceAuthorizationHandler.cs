@@ -14,7 +14,7 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
         private readonly ILogger<IsOwnResourceAuthorizationHandler> _logger;
 
         [LoggerMessage(0, LogLevel.Information, "Is not possible access to Resource information. Type of context.Resource: {ResourceType}")]
-        partial void LogResourceNotAvaliable(string resourceType);
+        partial void LogResourceNotAvailable(string resourceType);
 
         public IsOwnResourceAuthorizationHandler(ILogger<IsOwnResourceAuthorizationHandler> logger)
         {
@@ -35,7 +35,7 @@ namespace Doppler.HtmlEditorApi.DopplerSecurity
         {
             if (!TryGetRouteData(context, out var routeData))
             {
-                LogResourceNotAvaliable(context.Resource?.GetType().Name ?? "null");
+                LogResourceNotAvailable(context.Resource?.GetType().Name ?? "null");
                 return false;
             }
 

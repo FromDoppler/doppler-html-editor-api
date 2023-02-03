@@ -270,7 +270,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     [Theory]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, "")]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, null)]
-    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, "noexisto")]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/456/content", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, "unknown")]
     public async Task PUT_campaign_should_return_error_when_type_is_invalid(string url, string token, string type)
     {
         // Arrange
@@ -986,7 +986,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     [Theory]
     [InlineData("[[[firstname]]]", "VALUES (319)")]
     [InlineData("[[[firstname]]] [[[lastname]]]", "VALUES (319),(320)")]
-    [InlineData("[[[firstname]]] [[[lastname]]] [[[noexist]]]", "VALUES (319),(320)")]
+    [InlineData("[[[firstname]]] [[[lastname]]] [[[unknown]]]", "VALUES (319),(320)")]
     public async Task PUT_campaign_should_store_field_relations(string htmlContent, string expectedSubQuery)
     {
         // Arrange
@@ -1039,7 +1039,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
     [Theory]
     [InlineData("[[[firstname]]]", "VALUES (319)")]
     [InlineData("[[[firstname]]] [[[lastname]]]", "VALUES (319),(320)")]
-    [InlineData("[[[firstname]]] [[[lastname]]] [[[noexist]]]", "VALUES (319),(320)")]
+    [InlineData("[[[firstname]]] [[[lastname]]] [[[unknown]]]", "VALUES (319),(320)")]
     public async Task PUT_campaign_should_store_field_relations_in_campaign_TestAB(string htmlContent, string expectedSubQuery)
     {
         // Arrange

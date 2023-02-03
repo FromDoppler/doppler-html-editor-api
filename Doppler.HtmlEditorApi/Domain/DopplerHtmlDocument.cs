@@ -17,7 +17,7 @@ public class DopplerHtmlDocument
     // Old Doppler code:
     // https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.HypermediaAPI/ApiMappers/ToDoppler/CampaignContent_To_DtoContent.cs#L27-L29
 
-    // TODO: consider remove the linebreaks in hrefs:
+    // TODO: consider remove the line-breaks in href's:
     // * https://github.com/MakingSense/Doppler/blob/ed24e901c990b7fb2eaeaed557c62c1adfa80215/Doppler.Domain.Core/Classes/Utils.cs#L147-L151
     // TODO: consider sanitize field names
     // Searching the canonical name in FieldsRes.resx (replacing " " and "%20" by "_" in the key)

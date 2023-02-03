@@ -279,7 +279,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
     }
 
     [Fact]
-    public void GetTrackableUrls_should_not_map_fieldnames()
+    public void GetTrackableUrls_should_not_map_field_names()
     {
         // Arrange
         var input = @"<ul>
@@ -403,7 +403,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         @"
 <meta name=""copyright"" content=""© 2022 FromDoppler"">
 <meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">")]
-    public void RemoveHarmfulTags_should_remove_harmfultags_from_body(string input, string expectedBody)
+    public void RemoveHarmfulTags_should_remove_harmful_tags_from_body(string input, string expectedBody)
     {
         // Arrange
         var htmlDocument = new DopplerHtmlDocument(input);
@@ -452,7 +452,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
 <title>Hello safety!</title>
 <meta name=""copyright"" content=""© 2022 FromDoppler"">
 <meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">")]
-    public void RemoveHarmfulTags_should_remove_harmfultags_from_head(string input, string expectedHead)
+    public void RemoveHarmfulTags_should_remove_harmful_tags_from_head(string input, string expectedHead)
     {
         // Arrange
         var htmlDocument = new DopplerHtmlDocument(input);
