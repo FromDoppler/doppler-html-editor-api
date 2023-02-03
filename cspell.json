@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en, es",
+  "import": ["@cspell/dict-es-es/cspell-ext.json"],
+  "allowCompoundWords": false,
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "./cspell-project-words.txt",
+      "addWords": true
+    }
+  ],
+  "dictionaries": ["project-words"],
+  "ignorePaths": [
+    "*.csproj",
+    "**/obj/**",
+    "**/bin/**",
+    "**/TestResults/**",
+    "**/*-keys-dev/**",
+    "coverage/**",
+    ".eslintrc.js",
+    ".gitignore",
+    ".prettierignore",
+    "cspell.json",
+    "**/node_modules/**",
+    "**/vscode-extension/**",
+    "**/.git/**",
+    "**/lib/**",
+    "**/__snapshots__/**",
+    "**/*.snap",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml"
+  ],
+  "ignoreRegExpList": ["eyJhbGciOiJ[a-zA-Z0-9\\._-]+", "\\.resx", "&ntilde;"],
+  "overrides": [
+    {
+      "filename": "appsettings.json",
+      "ignoreWords": [
+        "PAIS",
+        "ELECTRONICO",
+        "CUMPLEANOS",
+        "FIRSTNAME",
+        "LASTNAME"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+# code
+CONV
+GETUTCDATE
+MSYS
+NZEC
+PATHCONV
+appsettings
+duplicatable
+endregion
+executesql
+hideable
+iframe
+nvarchar
+onclick
+ondragstart
+preheader
+valign
+
+# Own terms
+ContentXFIeld
+accountname
+doppler
+dopplerdock
+dplr
+mseditor
+mydplr
+socialshare
+
+# Technical terms
+Liskov
+automerge
+entitize
+nofile
+
+# our services and providers
+aspnet
+aspnetcore
+dockerhub
+dockerlint
+dotnet
+eclint
+gitlint
+hadolint
+hellang
+jenkinsfile
+jorisroovers
+linkedin
+loggly
+pinterest
+serilog
+shellcheck
+swashbuckle
+unlayer
+whatsapp
+xunit
