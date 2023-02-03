@@ -21,6 +21,7 @@ namespace Doppler.HtmlEditorApi;
 
 public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 {
+    // cSpell: enableCompoundWords
     #region Content examples
     private const string HEAD_CONTENT = "<title>Hello head!</title>";
     private const string BODY_CONTENT = "<div>Hello body!</div>";

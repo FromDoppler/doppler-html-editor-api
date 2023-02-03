@@ -31,6 +31,7 @@ public class DopplerHtmlDocument
     private const string FieldIdTagStartDelimiter = "|*|";
     private const string FieldIdTagEndDelimiter = "*|*";
     // &, # and ; are here to accept HTML Entities
+    // cspell:disable-next-line
     private static readonly Regex FieldNameTagRegex = new Regex($@"{Regex.Escape(FieldNameTagStartDelimiter)}([a-zA-Z0-9 \-_ñÑáéíóúÁÉÍÓÚ%&;#]+){Regex.Escape(FieldNameTagEndDelimiter)}");
     private static readonly Regex FieldIdTagRegex = new Regex($@"{Regex.Escape(FieldIdTagStartDelimiter)}(\d+){Regex.Escape(FieldIdTagEndDelimiter)}");
     private static readonly Regex CleanupUrlRegex = new Regex(@"^(?:\s?(?:%20)?)*|(?:\s?(?:%20)?)*$|\s");
