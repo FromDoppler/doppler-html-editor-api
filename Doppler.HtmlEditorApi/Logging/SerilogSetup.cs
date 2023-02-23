@@ -9,7 +9,7 @@ namespace Doppler.HtmlEditorApi.Logging
 {
     public static class SerilogSetup
     {
-        public static LoggerConfiguration SetupSeriLog(
+        public static LoggerConfiguration SetupSerilog(
             this LoggerConfiguration loggerConfiguration,
             IConfiguration configuration,
             IHostEnvironment hostEnvironment)

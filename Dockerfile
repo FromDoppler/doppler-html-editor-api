@@ -1,9 +1,10 @@
+# cSpell: enableCompoundWords
 FROM node:19 AS verify-format
 WORKDIR /src
 COPY package.json yarn.lock ./
 RUN yarn
 COPY . .
-RUN yarn verify-format
+RUN yarn verify-format && yarn verify-spell
 
 FROM koalaman/shellcheck-alpine:v0.9.0 as verify-sh
 WORKDIR /src

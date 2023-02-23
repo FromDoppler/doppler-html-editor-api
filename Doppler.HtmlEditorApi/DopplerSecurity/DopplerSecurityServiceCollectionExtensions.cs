@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
                     // TODO: I would like to use ownResourceOrSuperUserPolicy as the default policy, but I
                     // cannot override a more restrictive policy with a less restrictive one. So,
-                    // for the moment, we have to be carefull and chooses the right one for each
+                    // for the moment, we have to be careful and chooses the right one for each
                     // controller.
                     o.DefaultPolicy = simpleAuthenticationPolicy;
 

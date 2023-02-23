@@ -33,7 +33,7 @@ public class SaveNewCampaignLinksTest
     UNION SELECT @Url3 AS UrlLink
     UNION SELECT @Url4 AS UrlLink
     )")]
-    public void GenerateSqlQuery_should_insert_the_ids_in_sql_query(int idContent, string[] links, string expectedLinkParametersSubqueries)
+    public void GenerateSqlQuery_should_insert_the_ids_in_sql_query(int idContent, string[] links, string expectedLinkParametersSubQueries)
     {
         // Arrange
         var dbQuery = new SaveNewCampaignLinks(
@@ -45,7 +45,7 @@ INSERT INTO [Link] (IdCampaign, UrlLink, IsActiveForTracking, IsDynamic)
 SELECT rest.IdCampaign, newLinks.UrlLink, rest.IsActiveForTracking, rest.IsDynamic
 FROM
     (SELECT @IdCampaign AS IdCampaign, 1 AS IsActiveForTracking, 0 AS IsDynamic) rest
-JOIN {expectedLinkParametersSubqueries} AS newLinks ON 1=1
+JOIN {expectedLinkParametersSubQueries} AS newLinks ON 1=1
 LEFT JOIN [Link] oldLinks ON oldLinks.UrlLink = newLinks.UrlLink AND oldLinks.IdCampaign = rest.IdCampaign
 WHERE oldLinks.IdCampaign IS NULL";
 

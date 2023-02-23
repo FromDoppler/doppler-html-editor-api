@@ -2,10 +2,13 @@
   "name": "html-editor-api",
   "private": true,
   "devDependencies": {
+    "@cspell/dict-es-es": "2.2.3",
+    "cspell": "6.21.0",
     "eclint": "2.8.1",
     "prettier": "2.8.4"
   },
   "scripts": {
+    "verify-spell": "cspell .",
     "verify-format": "yarn prettier-check && yarn eclint-check",
     "fix-format": "yarn prettier-fix && yarn eclint-fix",
     "eclint-fix": "eclint fix",
