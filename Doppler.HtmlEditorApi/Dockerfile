@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:7.0.3-bullseye-slim AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0.103-bullseye-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0.201-bullseye-slim AS build
 WORKDIR /src
 COPY ["Doppler.HtmlEditorApi/Doppler.HtmlEditorApi.csproj", "Doppler.HtmlEditorApi/"]
 RUN dotnet restore "Doppler.HtmlEditorApi/Doppler.HtmlEditorApi.csproj"
