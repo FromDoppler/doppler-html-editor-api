@@ -27,7 +27,7 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
 
     [Theory]
     [InlineData("/accounts/x@x.com/templates/from-template/456", HttpStatusCode.Unauthorized)]
-    public async Task GET_template_should_require_token(string url, HttpStatusCode expectedStatusCode)
+    public async Task POST_template_should_require_token(string url, HttpStatusCode expectedStatusCode)
     {
         // Arrange
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
@@ -44,7 +44,7 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
     [Theory]
     [InlineData("/accounts/x@x.com/templates/from-template/456", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, HttpStatusCode.Forbidden)]
     [InlineData("/accounts/x@x.com/templates/from-template/456", TestUsersData.TOKEN_EXPIRE_20330518, HttpStatusCode.Forbidden)]
-    public async Task GET_template_should_not_accept_the_token_of_another_account(string url, string token, HttpStatusCode expectedStatusCode)
+    public async Task POST_template_should_not_accept_the_token_of_another_account(string url, string token, HttpStatusCode expectedStatusCode)
     {
         // Arrange
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
@@ -61,7 +61,7 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
     [Theory]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/456", TestUsersData.TOKEN_TEST1_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/456", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20010908, HttpStatusCode.Unauthorized)]
-    public async Task GET_template_should_not_accept_a_expired_token(string url, string token, HttpStatusCode expectedStatusCode)
+    public async Task POST_template_should_not_accept_a_expired_token(string url, string token, HttpStatusCode expectedStatusCode)
     {
         // Arrange
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
@@ -82,7 +82,7 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/459", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 459)]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/459", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 459)]
     [InlineData("/accounts/otro@test.com/templates/from-template/459", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 459)]
-    public async Task GET_template_should_accept_right_tokens_and_return_404_when_not_exist(string url, string token, string accountName, int baseTemplateId)
+    public async Task POST_template_should_accept_right_tokens_and_return_404_when_not_exist(string url, string token, string accountName, int baseTemplateId)
     {
         // Arrange
         TemplateModel templateModel = null;
@@ -110,7 +110,7 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/459", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 459)]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/459", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 459)]
     [InlineData("/accounts/otro@test.com/templates/from-template/459", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, "otro@test.com", 459)]
-    public async Task GET_template_should_accept_right_tokens_and_call_repository_and_return_createdResourceId(string url, string token, string accountName, int baseTemplateId)
+    public async Task POST_template_should_accept_right_tokens_and_call_repository_and_return_createdResourceId(string url, string token, string accountName, int baseTemplateId)
     {
         // Arrange
         const int unlayerEditorType = 5;
@@ -171,7 +171,7 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
 
     [Theory]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/459", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 459)]
-    public async Task GET_template_should_error_when_base_template_content_is_mseditor(string url, string token, string accountName, int baseTemplateId)
+    public async Task POST_template_should_error_when_base_template_content_is_mseditor(string url, string token, string accountName, int baseTemplateId)
     {
         // Arrange
         var editorType = 4;
@@ -212,5 +212,88 @@ public class PostTemplateFromTemplateTest : IClassFixture<WebApplicationFactory<
         Assert.Equal("Internal Server Error", responseContentJson.GetProperty("title").GetString());
         Assert.Equal("Unsupported template content type Doppler.HtmlEditorApi.Domain.UnknownTemplateContentData", responseContentJson.GetProperty("detail").GetString());
         Assert.Equal(500, responseContentJson.GetProperty("status").GetInt32());
+    }
+
+    [Theory]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/459", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 459)]
+    public async Task POST_template_should_save_with_base_template(string url, string token, string accountName, int baseTemplateId)
+    {
+        // Arrange
+        var isPublic = true;
+        var previewImage = "PreviewImage";
+        var name = "Name";
+        var contentData = new UnlayerTemplateContentData(
+            HtmlComplete: "<html></html>",
+            Meta: "{}");
+
+        var templateModel = new TemplateModel(
+            TemplateId: baseTemplateId,
+            IsPublic: isPublic,
+            PreviewImage: previewImage,
+            Name: name,
+            Content: contentData);
+
+        var repositoryMock = new Mock<ITemplateRepository>();
+
+        repositoryMock
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, baseTemplateId))
+            .ReturnsAsync(templateModel);
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: repositoryMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PostAsync(url, null);
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        using var responseContentDoc = JsonDocument.Parse(responseContent);
+        var responseContentJson = responseContentDoc.RootElement;
+
+        // Assert
+        repositoryMock.VerifyAll();
+        repositoryMock.Verify(x => x.CreatePrivateTemplate(accountName, new TemplateModel(0, false, previewImage, name, contentData)));
+        Assert.Equal(0, responseContentJson.GetProperty("createdResourceId").GetDecimal());
+    }
+
+    [Theory]
+    [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/templates/from-template/459?templateName=duplicatedTemplate", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, TestUsersData.EMAIL_TEST1, 459)]
+    public async Task POST_template_should_save_with_template_name_different_to_base_template_name(string url, string token, string accountName, int baseTemplateId)
+    {
+        // Arrange
+        var isPublic = true;
+        var previewImage = "PreviewImage";
+        var contentData = new UnlayerTemplateContentData(
+            HtmlComplete: "<html></html>",
+            Meta: "{}");
+
+        var templateModel = new TemplateModel(
+            TemplateId: baseTemplateId,
+            IsPublic: isPublic,
+            PreviewImage: previewImage,
+            Name: "Name",
+            Content: contentData);
+
+        var repositoryMock = new Mock<ITemplateRepository>();
+
+        repositoryMock
+            .Setup(x => x.GetOwnOrPublicTemplate(accountName, baseTemplateId))
+            .ReturnsAsync(templateModel);
+
+        var client = _factory.CreateSutClient(
+            serviceToOverride1: repositoryMock.Object,
+            token: token);
+
+        // Act
+        var response = await client.PostAsync(url, null);
+        _output.WriteLine(response.GetHeadersAsString());
+        var responseContent = await response.Content.ReadAsStringAsync();
+        using var responseContentDoc = JsonDocument.Parse(responseContent);
+        var responseContentJson = responseContentDoc.RootElement;
+
+        // Assert
+        repositoryMock.VerifyAll();
+        repositoryMock.Verify(x => x.CreatePrivateTemplate(accountName, new TemplateModel(0, false, previewImage, "duplicatedTemplate", contentData)));
+        Assert.Equal(0, responseContentJson.GetProperty("createdResourceId").GetDecimal());
     }
 }

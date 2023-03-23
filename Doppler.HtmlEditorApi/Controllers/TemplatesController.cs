@@ -95,7 +95,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPost("/accounts/{accountName}/templates/from-template/{baseTemplateId}")]
-        public async Task<Results<NotFound<ProblemDetails>, CreatedAtRoute<ResourceCreated>>> CreateTemplateFromTemplate(string accountName, int baseTemplateId)
+        public async Task<Results<NotFound<ProblemDetails>, CreatedAtRoute<ResourceCreated>>> CreateTemplateFromTemplate(string accountName, int baseTemplateId, string templateName = null)
         {
             var templateModel = await _templateRepository.GetOwnOrPublicTemplate(accountName, baseTemplateId);
             if (templateModel == null)
@@ -115,7 +115,8 @@ namespace Doppler.HtmlEditorApi.Controllers
             var newTemplate = templateModel with
             {
                 TemplateId = 0,
-                IsPublic = false
+                IsPublic = false,
+                Name = templateName ?? templateModel.Name
             };
 
             var templateId = await _templateRepository.CreatePrivateTemplate(accountName, newTemplate);
