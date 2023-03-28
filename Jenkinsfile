@@ -58,7 +58,7 @@ pipeline {
                     }
                     steps {
                         withDockerRegistry(credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "") {
-                            sh 'sh build-n-publish.sh --image=${DOCKER_IMAGE_NAME} --commit=${GIT_COMMIT} --name=pr-${CHANGE_ID}'
+                            sh 'sh build-n-publish.sh --image=${DOCKER_IMAGE_NAME}${PACKAGE_SUFFIX} --commit=${GIT_COMMIT} --name=pr-${CHANGE_ID}'
                         }
                     }
                 }
@@ -68,7 +68,7 @@ pipeline {
                     }
                     steps {
                         withDockerRegistry(credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "") {
-                            sh 'sh build-n-publish.sh --image=${DOCKER_IMAGE_NAME} --commit=${GIT_COMMIT} --name=main'
+                            sh 'sh build-n-publish.sh --image=${DOCKER_IMAGE_NAME}${PACKAGE_SUFFIX} --commit=${GIT_COMMIT} --name=main'
                         }
                     }
                 }
@@ -78,7 +78,7 @@ pipeline {
                     }
                     steps {
                         withDockerRegistry(credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "") {
-                            sh 'sh build-n-publish.sh --image=${DOCKER_IMAGE_NAME} --commit=${GIT_COMMIT} --name=INT'
+                            sh 'sh build-n-publish.sh --image=${DOCKER_IMAGE_NAME}${PACKAGE_SUFFIX} --commit=${GIT_COMMIT} --name=INT'
                         }
                     }
                 }
@@ -90,7 +90,7 @@ pipeline {
                     }
                     steps {
                         withDockerRegistry(credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "") {
-                            sh 'sh build-n-publish.sh --image=${DOCKER_IMAGE_NAME} --commit=${GIT_COMMIT} --version=${TAG_NAME}'
+                            sh 'sh build-n-publish.sh --image=${DOCKER_IMAGE_NAME}${PACKAGE_SUFFIX} --commit=${GIT_COMMIT} --version=${TAG_NAME}'
                         }
                     }
                 }
