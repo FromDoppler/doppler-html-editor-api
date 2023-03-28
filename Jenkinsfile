@@ -74,7 +74,10 @@ pipeline {
                 }
                 stage('Publish pre-release images from INT') {
                     when {
-                        branch 'INT'
+                        anyOf {
+                            branch 'INT'
+                            branch 'TESTING-JENKINS'
+                        }
                     }
                     steps {
                         withDockerRegistry(credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "") {
