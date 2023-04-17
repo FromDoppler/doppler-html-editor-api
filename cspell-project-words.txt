@@ -54,3 +54,4 @@ swashbuckle
 unlayer
 whatsapp
 xunit
+jenkins
