@@ -14,7 +14,9 @@ RUN shellcheck -e SC1091,SC1090 ./*.sh
 FROM mcr.microsoft.com/dotnet/sdk:7.0.202-bullseye-slim AS restore
 WORKDIR /src
 COPY ./*.sln ./
-COPY */*.csproj ./
+# Using `Doppler.` prefix to avoid docker confuse symlink with directories
+# "ERROR: error from sender: readdir: readdirent Jenkinsfile: not a directory"
+COPY Doppler.*/*.csproj ./
 # Take into account using the same name for the folder and the .csproj and only one folder level
 RUN for file in *.csproj; do mkdir -p -- "${file%.*}/" && mv -- "$file" "${file%.*}/"; done
 RUN dotnet restore

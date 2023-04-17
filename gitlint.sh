@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # It is only here for reference and backward compatibility, the source of truth
-# is Jenkinsfile
+# is doppler-jenkins-ci.groovy
 
 # Stop script on NZEC
 set -e
@@ -18,11 +18,13 @@ cd "$(dirname "$0")"
 export MSYS_NO_PATHCONV=1
 export MSYS2_ARG_CONV_EXCL="*"
 
-# See more information in https://jorisroovers.com/gitlint
-
-docker run --ulimit nofile=1024 \
-  -v "$(pwd)/.git":/repo/.git \
-  -v "$(pwd)/.gitlint":/repo/.gitlint \
-  jorisroovers/gitlint:0.18.0 \
-  --config /repo/.gitlint \
-  --commits origin/main..HEAD
+if [ -x "$(command -v gitlint)" ]; then
+  gitlint --config .gitlint --commits origin/main..HEAD
+else
+  docker run --ulimit nofile=1024 \
+    -v "$(pwd)/.git":/repo/.git \
+    -v "$(pwd)/.gitlint":/repo/.gitlint \
+    jorisroovers/gitlint:0.18.0 \
+    --config /repo/.gitlint \
+    --commits origin/main..HEAD
+fi
