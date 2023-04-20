@@ -1,5 +1,5 @@
 # cSpell: enableCompoundWords
-FROM node:19 AS verify-format
+FROM node:20 AS verify-format
 WORKDIR /src
 COPY package.json yarn.lock ./
 RUN yarn
