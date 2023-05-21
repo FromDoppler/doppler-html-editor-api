@@ -11,7 +11,7 @@ WORKDIR /src
 COPY ./*.sh ./
 RUN shellcheck -e SC1091,SC1090 ./*.sh
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0.203-bullseye-slim AS restore
+FROM mcr.microsoft.com/dotnet/sdk:7.0.302-bullseye-slim AS restore
 WORKDIR /src
 COPY ./*.sln ./
 # Using `Doppler.` prefix to avoid docker confuse symlink with directories
