@@ -86,12 +86,8 @@ public class DopplerTemplateRepository : ITemplateRepository
             Name: templateModel.Name
         );
 
-        var result = await _dbContext.ExecuteAsync(createTemplateQuery);
-
-        if (result is null)
-        {
-            throw new ArgumentException($"Account with name '{accountName}' does not exist.", nameof(accountName));
-        }
+        var result = await _dbContext.ExecuteAsync(createTemplateQuery)
+            ?? throw new ArgumentException($"Account with name '{accountName}' does not exist.", nameof(accountName));
 
         return result.NewTemplateId;
     }
