@@ -12,10 +12,12 @@ public class UpdateCampaignStatusDbQueryTest
         var oldStep = 1;
         var newStep = 2;
         var newHtmlSourceType = 3;
+        var newContentType = 4;
 
         var dbQuery = new UpdateCampaignStatusDbQuery(
             SetCurrentStep: newStep,
             SetHtmlSourceType: newHtmlSourceType,
+            SetContentType: newContentType,
             WhenIdCampaignIs: idCampaign,
             WhenCurrentStepIs: oldStep
         );
@@ -24,7 +26,8 @@ public class UpdateCampaignStatusDbQueryTest
             UPDATE Campaign
             SET
                 CurrentStep = @setCurrentStep,
-                HtmlSourceType = @setHtmlSourceType
+                HtmlSourceType = @setHtmlSourceType,
+                ContentType = @setContentType
             WHERE
                 IdCampaign = @whenIdCampaignIs
                 AND CurrentStep = @whenCurrentStepIs

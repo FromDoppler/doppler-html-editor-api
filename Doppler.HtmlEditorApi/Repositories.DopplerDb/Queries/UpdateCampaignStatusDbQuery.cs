@@ -5,6 +5,7 @@ namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 public record UpdateCampaignStatusDbQuery(
     int SetCurrentStep,
     int? SetHtmlSourceType,
+    int SetContentType,
     int WhenIdCampaignIs,
     int WhenCurrentStepIs
 ) : IExecutableDbQuery
@@ -13,7 +14,8 @@ public record UpdateCampaignStatusDbQuery(
         UPDATE Campaign
         SET
             CurrentStep = @setCurrentStep,
-            HtmlSourceType = @setHtmlSourceType
+            HtmlSourceType = @setHtmlSourceType,
+            ContentType = @setContentType
         WHERE
             IdCampaign = @whenIdCampaignIs
             AND CurrentStep = @whenCurrentStepIs

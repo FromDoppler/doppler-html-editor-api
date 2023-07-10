@@ -652,6 +652,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
 
         var setCurrentStep = 2;
         var setHtmlSourceType = 2;
+        var setContentType = 2;
         var whenCurrentStepIs = 1;
         var whenIdCampaignIs = idCampaign;
         dbContextMock
@@ -659,6 +660,7 @@ public class CreateCampaignContentFromTemplateTest : IClassFixture<WebApplicatio
                 new UpdateCampaignStatusDbQuery(
                     setCurrentStep,
                     setHtmlSourceType,
+                    setContentType,
                     whenIdCampaignIs,
                     whenCurrentStepIs)))
             .ReturnsAsync(1);

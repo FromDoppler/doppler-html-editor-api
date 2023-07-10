@@ -177,11 +177,17 @@ public class DopplerCampaignContentRepository : ICampaignContentRepository
         await _dbContext.ExecuteAsync(new DeleteRemovedCampaignLinks(contentId, links));
     }
 
-    public async Task UpdateCampaignStatus(int setCurrentStep, int setHtmlSourceType, int whenIdCampaignIs, int whenCurrentStepIs)
+    public async Task UpdateCampaignStatus(
+        int setCurrentStep,
+        int setHtmlSourceType,
+        int setContentType,
+        int whenIdCampaignIs,
+        int whenCurrentStepIs)
     {
         var updateCampaignStatusQuery = new UpdateCampaignStatusDbQuery(
             setCurrentStep,
             setHtmlSourceType,
+            setContentType,
             whenIdCampaignIs,
             whenCurrentStepIs);
         await _dbContext.ExecuteAsync(updateCampaignStatusQuery);
