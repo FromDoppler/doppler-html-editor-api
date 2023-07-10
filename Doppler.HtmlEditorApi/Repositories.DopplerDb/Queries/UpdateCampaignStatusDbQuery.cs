@@ -9,13 +9,13 @@ public record UpdateCampaignStatusDbQuery(
     int WhenCurrentStepIs
 ) : IExecutableDbQuery
 {
-    public string GenerateSqlQuery() => @"
-UPDATE Campaign
-SET
-    CurrentStep = @setCurrentStep,
-    HtmlSourceType = @setHtmlSourceType
-WHERE
-    IdCampaign = @whenIdCampaignIs
-    AND CurrentStep = @whenCurrentStepIs";
-
+    public string GenerateSqlQuery() => """
+        UPDATE Campaign
+        SET
+            CurrentStep = @setCurrentStep,
+            HtmlSourceType = @setHtmlSourceType
+        WHERE
+            IdCampaign = @whenIdCampaignIs
+            AND CurrentStep = @whenCurrentStepIs
+        """;
 }
