@@ -713,6 +713,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
 
         var setCurrentStep = 2;
         var setHtmlSourceType = 2;
+        var setContentType = 2;
         var whenCurrentStepIs = 1;
         var whenIdCampaignIs = expectedIdCampaign;
         dbContextMock
@@ -720,6 +721,7 @@ public class PutCampaignTest : IClassFixture<WebApplicationFactory<Startup>>
                 new UpdateCampaignStatusDbQuery(
                     setCurrentStep,
                     setHtmlSourceType,
+                    setContentType,
                     whenIdCampaignIs,
                     whenCurrentStepIs)))
             .ReturnsAsync(1);

@@ -43,6 +43,7 @@ namespace Doppler.HtmlEditorApi.Controllers
         // We are using HTMLSourceType = 2 (Template) because Editor seems to be tied to the old HTML Editor
         // See https://github.com/MakingSense/Doppler/blob/48cf637bb1f8b4d81837fff904d8736fe889ff1c/Doppler.Transversal/Classes/CampaignHTMLContentTypeEnum.cs#L12-L17
         private const int TemplateHtmlSourceType = 2;
+        private const int HtmlContentType = 2;
 
         public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions, ITemplateRepository templateRepository)
         {
@@ -199,6 +200,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                     await _campaignContentRepository.UpdateCampaignStatus(
                         setCurrentStep: 2,
                         setHtmlSourceType: TemplateHtmlSourceType,
+                        setContentType: HtmlContentType,
                         whenIdCampaignIs: campaignId,
                         whenCurrentStepIs: 1);
                 }
@@ -212,6 +214,7 @@ namespace Doppler.HtmlEditorApi.Controllers
                 await _campaignContentRepository.UpdateCampaignStatus(
                     setCurrentStep: 2,
                     setHtmlSourceType: TemplateHtmlSourceType,
+                    setContentType: HtmlContentType,
                     whenIdCampaignIs: campaignState.IdCampaignResult.Value,
                     whenCurrentStepIs: 1);
             }

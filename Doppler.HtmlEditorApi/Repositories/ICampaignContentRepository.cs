@@ -21,6 +21,11 @@ public interface ICampaignContentRepository
     /// It does not update the properties of existing links that are also in the payload.
     /// </summary>
     Task SaveLinks(int contentId, IEnumerable<string> links);
-    Task UpdateCampaignStatus(int setCurrentStep, int setHtmlSourceType, int whenIdCampaignIs, int whenCurrentStepIs);
+    Task UpdateCampaignStatus(
+        int setCurrentStep,
+        int setHtmlSourceType,
+        int setContentType,
+        int whenIdCampaignIs,
+        int whenCurrentStepIs);
     Task UpdateCampaignPreviewImage(int campaignId, string previewImage);
 }
