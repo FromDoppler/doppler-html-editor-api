@@ -11,7 +11,7 @@ WORKDIR /src
 COPY ./*.sh ./
 RUN shellcheck -e SC1091,SC1090 ./*.sh
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0.305-bullseye-slim AS restore
+FROM mcr.microsoft.com/dotnet/sdk:7.0.306-bullseye-slim AS restore
 WORKDIR /src
 COPY ./*.sln ./
 # Using `Doppler.` prefix to avoid docker confuse symlink with directories
@@ -32,7 +32,7 @@ RUN dotnet test
 FROM build AS publish
 RUN dotnet publish "./Doppler.HtmlEditorApi/Doppler.HtmlEditorApi.csproj" -c Release -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0.8-bullseye-slim AS final
+FROM mcr.microsoft.com/dotnet/aspnet:7.0.9-bullseye-slim AS final
 WORKDIR /app
 EXPOSE 80
 COPY --from=publish /app/publish .
