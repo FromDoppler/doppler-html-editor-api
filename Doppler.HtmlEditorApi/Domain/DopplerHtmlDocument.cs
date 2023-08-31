@@ -36,7 +36,7 @@ public class DopplerHtmlDocument
     private static readonly Regex FieldIdTagRegex = new Regex($@"{Regex.Escape(FieldIdTagStartDelimiter)}(\d+){Regex.Escape(FieldIdTagEndDelimiter)}");
     private static readonly Regex CleanupUrlRegex = new Regex(@"^(?:\s?(?:%20)?)*|(?:\s?(?:%20)?)*$|\s");
     private static readonly Regex TrackableUrlAcceptanceRegex = new Regex(@"^(?:\s?(?:%20)?)*(?:(?:https?|ftp):\/\/|www\.)", RegexOptions.IgnoreCase);
-    private static readonly Regex TrackableUrlPartsRegex = new Regex(@"^(?:(?<scheme>(?:https?|ftp):\/\/)(?<domain>[^\/]+)|(?<domainWithoutScheme>www\.[^\/]+))(?<rest>\/.*)?$", RegexOptions.IgnoreCase);
+    private static readonly Regex TrackableUrlPartsRegex = new Regex(@"^(?:(?<scheme>(?:https?|ftp):\/\/)(?<domain>[^\/\?]*)|(?<domainWithoutScheme>www\.[^\/\?]*))(?<rest>[\/\?].*)?$", RegexOptions.IgnoreCase);
 
     private readonly HtmlNode _headNode;
     private readonly HtmlNode _contentNode;
