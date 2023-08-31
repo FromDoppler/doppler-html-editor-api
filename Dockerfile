@@ -15,6 +15,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0.400-bullseye-slim AS restore
 WORKDIR /src
 COPY ./*.sln ./
 # Using `Doppler.` prefix to avoid docker confuse symlink with directories
+# cSpell: disable-next-line
 # "ERROR: error from sender: readdir: readdirent Jenkinsfile: not a directory"
 COPY Doppler.*/*.csproj ./
 # Take into account using the same name for the folder and the .csproj and only one folder level

@@ -194,6 +194,10 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
         "%20\n%20  WWW.GOOGLE7.com/TEST%20space%20\n %20  ",
         "http://www.google7.com/TEST%20space"
     )]
+    [InlineData(
+        "https://test.fromdoppler.net?QueryString=ItShouldHaveInstance",
+        "https://test.fromdoppler.net?QueryString=ItShouldHaveInstance"
+    )]
     public void SanitizeTrackableLinks_should_sanitize_trackable_links(string inputHref, string expectedHref)
     {
         // Arrange
