@@ -71,7 +71,7 @@ public class DopplerHtmlDocument
 
     public IEnumerable<string> GetTrackableUrls()
         => GetTrackableLinkNodes()
-            .Select(x => x.Attributes["href"].Value)
+            .Select(x => x.Attributes["href"].Value.Replace("&amp;", "&"))
             .Distinct();
 
     public void SanitizeTrackableLinks()
