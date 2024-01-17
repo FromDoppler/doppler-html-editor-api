@@ -308,12 +308,13 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
     }
 
     [Fact]
-    public void GetTrackableUrls_remove_encoding_to_save()
+    public void GetTrackableUrls_remove_encoding_on_sanitize_to_save()
     {
         // Arrange
         var input = "<p><a href=\"https://midomain.com/?param1=aa&amp;param2=bb\">This is a link with parameters</a></p>";
         var htmlDocument = new DopplerHtmlDocument(input);
         htmlDocument.GetDopplerContent();
+        htmlDocument.SanitizeTrackableLinks();
 
         // Act
         var links = htmlDocument.GetTrackableUrls();
