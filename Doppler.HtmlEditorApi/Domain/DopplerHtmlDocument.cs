@@ -151,7 +151,7 @@ public class DopplerHtmlDocument
         var domain = match.Groups["domain"].Value
             .FallbackIfNullOrEmpty(match.Groups["domainWithoutScheme"].Value)
             .ToLowerInvariant();
-        var rest = match.Groups["rest"].Value;
+        var rest = match.Groups["rest"].Value.Replace("&amp;", "&");
         var sanitizedUrl = $"{scheme}{domain}{rest}";
 
         return sanitizedUrl;
