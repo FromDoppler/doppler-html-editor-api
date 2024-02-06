@@ -25,6 +25,7 @@ dplr
 mseditor
 mydplr
 socialshare
+dynamiccontent
 
 # Technical terms
 Liskov
