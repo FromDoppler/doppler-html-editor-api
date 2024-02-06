@@ -261,6 +261,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
     }
 
     [Fact]
+
     public void GetTrackableUrls_should_return_list_of_trackable_urls()
     {
         // Arrange
@@ -306,6 +307,67 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
             link => Assert.Equal("www.GOOGLE.com/[[[field]]]", link),
             link => Assert.Equal("ftp://|*|3*|*", link));
     }
+
+    [Fact]
+    public void SanitizeDynamicContentNode_should_modify_html_dynamic_content_when_has_two_or_more_child_node_and_replace_image_src()
+    {
+        // Arrange
+        var input = $@"<dynamiccontent action=""abandoned_cart"" items=""2"">
+    <div role=""container"">
+        <section>
+            <a role=""link"" href=""[[[DC:URL]]]"" target=""_blank"">
+                <img
+                    src=""https://cdn.fromdoppler.com/unlayer-editor/assets/cart_v2.svg""
+                    alt=""product image""
+                />
+            </a>
+        </section>
+        <section>
+            <span>[[[DC:TITLE]]]</span>
+            <span >[[[DC:PRICE]]]</span>
+            <a role=""link"" href=""[[[DC:URL]]]"" target=""_blank"">Comprar</a>
+        </section>
+    </div>
+    <div role=""container"">
+        <section>
+            <a role=""link"" href=""[[[DC:URL]]]"" target=""_blank"">
+                <img
+                    src=""https://cdn.fromdoppler.com/unlayer-editor/assets/cart_v2.svg""
+                    alt=""product image""
+                />
+            </a>
+        </section>
+        <section>
+            <span>[[[DC:TITLE]]]</span>
+            <span >[[[DC:PRICE]]]</span>
+            <a role=""link"" href=""[[[DC:URL]]]"" target=""_blank"">Comprar</a>
+        </section>
+    </div></dynamiccontent>";
+        var htmlDocument = new DopplerHtmlDocument(input);
+        htmlDocument.GetDopplerContent();
+        var sanitizedContent = $@"<dynamiccontent action=""abandoned_cart"" items=""2"">
+    <div role=""container"">
+        <section>
+            <a role=""link"" href=""[[[DC:URL]]]"" target=""_blank"">
+                <img src=""[[[DC:IMAGE]]]"" alt=""product image"">
+            </a>
+        </section>
+        <section>
+            <span>[[[DC:TITLE]]]</span>
+            <span>[[[DC:PRICE]]]</span>
+            <a role=""link"" href=""[[[DC:URL]]]"" target=""_blank"">Comprar</a>
+        </section>
+    </div>
+    </dynamiccontent>";
+
+        // Act
+        htmlDocument.SanitizeDynamicContentNode();
+        var content = htmlDocument.GetDopplerContent();
+
+        // Assert
+        Assert.Equal(sanitizedContent, content);
+    }
+
 
     [Fact]
     public void GetTrackableUrls_remove_encoding_on_sanitize_to_save()
