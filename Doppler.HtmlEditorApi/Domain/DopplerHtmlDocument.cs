@@ -89,6 +89,30 @@ public class DopplerHtmlDocument
         }
     }
 
+    /// <summary>
+    /// Sanitize the HTML code exported by Unlayer for the right processing of Doppler.
+    /// - Remove repeated cart item tags
+    /// - Replace img src value by [[[DC:IMAGE]]]
+    /// </summary>
+    public void SanitizeDynamicContentNode()
+    {
+        var dynamicContentNode = _contentNode.SelectSingleNode("//dynamiccontent");
+        if (dynamicContentNode != null)
+        {
+            var divNodes = dynamicContentNode.SelectNodes("div");
+            if (divNodes != null && divNodes.Count > 1)
+            {
+                for (var i = 1; i < divNodes.Count; i++)
+                {
+                    dynamicContentNode.RemoveChild(divNodes[i]);
+                }
+            }
+
+            var imgNode = dynamicContentNode.SelectSingleNode(".//img");
+            imgNode?.SetAttributeValue("src", "[[[DC:IMAGE]]]");
+        }
+    }
+
     public void RemoveHarmfulTags()
     {
         var harmfulTags = _rootNode.SelectNodes(@"//script|//embed|//iframe|//meta[contains(@http-equiv,'refresh')]").EmptyIfNull();
