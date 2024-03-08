@@ -236,7 +236,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             htmlDocument.ReplaceFieldNameTagsByFieldIdTags(dopplerFieldsProcessor.GetFieldIdOrNull);
             htmlDocument.RemoveUnknownFieldIdTags(dopplerFieldsProcessor.FieldIdExist);
             htmlDocument.SanitizeTrackableLinks();
-            htmlDocument.SanitizeDynamicContentNode();
+            htmlDocument.SanitizeDynamicContentNodes();
             return htmlDocument;
         }
 
