@@ -309,7 +309,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
     }
 
     [Fact]
-    public void SanitizeDynamicContentNode_should_modify_html_dynamic_content_when_has_two_or_more_child_node_and_replace_image_src()
+    public void SanitizeDynamicContentNodes_should_modify_html_dynamic_content_when_has_two_or_more_child_node_and_replace_image_src()
     {
         // Arrange
         var input = $@"<dynamiccontent action=""abandoned_cart"" items=""2"">
@@ -361,7 +361,7 @@ shareArticle?mini=true&amp;url=https%3a%2f%2fvp.mydplr.com%2f123&amp;title=Prueb
     </dynamiccontent>";
 
         // Act
-        htmlDocument.SanitizeDynamicContentNode();
+        htmlDocument.SanitizeDynamicContentNodes();
         var content = htmlDocument.GetDopplerContent();
 
         // Assert
