@@ -94,22 +94,24 @@ public class DopplerHtmlDocument
     /// - Remove repeated cart item tags
     /// - Replace img src value by [[[DC:IMAGE]]]
     /// </summary>
-    public void SanitizeDynamicContentNode()
+    public void SanitizeDynamicContentNodes()
     {
-        var dynamicContentNode = _contentNode.SelectSingleNode("//dynamiccontent");
-        if (dynamicContentNode != null)
+        var dynamicContentNodes = _contentNode.SelectNodes("//dynamiccontent");
+        if (dynamicContentNodes != null)
         {
-            var divNodes = dynamicContentNode.SelectNodes("div");
-            if (divNodes != null && divNodes.Count > 1)
+            for (var i = 0; i < dynamicContentNodes.Count; i++)
             {
-                for (var i = 1; i < divNodes.Count; i++)
+                var divNodes = dynamicContentNodes[i].SelectNodes("div");
+                if (divNodes != null && divNodes.Count > 1)
                 {
-                    dynamicContentNode.RemoveChild(divNodes[i]);
+                    for (var j = 1; j < divNodes.Count; j++)
+                    {
+                        dynamicContentNodes[i].RemoveChild(divNodes[j]);
+                    }
                 }
+                var imgNode = dynamicContentNodes[i].SelectSingleNode(".//img");
+                imgNode?.SetAttributeValue("src", "[[[DC:IMAGE]]]");
             }
-
-            var imgNode = dynamicContentNode.SelectSingleNode(".//img");
-            imgNode?.SetAttributeValue("src", "[[[DC:IMAGE]]]");
         }
     }
 
