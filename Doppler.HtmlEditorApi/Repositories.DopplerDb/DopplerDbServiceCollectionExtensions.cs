@@ -9,5 +9,6 @@ public static class DopplerDbServiceCollectionExtensions
         => services
             .AddScoped<ICampaignContentRepository, DopplerCampaignContentRepository>()
             .AddScoped<ITemplateRepository, DopplerTemplateRepository>()
-            .AddScoped<IFieldsRepository, DopplerFieldsRepository>();
+            .AddScoped<IFieldsRepository, DopplerFieldsRepository>()
+            .AddScoped<IPromoCodeRepository, DopplerPromoCodeRepository>();
 }
