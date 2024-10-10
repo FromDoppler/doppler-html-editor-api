@@ -8,9 +8,9 @@ public record PromoCodeModel(
     decimal Value,
     bool IncludeShipping,
     bool FirstPurchase,
+    bool CombineDiscounts,
+    int ExpireDays,
     decimal? MinPrice,
-    DateTime? StartDate,
-    DateTime? EndDate,
     string Categories
     );
 

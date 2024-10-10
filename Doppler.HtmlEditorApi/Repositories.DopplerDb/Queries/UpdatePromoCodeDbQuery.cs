@@ -1,5 +1,4 @@
 using Doppler.HtmlEditorApi.DataAccess;
-using System;
 
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
@@ -9,9 +8,9 @@ public record UpdatePromoCodeDbQuery(
     decimal Value,
     bool IncludeShipping,
     bool FirstPurchase,
+    bool AllowCombines,
     decimal? MinPrice,
-    DateTime? StartDate,
-    DateTime? EndDate,
+    int ExpireDays,
     string? Categories
 ) : IExecutableDbQuery
 {
@@ -21,9 +20,9 @@ SET Type = @Type,
     Value = @Value,
     IncludeShipping = @IncludeShipping,
     FirstPurchase = @FirstPurchase,
+    AllowCombines = @AllowCombines,
     MinPrice = @MinPrice,
-    StartDate = @StartDate,
-    EndDate = @EndDate,
+    ExpireDays = @ExpireDays,
     Categories = @Categories
 WHERE IdDynamicContentPromoCode = @Id";
 }

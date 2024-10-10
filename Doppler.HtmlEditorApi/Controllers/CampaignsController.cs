@@ -199,9 +199,9 @@ namespace Doppler.HtmlEditorApi.Controllers
                 Value: promoCode.value,
                 IncludeShipping: promoCode.includeShipping,
                 FirstPurchase: promoCode.firstPurchase,
+                CombineDiscounts: promoCode.combineDiscounts,
+                ExpireDays: promoCode.expireDays,
                 MinPrice: promoCode.minPrice,
-                StartDate: promoCode.startDate,
-                EndDate: promoCode.endDate,
                 Categories: promoCode.cagetories);
 
             var result = await _promoCodeRepository.CreatePromoCode(promoCodeModel);
@@ -209,6 +209,7 @@ namespace Doppler.HtmlEditorApi.Controllers
             return new OkObjectResult(result);
         }
 
+        [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content/promoCode/{promoCodeId}")]
         public async Task<IActionResult> UpdatePromoCode(string accountName, int campaignId, int promoCodeId, PromoCode promoCode)
         {
@@ -217,9 +218,10 @@ namespace Doppler.HtmlEditorApi.Controllers
                 Value: promoCode.value,
                 IncludeShipping: promoCode.includeShipping,
                 FirstPurchase: promoCode.firstPurchase,
+                CombineDiscounts: promoCode.combineDiscounts,
                 MinPrice: promoCode.minPrice,
-                StartDate: promoCode.startDate,
-                EndDate: promoCode.endDate,
+                ExpireDays: promoCode.expireDays,
+
                 Categories: promoCode.cagetories);
 
             await _promoCodeRepository.UpdatePromoCode(promoCodeModel);

@@ -20,9 +20,9 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             Value: promoCodeModel.Value,
             IncludeShipping: promoCodeModel.IncludeShipping,
             FirstPurchase: promoCodeModel.FirstPurchase,
+            AllowCombines: promoCodeModel.CombineDiscounts,
             MinPrice: promoCodeModel.MinPrice,
-            StartDate: promoCodeModel.StartDate,
-            EndDate: promoCodeModel.EndDate,
+            ExpireDays: promoCodeModel.ExpireDays,
             Categories: promoCodeModel.Categories);
 
         var result = await _dbContext.ExecuteAsync(insertPromoCodeDbQuery);
@@ -38,9 +38,9 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             Value: promoCodeModel.Value,
             IncludeShipping: promoCodeModel.IncludeShipping,
             FirstPurchase: promoCodeModel.FirstPurchase,
+            AllowCombines: promoCodeModel.CombineDiscounts,
             MinPrice: promoCodeModel.MinPrice,
-            StartDate: promoCodeModel.StartDate,
-            EndDate: promoCodeModel.EndDate,
+            ExpireDays: promoCodeModel.ExpireDays,
             Categories: promoCodeModel.Categories);
 
         await _dbContext.ExecuteAsync(updatePromocoDbQuery);
