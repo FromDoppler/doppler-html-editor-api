@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -13,9 +12,10 @@ public record PromoCode(
         bool includeShipping,
     [Required]
         bool firstPurchase,
-    decimal? minPrice,
-    DateTime? startDate,
-    DateTime? endDate,
+    bool combineDiscounts,
+    int expireDays,
+    decimal minPrice,
+    int maxUses,
     string cagetories
 ) : IValidatableObject
 {

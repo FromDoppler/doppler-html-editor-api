@@ -185,7 +185,7 @@ namespace Doppler.HtmlEditorApi.Controllers
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
-        [HttpPost("/accounts/{accountName}/campaigns/{campaignId}/content/promoCode")]
+        [HttpPost("/accounts/{accountName}/campaigns/{campaignId}/content/promo-code")]
         public async Task<IActionResult> CreatePromoCode(string accountName, int campaignId, PromoCode promoCode)
         {
             var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
@@ -199,17 +199,20 @@ namespace Doppler.HtmlEditorApi.Controllers
                 Value: promoCode.value,
                 IncludeShipping: promoCode.includeShipping,
                 FirstPurchase: promoCode.firstPurchase,
+                CombineDiscounts: promoCode.combineDiscounts,
+                ExpireDays: promoCode.expireDays,
                 MinPrice: promoCode.minPrice,
-                StartDate: promoCode.startDate,
-                EndDate: promoCode.endDate,
-                Categories: promoCode.cagetories);
+                MaxUses: promoCode.maxUses,
+                Categories: promoCode.cagetories,
+                CampaignId: campaignId);
 
             var result = await _promoCodeRepository.CreatePromoCode(promoCodeModel);
 
-            return new OkObjectResult(result);
+            return new OkObjectResult(new { newPromoCodeId = result });
         }
 
-        [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content/promoCode/{promoCodeId}")]
+        [Authorize(Policies.OwnResourceOrSuperUser)]
+        [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content/promo-code/{promoCodeId}")]
         public async Task<IActionResult> UpdatePromoCode(string accountName, int campaignId, int promoCodeId, PromoCode promoCode)
         {
             var promoCodeModel = new PromoCodeModel(Id: promoCodeId,
@@ -217,10 +220,12 @@ namespace Doppler.HtmlEditorApi.Controllers
                 Value: promoCode.value,
                 IncludeShipping: promoCode.includeShipping,
                 FirstPurchase: promoCode.firstPurchase,
+                CombineDiscounts: promoCode.combineDiscounts,
                 MinPrice: promoCode.minPrice,
-                StartDate: promoCode.startDate,
-                EndDate: promoCode.endDate,
-                Categories: promoCode.cagetories);
+                ExpireDays: promoCode.expireDays,
+                MaxUses: promoCode.maxUses,
+                Categories: promoCode.cagetories,
+                CampaignId: campaignId);
 
             await _promoCodeRepository.UpdatePromoCode(promoCodeModel);
 

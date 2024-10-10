@@ -20,10 +20,12 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             Value: promoCodeModel.Value,
             IncludeShipping: promoCodeModel.IncludeShipping,
             FirstPurchase: promoCodeModel.FirstPurchase,
+            AllowCombines: promoCodeModel.CombineDiscounts,
             MinPrice: promoCodeModel.MinPrice,
-            StartDate: promoCodeModel.StartDate,
-            EndDate: promoCodeModel.EndDate,
-            Categories: promoCodeModel.Categories);
+            ExpireDays: promoCodeModel.ExpireDays,
+            MaxUses: promoCodeModel.MaxUses,
+            Categories: promoCodeModel.Categories,
+            IdCampaign: promoCodeModel.CampaignId);
 
         var result = await _dbContext.ExecuteAsync(insertPromoCodeDbQuery);
 
@@ -38,10 +40,12 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             Value: promoCodeModel.Value,
             IncludeShipping: promoCodeModel.IncludeShipping,
             FirstPurchase: promoCodeModel.FirstPurchase,
+            AllowCombines: promoCodeModel.CombineDiscounts,
             MinPrice: promoCodeModel.MinPrice,
-            StartDate: promoCodeModel.StartDate,
-            EndDate: promoCodeModel.EndDate,
-            Categories: promoCodeModel.Categories);
+            ExpireDays: promoCodeModel.ExpireDays,
+            MaxUses: promoCodeModel.MaxUses,
+            Categories: promoCodeModel.Categories,
+            CampaignId: promoCodeModel.CampaignId);
 
         await _dbContext.ExecuteAsync(updatePromocoDbQuery);
     }

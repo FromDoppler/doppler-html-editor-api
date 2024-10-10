@@ -1,5 +1,3 @@
-using System;
-
 namespace Doppler.HtmlEditorApi.Domain;
 
 public record PromoCodeModel(
@@ -8,9 +6,10 @@ public record PromoCodeModel(
     decimal Value,
     bool IncludeShipping,
     bool FirstPurchase,
-    decimal? MinPrice,
-    DateTime? StartDate,
-    DateTime? EndDate,
-    string Categories
+    bool CombineDiscounts,
+    int ExpireDays,
+    decimal MinPrice,
+    int MaxUses,
+    string Categories,
+    int CampaignId
     );
-
