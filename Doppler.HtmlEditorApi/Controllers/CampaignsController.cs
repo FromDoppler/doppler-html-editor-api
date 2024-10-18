@@ -8,6 +8,8 @@ using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.DopplerSecurity;
 using Doppler.HtmlEditorApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -186,12 +188,12 @@ namespace Doppler.HtmlEditorApi.Controllers
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
         [HttpPost("/accounts/{accountName}/campaigns/{campaignId}/content/promo-code")]
-        public async Task<IActionResult> CreatePromoCode(string accountName, int campaignId, PromoCode promoCode)
+        public async Task<Results<NotFound<ProblemDetails>, CreatedAtRoute<ResourceCreated>>> CreatePromoCode(string accountName, int campaignId, PromoCode promoCode)
         {
             var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
             if (!ValidateCampaignStateToUpdate(campaignState, out var error))
             {
-                return error;
+                return TypedResults.NotFound((ProblemDetails)error.Value);
             }
 
             var promoCodeModel = new PromoCodeModel(0,
@@ -208,7 +210,7 @@ namespace Doppler.HtmlEditorApi.Controllers
 
             var result = await _promoCodeRepository.CreatePromoCode(promoCodeModel);
 
-            return new OkObjectResult(new { newPromoCodeId = result });
+            return TypedResults.CreatedAtRoute(new ResourceCreated(result));
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
