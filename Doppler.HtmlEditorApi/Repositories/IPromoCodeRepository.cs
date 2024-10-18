@@ -1,5 +1,5 @@
-using Doppler.HtmlEditorApi.Domain;
 using System.Threading.Tasks;
+using Doppler.HtmlEditorApi.Domain;
 
 namespace Doppler.HtmlEditorApi.Repositories;
 

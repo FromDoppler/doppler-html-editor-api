@@ -1,7 +1,7 @@
+using System.Threading.Tasks;
 using Doppler.HtmlEditorApi.DataAccess;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
-using System.Threading.Tasks;
 
 namespace Doppler.HtmlEditorApi.Repositories.DopplerDb;
 
