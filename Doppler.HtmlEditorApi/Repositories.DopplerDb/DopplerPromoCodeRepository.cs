@@ -34,7 +34,7 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
 
     public async Task UpdatePromoCode(PromoCodeModel promoCodeModel)
     {
-        var updatePromocoDbQuery = new UpdatePromoCodeDbQuery(
+        var updatePromoCodeDbQuery = new UpdatePromoCodeDbQuery(
             Id: promoCodeModel.Id,
             Type: promoCodeModel.Type,
             Value: promoCodeModel.Value,
@@ -47,7 +47,7 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             Categories: promoCodeModel.Categories,
             CampaignId: promoCodeModel.CampaignId);
 
-        await _dbContext.ExecuteAsync(updatePromocoDbQuery);
+        await _dbContext.ExecuteAsync(updatePromoCodeDbQuery);
     }
 }
 
