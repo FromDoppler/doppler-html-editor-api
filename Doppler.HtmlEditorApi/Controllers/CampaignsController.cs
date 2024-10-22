@@ -8,6 +8,8 @@ using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.DopplerSecurity;
 using Doppler.HtmlEditorApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -39,18 +41,20 @@ namespace Doppler.HtmlEditorApi.Controllers
         private readonly IFieldsRepository _fieldsRepository;
         private readonly IOptions<FieldsOptions> _fieldsOptions;
         private readonly ITemplateRepository _templateRepository;
+        private readonly IPromoCodeRepository _promoCodeRepository;
 
         // We are using HTMLSourceType = 2 (Template) because Editor seems to be tied to the old HTML Editor
         // See https://github.com/MakingSense/Doppler/blob/48cf637bb1f8b4d81837fff904d8736fe889ff1c/Doppler.Transversal/Classes/CampaignHTMLContentTypeEnum.cs#L12-L17
         private const int TemplateHtmlSourceType = 2;
         private const int HtmlContentType = 2;
 
-        public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions, ITemplateRepository templateRepository)
+        public CampaignsController(ICampaignContentRepository repository, IFieldsRepository fieldsRepository, IOptions<FieldsOptions> fieldsOptions, ITemplateRepository templateRepository, IPromoCodeRepository promoCodeRepository)
         {
             _templateRepository = templateRepository;
             _campaignContentRepository = repository;
             _fieldsRepository = fieldsRepository;
             _fieldsOptions = fieldsOptions;
+            _promoCodeRepository = promoCodeRepository;
         }
 
         [Authorize(Policies.OwnResourceOrSuperUser)]
@@ -180,6 +184,54 @@ namespace Doppler.HtmlEditorApi.Controllers
             await SaveCampaignContent(contentData, fieldIds, trackableUrls, campaignState, templateModel.PreviewImage);
 
             return new OkObjectResult($"La campaña '{campaignId}' del usuario '{accountName}' se guardó exitosamente ");
+        }
+
+        [Authorize(Policies.OwnResourceOrSuperUser)]
+        [HttpPost("/accounts/{accountName}/campaigns/{campaignId}/content/promo-code")]
+        public async Task<Results<NotFound<ProblemDetails>, CreatedAtRoute<ResourceCreated>>> CreatePromoCode(string accountName, int campaignId, PromoCode promoCode)
+        {
+            var campaignState = await _campaignContentRepository.GetCampaignState(accountName, campaignId);
+            if (!ValidateCampaignStateToUpdate(campaignState, out var error))
+            {
+                return TypedResults.NotFound((ProblemDetails)error.Value);
+            }
+
+            var promoCodeModel = new PromoCodeModel(0,
+                Type: promoCode.type,
+                Value: promoCode.value,
+                IncludeShipping: promoCode.includeShipping,
+                FirstPurchase: promoCode.firstPurchase,
+                CombineDiscounts: promoCode.combineDiscounts,
+                ExpireDays: promoCode.expireDays,
+                MinPrice: promoCode.minPrice,
+                MaxUses: promoCode.maxUses,
+                Categories: promoCode.categories,
+                CampaignId: campaignId);
+
+            var result = await _promoCodeRepository.CreatePromoCode(promoCodeModel);
+
+            return TypedResults.CreatedAtRoute(new ResourceCreated(result));
+        }
+
+        [Authorize(Policies.OwnResourceOrSuperUser)]
+        [HttpPut("/accounts/{accountName}/campaigns/{campaignId}/content/promo-code/{promoCodeId}")]
+        public async Task<IActionResult> UpdatePromoCode(string accountName, int campaignId, int promoCodeId, PromoCode promoCode)
+        {
+            var promoCodeModel = new PromoCodeModel(Id: promoCodeId,
+                Type: promoCode.type,
+                Value: promoCode.value,
+                IncludeShipping: promoCode.includeShipping,
+                FirstPurchase: promoCode.firstPurchase,
+                CombineDiscounts: promoCode.combineDiscounts,
+                MinPrice: promoCode.minPrice,
+                ExpireDays: promoCode.expireDays,
+                MaxUses: promoCode.maxUses,
+                Categories: promoCode.categories,
+                CampaignId: campaignId);
+
+            await _promoCodeRepository.UpdatePromoCode(promoCodeModel);
+
+            return new OkObjectResult($"Promo code {promoCodeId} was successfully updated.");
         }
 
         private async Task SaveCampaignContent(BaseHtmlCampaignContentData contentData, IEnumerable<int> fieldIds, IEnumerable<string> trackableUrls, CampaignState campaignState, string previewImage)
