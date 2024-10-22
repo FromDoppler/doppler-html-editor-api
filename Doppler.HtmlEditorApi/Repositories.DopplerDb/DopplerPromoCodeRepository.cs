@@ -44,8 +44,7 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             MinPrice: promoCodeModel.MinPrice,
             ExpireDays: promoCodeModel.ExpireDays,
             MaxUses: promoCodeModel.MaxUses,
-            Categories: promoCodeModel.Categories,
-            CampaignId: promoCodeModel.CampaignId);
+            Categories: promoCodeModel.Categories);
 
         await _dbContext.ExecuteAsync(updatePromoCodeDbQuery);
     }
