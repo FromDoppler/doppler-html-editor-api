@@ -32,10 +32,11 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
         return result.IdDynamicContentPromoCode;
     }
 
-    public async Task UpdatePromoCode(PromoCodeModel promoCodeModel)
+    public async Task<bool> UpdatePromoCode(PromoCodeModel promoCodeModel)
     {
         var updatePromoCodeDbQuery = new UpdatePromoCodeDbQuery(
             Id: promoCodeModel.Id,
+            IdCampaign: promoCodeModel.CampaignId,
             Type: promoCodeModel.Type,
             Value: promoCodeModel.Value,
             IncludeShipping: promoCodeModel.IncludeShipping,
@@ -46,7 +47,8 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             MaxUses: promoCodeModel.MaxUses,
             Categories: promoCodeModel.Categories);
 
-        await _dbContext.ExecuteAsync(updatePromoCodeDbQuery);
+        var result = await _dbContext.ExecuteAsync(updatePromoCodeDbQuery);
+        return result > 0;
     }
 }
 

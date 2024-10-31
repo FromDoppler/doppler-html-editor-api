@@ -229,7 +229,12 @@ namespace Doppler.HtmlEditorApi.Controllers
                 Categories: promoCode.categories,
                 CampaignId: campaignId);
 
-            await _promoCodeRepository.UpdatePromoCode(promoCodeModel);
+            var updateResult = await _promoCodeRepository.UpdatePromoCode(promoCodeModel);
+
+            if (!updateResult)
+            {
+                return new NotFoundObjectResult("The Campaign/PromoCode relation doesn't exist.");
+            }
 
             return new OkObjectResult($"Promo code {promoCodeId} was successfully updated.");
         }

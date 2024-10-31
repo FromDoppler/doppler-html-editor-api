@@ -4,6 +4,7 @@ namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 public record UpdatePromoCodeDbQuery(
     int Id,
+    int IdCampaign,
     string Type,
     decimal Value,
     bool IncludeShipping,
@@ -26,5 +27,5 @@ SET Type = @Type,
     ExpireDays = @ExpireDays,
     MaxUses = @MaxUses,
     Categories = @Categories
-WHERE IdDynamicContentPromoCode = @Id";
+WHERE IdDynamicContentPromoCode = @Id AND IdCampaign = @IdCampaign";
 }
