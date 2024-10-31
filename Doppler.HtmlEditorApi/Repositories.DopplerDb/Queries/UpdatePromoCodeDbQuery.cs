@@ -13,7 +13,8 @@ public record UpdatePromoCodeDbQuery(
     decimal MinPrice,
     int ExpireDays,
     int MaxUses,
-    string? Categories
+    string? Categories,
+    string Prefix
 ) : IExecutableDbQuery
 {
     public string GenerateSqlQuery() => @"
@@ -26,6 +27,7 @@ SET Type = @Type,
     MinPrice = @MinPrice,
     ExpireDays = @ExpireDays,
     MaxUses = @MaxUses,
-    Categories = @Categories
+    Categories = @Categories,
+    Prefix = @Prefix
 WHERE IdDynamicContentPromoCode = @Id AND IdCampaign = @IdCampaign";
 }

@@ -12,7 +12,8 @@ public record InsertPromoCodeDbQuery(
     int ExpireDays,
     int MaxUses,
     string? Categories,
-    int IdCampaign
+    int IdCampaign,
+    string Prefix
 ) : ISingleItemDbQuery<InsertPromoCodeDbQuery.Result>
 {
     public string GenerateSqlQuery() => @"
@@ -26,7 +27,8 @@ INSERT INTO DynamicContentPromoCode (
     ExpireDays,
     MaxUses,
     Categories,
-    IdCampaign
+    IdCampaign,
+    Prefix
 ) VALUES (
     @Type,
     @Value,
@@ -37,7 +39,8 @@ INSERT INTO DynamicContentPromoCode (
     @ExpireDays,
     @MaxUses,
     @Categories,
-    @IdCampaign
+    @IdCampaign,
+    @Prefix
 )
 
 SELECT @@Identity AS IdDynamicContentPromoCode";
