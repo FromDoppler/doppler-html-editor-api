@@ -22,4 +22,3 @@ public record PromoCode(
 {
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) { yield break; }
 }
-
