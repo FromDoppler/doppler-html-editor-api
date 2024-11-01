@@ -25,17 +25,20 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             ExpireDays: promoCodeModel.ExpireDays,
             MaxUses: promoCodeModel.MaxUses,
             Categories: promoCodeModel.Categories,
-            IdCampaign: promoCodeModel.CampaignId);
+            IdCampaign: promoCodeModel.CampaignId,
+            Prefix: promoCodeModel.Prefix
+        );
 
         var result = await _dbContext.ExecuteAsync(insertPromoCodeDbQuery);
 
         return result.IdDynamicContentPromoCode;
     }
 
-    public async Task UpdatePromoCode(PromoCodeModel promoCodeModel)
+    public async Task<bool> UpdatePromoCode(PromoCodeModel promoCodeModel)
     {
         var updatePromoCodeDbQuery = new UpdatePromoCodeDbQuery(
             Id: promoCodeModel.Id,
+            IdCampaign: promoCodeModel.CampaignId,
             Type: promoCodeModel.Type,
             Value: promoCodeModel.Value,
             IncludeShipping: promoCodeModel.IncludeShipping,
@@ -44,9 +47,12 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             MinPrice: promoCodeModel.MinPrice,
             ExpireDays: promoCodeModel.ExpireDays,
             MaxUses: promoCodeModel.MaxUses,
-            Categories: promoCodeModel.Categories);
+            Categories: promoCodeModel.Categories,
+            Prefix: promoCodeModel.Prefix
+        );
 
-        await _dbContext.ExecuteAsync(updatePromoCodeDbQuery);
+        var result = await _dbContext.ExecuteAsync(updatePromoCodeDbQuery);
+        return result > 0;
     }
 }
 

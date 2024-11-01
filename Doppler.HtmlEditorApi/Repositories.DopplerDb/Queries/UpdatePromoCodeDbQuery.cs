@@ -4,6 +4,7 @@ namespace Doppler.HtmlEditorApi.Repositories.DopplerDb.Queries;
 
 public record UpdatePromoCodeDbQuery(
     int Id,
+    int IdCampaign,
     string Type,
     decimal Value,
     bool IncludeShipping,
@@ -12,7 +13,8 @@ public record UpdatePromoCodeDbQuery(
     decimal MinPrice,
     int ExpireDays,
     int MaxUses,
-    string? Categories
+    string? Categories,
+    string Prefix
 ) : IExecutableDbQuery
 {
     public string GenerateSqlQuery() => @"
@@ -25,6 +27,7 @@ SET Type = @Type,
     MinPrice = @MinPrice,
     ExpireDays = @ExpireDays,
     MaxUses = @MaxUses,
-    Categories = @Categories
-WHERE IdDynamicContentPromoCode = @Id";
+    Categories = @Categories,
+    Prefix = @Prefix
+WHERE IdDynamicContentPromoCode = @Id AND IdCampaign = @IdCampaign";
 }

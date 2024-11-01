@@ -56,3 +56,6 @@ unlayer
 whatsapp
 xunit
 jenkins
+
+# Business words
+promocode

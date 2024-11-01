@@ -11,5 +11,6 @@ public record PromoCodeModel(
     decimal MinPrice,
     int MaxUses,
     string Categories,
-    int CampaignId
+    int CampaignId,
+    string Prefix
     );

@@ -6,6 +6,6 @@ namespace Doppler.HtmlEditorApi.Repositories;
 public interface IPromoCodeRepository
 {
     Task<int> CreatePromoCode(PromoCodeModel promoCodeModel);
-    Task UpdatePromoCode(PromoCodeModel promoCodeModel);
+    Task<bool> UpdatePromoCode(PromoCodeModel promoCodeModel);
 }
 

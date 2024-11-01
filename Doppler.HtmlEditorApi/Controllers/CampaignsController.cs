@@ -206,7 +206,9 @@ namespace Doppler.HtmlEditorApi.Controllers
                 MinPrice: promoCode.minPrice,
                 MaxUses: promoCode.maxUses,
                 Categories: promoCode.categories,
-                CampaignId: campaignId);
+                CampaignId: campaignId,
+                Prefix: promoCode.prefix
+            );
 
             var result = await _promoCodeRepository.CreatePromoCode(promoCodeModel);
 
@@ -227,9 +229,16 @@ namespace Doppler.HtmlEditorApi.Controllers
                 ExpireDays: promoCode.expireDays,
                 MaxUses: promoCode.maxUses,
                 Categories: promoCode.categories,
-                CampaignId: campaignId);
+                CampaignId: campaignId,
+                Prefix: promoCode.prefix
+            );
 
-            await _promoCodeRepository.UpdatePromoCode(promoCodeModel);
+            var updateResult = await _promoCodeRepository.UpdatePromoCode(promoCodeModel);
+
+            if (!updateResult)
+            {
+                return new NotFoundObjectResult("The Campaign/PromoCode relation doesn't exist.");
+            }
 
             return new OkObjectResult($"Promo code {promoCodeId} was successfully updated.");
         }
