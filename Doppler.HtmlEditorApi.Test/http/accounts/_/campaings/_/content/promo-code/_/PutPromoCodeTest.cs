@@ -91,7 +91,7 @@ public class PutPromoCodeTest : IClassFixture<WebApplicationFactory<Startup>>
     [Theory]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/111/content/promo-code/222", TestUsersData.TOKEN_TEST1_EXPIRE_20330518, 222)]
     [InlineData($"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/111/content/promo-code/222", TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518, 222)]
-    public async Task PUT_campaign_should_accept_right_tokens_and_return_Ok(string url, string token, int promoCodeId)
+    public async Task PUT_promo_code_should_accept_right_tokens_and_return_Ok(string url, string token, int promoCodeId)
     {
         // Arrange
         var dbContextMock = new Mock<IDbContext>();
@@ -113,5 +113,39 @@ public class PutPromoCodeTest : IClassFixture<WebApplicationFactory<Startup>>
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PUT_promo_code_should_return_NotFound_when_campaign_promocode_relation_does_not_exist()
+    {
+        // Arrange
+        var dbContextMock = new Mock<IDbContext>();
+
+        var campaignId = 111;
+        var promoCodeId = 222;
+        var endpointPath = $"/accounts/{TestUsersData.EMAIL_TEST1}/campaigns/{campaignId}/content/promo-code/{promoCodeId}";
+        var token = TestUsersData.TOKEN_SUPERUSER_EXPIRE_20330518;
+
+        // Return 0, it does not found CampaignId/PromoCodeId relation to update
+        dbContextMock
+            .Setup(x => x.ExecuteAsync(It.Is<UpdatePromoCodeDbQuery>(q => q.Id == promoCodeId && q.IdCampaign == campaignId)))
+            .ReturnsAsync(0);
+
+        var client = _factory.CreateSutClient(serviceToOverride1: dbContextMock.Object, token);
+
+        // Act
+        var response = await client.PutAsync(endpointPath, JsonContent.Create(new
+        {
+            type = "type",
+            value = 10,
+            includeShipping = true,
+            firstPurchase = true,
+        }));
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        Assert.Equal("The Campaign/PromoCode relation doesn't exist.", responseContent);
     }
 }
