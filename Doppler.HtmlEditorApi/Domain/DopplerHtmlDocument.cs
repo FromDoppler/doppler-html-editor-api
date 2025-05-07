@@ -110,7 +110,10 @@ public class DopplerHtmlDocument
                     }
                 }
                 var imgNode = dynamicContentNodes[i].SelectSingleNode(".//img");
-                imgNode?.SetAttributeValue("src", "[[[DC:IMAGE]]]");
+                if (imgNode != null && imgNode.GetAttributeValue("data-dc-type", null) == null)
+                {
+                    imgNode.SetAttributeValue("src", "[[[DC:IMAGE]]]");
+                }
             }
         }
     }
