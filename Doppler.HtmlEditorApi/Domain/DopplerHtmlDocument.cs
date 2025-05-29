@@ -103,6 +103,7 @@ public class DopplerHtmlDocument
             var substringsToMatch = new[]
             {
                 "unlayer-editor",
+                // cspell:disable-next-line
                 "cdn.fromdoppler.com",
                 "product_transparent.svg"
             };
