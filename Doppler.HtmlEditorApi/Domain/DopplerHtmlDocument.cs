@@ -97,8 +97,16 @@ public class DopplerHtmlDocument
     public void SanitizeDynamicContentNodes()
     {
         var dynamicContentNodes = _contentNode.SelectNodes("//dynamiccontent");
+
         if (dynamicContentNodes != null)
         {
+            var substringsToMatch = new[]
+            {
+                "unlayer-editor",
+                // cspell:disable-next-line
+                "cdn.fromdoppler.com"
+            };
+
             for (var i = 0; i < dynamicContentNodes.Count; i++)
             {
                 var divNodes = dynamicContentNodes[i].SelectNodes("div");
@@ -110,9 +118,15 @@ public class DopplerHtmlDocument
                     }
                 }
                 var imgNode = dynamicContentNodes[i].SelectSingleNode(".//img");
-                if (imgNode != null && imgNode.GetAttributeValue("data-dc-type", null) == null)
+
+                if (imgNode != null)
                 {
-                    imgNode.SetAttributeValue("src", "[[[DC:IMAGE]]]");
+                    var srcValue = imgNode.GetAttributeValue("src", "");
+
+                    if (substringsToMatch.Any(sub => srcValue.Contains(sub)))
+                    {
+                        imgNode.SetAttributeValue("src", "[[[DC:IMAGE]]]");
+                    }
                 }
             }
         }
