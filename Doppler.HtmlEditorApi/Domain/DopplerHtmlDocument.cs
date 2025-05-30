@@ -104,8 +104,7 @@ public class DopplerHtmlDocument
             {
                 "unlayer-editor",
                 // cspell:disable-next-line
-                "cdn.fromdoppler.com",
-                "product_transparent.svg"
+                "cdn.fromdoppler.com"
             };
 
             for (var i = 0; i < dynamicContentNodes.Count; i++)
