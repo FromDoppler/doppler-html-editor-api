@@ -6,6 +6,7 @@ using Doppler.HtmlEditorApi.ApiModels;
 using Doppler.HtmlEditorApi.Configuration;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.DopplerSecurity;
+using Doppler.HtmlEditorApi.Enums;
 using Doppler.HtmlEditorApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -207,7 +208,8 @@ namespace Doppler.HtmlEditorApi.Controllers
                 MaxUses: promoCode.maxUses,
                 Categories: promoCode.categories,
                 CampaignId: campaignId,
-                Prefix: promoCode.prefix
+                Prefix: promoCode.prefix,
+                Store: promoCode.store
             );
 
             var result = await _promoCodeRepository.CreatePromoCode(promoCodeModel);
@@ -230,7 +232,8 @@ namespace Doppler.HtmlEditorApi.Controllers
                 MaxUses: promoCode.maxUses,
                 Categories: promoCode.categories,
                 CampaignId: campaignId,
-                Prefix: promoCode.prefix
+                Prefix: promoCode.prefix,
+                Store: promoCode.store
             );
 
             var updateResult = await _promoCodeRepository.UpdatePromoCode(promoCodeModel);
