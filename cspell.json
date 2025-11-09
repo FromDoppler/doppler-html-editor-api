@@ -44,6 +44,10 @@
         "FIRSTNAME",
         "LASTNAME"
       ]
+    },
+    {
+      "filename": "**/Repositories.DopplerDb/Queries/*.cs",
+      "ignoreWords": ["ISNULL"]
     }
   ]
 }
