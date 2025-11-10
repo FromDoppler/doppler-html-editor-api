@@ -20,7 +20,7 @@ public record UpdatePromoCodeDbQuery(
 {
     public string GenerateSqlQuery() => @"
 DECLARE @IdThirdPartyApp INT;
-SELECT @IdThirdPartyApp = IdThirdPartyApp FROM ThirdPartyApp WHERE Name = '@ThirdPartyApp';
+SELECT @IdThirdPartyApp = IdThirdPartyApp FROM ThirdPartyApp WHERE Name = @ThirdPartyApp;
 
 UPDATE DynamicContentPromoCode
 SET Type = @Type,
