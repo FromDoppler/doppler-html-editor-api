@@ -6,7 +6,6 @@ using Doppler.HtmlEditorApi.ApiModels;
 using Doppler.HtmlEditorApi.Configuration;
 using Doppler.HtmlEditorApi.Domain;
 using Doppler.HtmlEditorApi.DopplerSecurity;
-using Doppler.HtmlEditorApi.Enums;
 using Doppler.HtmlEditorApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
