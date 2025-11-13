@@ -17,7 +17,8 @@ public record PromoCode(
     decimal minPrice,
     int maxUses,
     string categories,
-    string prefix
+    string prefix,
+    string store
 ) : IValidatableObject
 {
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) { yield break; }

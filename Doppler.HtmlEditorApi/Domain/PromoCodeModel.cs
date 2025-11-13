@@ -12,5 +12,6 @@ public record PromoCodeModel(
     int MaxUses,
     string Categories,
     int CampaignId,
-    string Prefix
+    string Prefix,
+    string Store
     );
