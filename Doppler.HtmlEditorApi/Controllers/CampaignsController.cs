@@ -207,7 +207,8 @@ namespace Doppler.HtmlEditorApi.Controllers
                 MaxUses: promoCode.maxUses,
                 Categories: promoCode.categories,
                 CampaignId: campaignId,
-                Prefix: promoCode.prefix
+                Prefix: promoCode.prefix,
+                Store: promoCode.store
             );
 
             var result = await _promoCodeRepository.CreatePromoCode(promoCodeModel);
@@ -230,7 +231,8 @@ namespace Doppler.HtmlEditorApi.Controllers
                 MaxUses: promoCode.maxUses,
                 Categories: promoCode.categories,
                 CampaignId: campaignId,
-                Prefix: promoCode.prefix
+                Prefix: promoCode.prefix,
+                Store: promoCode.store
             );
 
             var updateResult = await _promoCodeRepository.UpdatePromoCode(promoCodeModel);

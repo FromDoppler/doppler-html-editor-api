@@ -13,10 +13,14 @@ public record InsertPromoCodeDbQuery(
     int MaxUses,
     string? Categories,
     int IdCampaign,
-    string Prefix
+    string Prefix,
+    string ThirdPartyApp
 ) : ISingleItemDbQuery<InsertPromoCodeDbQuery.Result>
 {
     public string GenerateSqlQuery() => @"
+DECLARE @IdThirdPartyApp INT;
+SELECT @IdThirdPartyApp = IdThirdPartyApp FROM ThirdPartyApp WHERE Name = @ThirdPartyApp;
+
 INSERT INTO DynamicContentPromoCode (
     Type,
     Value,
@@ -28,7 +32,8 @@ INSERT INTO DynamicContentPromoCode (
     MaxUses,
     Categories,
     IdCampaign,
-    Prefix
+    Prefix,
+    IdThirdPartyApp
 ) VALUES (
     @Type,
     @Value,
@@ -40,7 +45,8 @@ INSERT INTO DynamicContentPromoCode (
     @MaxUses,
     @Categories,
     @IdCampaign,
-    @Prefix
+    @Prefix,
+    ISNULL(@IdThirdPartyApp, 3)
 )
 
 SELECT @@Identity AS IdDynamicContentPromoCode";

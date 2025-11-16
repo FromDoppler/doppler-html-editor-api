@@ -26,7 +26,8 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             MaxUses: promoCodeModel.MaxUses,
             Categories: promoCodeModel.Categories,
             IdCampaign: promoCodeModel.CampaignId,
-            Prefix: promoCodeModel.Prefix
+            Prefix: promoCodeModel.Prefix,
+            ThirdPartyApp: promoCodeModel.Store
         );
 
         var result = await _dbContext.ExecuteAsync(insertPromoCodeDbQuery);
@@ -48,7 +49,8 @@ public class DopplerPromoCodeRepository : IPromoCodeRepository
             ExpireDays: promoCodeModel.ExpireDays,
             MaxUses: promoCodeModel.MaxUses,
             Categories: promoCodeModel.Categories,
-            Prefix: promoCodeModel.Prefix
+            Prefix: promoCodeModel.Prefix,
+            ThirdPartyApp: promoCodeModel.Store
         );
 
         var result = await _dbContext.ExecuteAsync(updatePromoCodeDbQuery);
