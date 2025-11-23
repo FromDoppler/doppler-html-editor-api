@@ -14,10 +14,14 @@ public record UpdatePromoCodeDbQuery(
     int ExpireDays,
     int MaxUses,
     string? Categories,
-    string Prefix
+    string Prefix,
+    string ThirdPartyApp
 ) : IExecutableDbQuery
 {
     public string GenerateSqlQuery() => @"
+DECLARE @IdThirdPartyApp INT;
+SELECT @IdThirdPartyApp = IdThirdPartyApp FROM ThirdPartyApp WHERE Name = @ThirdPartyApp;
+
 UPDATE DynamicContentPromoCode
 SET Type = @Type,
     Value = @Value,
@@ -28,6 +32,7 @@ SET Type = @Type,
     ExpireDays = @ExpireDays,
     MaxUses = @MaxUses,
     Categories = @Categories,
-    Prefix = @Prefix
+    Prefix = @Prefix,
+    IdThirdPartyApp = ISNULL(@IdThirdPartyApp, IdThirdPartyApp)
 WHERE IdDynamicContentPromoCode = @Id AND IdCampaign = @IdCampaign";
 }
