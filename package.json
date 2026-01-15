@@ -5,7 +5,7 @@
     "@cspell/dict-es-es": "3.0.8",
     "cspell": "9.6.0",
     "eclint": "2.8.1",
-    "prettier": "3.7.4"
+    "prettier": "3.8.0"
   },
   "scripts": {
     "verify-spell": "cspell .",
